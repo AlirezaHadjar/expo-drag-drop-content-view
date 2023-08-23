@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "android", "web"],
+  "ios": {
+    "modules": ["ExpoDragDropContentViewModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.dragdropcontentview.ExpoDragDropContentViewModule"]
+  }
+}
