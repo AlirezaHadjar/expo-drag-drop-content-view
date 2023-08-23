@@ -6,8 +6,8 @@ A superset of View component that supports ios drag and drop feature.
 
 ## Features
 
-- Ability to drag and drop image from other apps
-- Support multi selection
+- Ability to drag and drop images from other apps
+- Support multi-selection
 
 ## Installation
 
