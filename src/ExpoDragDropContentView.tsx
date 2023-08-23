@@ -1,11 +1,26 @@
-import { requireNativeViewManager } from 'expo-modules-core';
-import * as React from 'react';
+import { ViewProps } from "react-native";
+import { requireNativeViewManager } from "expo-modules-core";
+import * as React from "react";
 
-import { ExpoDragDropContentViewProps } from './ExpoDragDropContentView.types';
+export type OnDropEvent = {
+  uri: string;
+  type: string;
+  base64?: string;
+  path: string;
+  height: number;
+  width: number;
+  fileName: string;
+};
 
-const NativeView: React.ComponentType<ExpoDragDropContentViewProps> =
-  requireNativeViewManager('ExpoDragDropContentView');
+export type Props = ViewProps & {
+  onDropEvent?: (event: { nativeEvent: { assets: OnDropEvent[] } }) => void;
+  includeBase64?: boolean;
+};
 
-export default function ExpoDragDropContentView(props: ExpoDragDropContentViewProps) {
+const NativeView: React.ComponentType<Props> = requireNativeViewManager(
+  "ExpoDragDropContentView"
+);
+
+export default function ExpoDragDropContentView(props: Props) {
   return <NativeView {...props} />;
 }
