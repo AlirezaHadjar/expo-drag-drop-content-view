@@ -1,5 +1,5 @@
 import { DragDropContentView } from "expo-drag-drop-content-view";
-import { OnDropEvent } from "expo-drag-drop-content-view/ExpoDragDropContentView";
+import { OnDropEvent } from "expo-drag-drop-content-view";
 import React, { ComponentProps, useState } from "react";
 import { Image, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
