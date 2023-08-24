@@ -1,12 +1,11 @@
-import { DragDropContentView } from "expo-drag-drop-content-view";
-import { OnDropEvent } from "expo-drag-drop-content-view";
-import React, { ComponentProps, useState } from "react";
+import {
+  DragDropContentView,
+  DragDropContentViewProps,
+  OnDropEvent,
+} from "expo-drag-drop-content-view";
+import React, { useState } from "react";
 import { Image, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-
-type IDragDropContentViewProps = ComponentProps<
-  typeof DragDropContentView
-> & {};
 
 const styles = StyleSheet.create({
   container: {
@@ -34,7 +33,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export const IDragDropContentView: React.FC<IDragDropContentViewProps> = (
+export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
 ) => {
   const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
