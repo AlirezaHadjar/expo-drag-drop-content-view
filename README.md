@@ -104,8 +104,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 ```
 
 ## Options
-`DragDropContentView` supports all `View` Props
-Other Props:
+`DragDropContentView` supports all `View` Props. Other Props:
 | Option                  | iOS | Android | Web | Description                                                                                                                                                                     |
 | ----------------------- | --- | ------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | onDropEvent               | OK  | NO      | NO  | A callback that returns an array of assets. [refer to Asset Object](#Asset-Object)                                       
