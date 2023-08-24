@@ -15,6 +15,10 @@ A superset of View component that supports ios drag and drop feature.
 
 ## Installation
 
+### 🔔 You should have expo installed in your project
+
+#### 🗒️ Since it has native code you cannot run it using Expo Go
+
 You can install the package using the following command:
 
 ```sh
