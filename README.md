@@ -18,7 +18,7 @@ A superset of View component that supports ios drag and drop feature.
 You can install the package using the following command:
 
 ```sh
-yarn add expo-drag-drop-content-view
+npx expo install expo-drag-drop-content-view
 ```
 
 ## Examples
