@@ -1,13 +1,21 @@
 # Expo Drag Drop Content View
 
+
+https://github.com/AlirezaHadjar/expo-drag-drop-content-view/assets/57192409/34a2ee62-88e0-480c-b6ca-5e297954d8ad
+
+
+
+https://github.com/AlirezaHadjar/expo-drag-drop-content-view/assets/57192409/ced26cf2-b967-4055-82d9-bc11efeb8ce8
+
+
 ## What
 
 A superset of View component that supports ios drag and drop feature.
 
 ## Features
 
-- Ability to drag and drop image from other apps
-- Support multi selection
+- Ability to drag and drop images from other apps
+- Support multi-selection
 
 ## Installation
 
