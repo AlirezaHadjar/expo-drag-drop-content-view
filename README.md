@@ -1,12 +1,8 @@
 # Expo Drag Drop Content View
 
-
 https://github.com/AlirezaHadjar/expo-drag-drop-content-view/assets/57192409/34a2ee62-88e0-480c-b6ca-5e297954d8ad
 
-
-
 https://github.com/AlirezaHadjar/expo-drag-drop-content-view/assets/57192409/ced26cf2-b967-4055-82d9-bc11efeb8ce8
-
 
 ## What
 
@@ -32,7 +28,13 @@ yarn add expo-drag-drop-content-view
 ## Usage
 
 ```tsx
-type IDragDropContentViewProps = ComponentProps<typeof DragDropContentView>;
+import {
+  DragDropContentView,
+  DragDropContentViewProps,
+  OnDropEvent,
+} from "expo-drag-drop-content-view";
+import React, { useState } from "react";
+import { Image, StyleSheet, View } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
@@ -60,25 +62,25 @@ const styles = StyleSheet.create({
   },
 });
 
-export const IDragDropContentView: React.FC<IDragDropContentViewProps> = (
+export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
 ) => {
   const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
   return (
     <DragDropContentView
+      {...props}
       onDropEvent={(event) => {
         setImageData(event.nativeEvent.assets);
       }}
-      style={[styles.container]}
+      style={[styles.container, props.style]}
     >
       {imageData &&
         imageData.map((asset, index) => {
           const rotation = Math.ceil(index / 2) * 5;
           const direction = index % 2 === 0 ? 1 : -1;
           return (
-            <Animated.View
+            <View
               key={asset.uri}
-              entering={FadeIn.springify().delay(index * 100)}
               style={[
                 styles.imageContainer,
                 {
@@ -87,7 +89,7 @@ export const IDragDropContentView: React.FC<IDragDropContentViewProps> = (
               ]}
             >
               <Image source={{ uri: asset.uri }} style={styles.image} />
-            </Animated.View>
+            </View>
           );
         })}
     </DragDropContentView>
