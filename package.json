@@ -1,6 +1,6 @@
 {
   "name": "expo-drag-drop-content-view",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A Superset of View which listens for dragged contents",
   "main": "build/index.js",
   "types": "build/index.d.ts",
