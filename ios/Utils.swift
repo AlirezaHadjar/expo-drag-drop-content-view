@@ -9,9 +9,26 @@ import Foundation
 import MobileCoreServices
 import ImageIO
 
+extension UIImage {
+    var hasAlpha: Bool {
+        guard let alphaInfo = cgImage?.alphaInfo else { return false }
+        return alphaInfo != .none && alphaInfo != .noneSkipFirst && alphaInfo != .noneSkipLast
+    }
+}
+
 func extractImageData(image: UIImage) -> Data? {
     let imageData = NSMutableData()
-    guard let destination = CGImageDestinationCreateWithData(imageData as CFMutableData, kUTTypeJPEG, 1, nil) else {
+    var destination: CGImageDestination?
+
+    if image.hasAlpha {
+        print("alpha")
+        destination = CGImageDestinationCreateWithData(imageData as CFMutableData, kUTTypePNG, 1, nil)
+    } else {
+        print("no alpha")
+        destination = CGImageDestinationCreateWithData(imageData as CFMutableData, kUTTypeJPEG, 1, nil)
+    }
+
+    guard let finalDestination = destination else {
         return nil
     }
 
@@ -44,9 +61,9 @@ func extractImageData(image: UIImage) -> Data? {
 
     let imageProps = orientationDictionary as CFDictionary
 
-    CGImageDestinationAddImage(destination, image.cgImage!, imageProps)
+    CGImageDestinationAddImage(finalDestination, image.cgImage!, imageProps)
 
-    CGImageDestinationFinalize(destination)
+    CGImageDestinationFinalize(finalDestination)
 
     return imageData as Data
 }
@@ -57,36 +74,29 @@ func getImageFileName(fileType: String) -> String {
     return fileName.appending(fileType)
 }
 
-func getFileType(imageData: Data) -> String {
-    let firstByteJpg: UInt8 = 0xFF
-    let firstBytePng: UInt8 = 0x89
-    let firstByteGif: UInt8 = 0x47
-
-    var firstByte: UInt8 = 0
-    imageData.copyBytes(to: &firstByte, count: 1)
-
-    switch firstByte {
-    case firstByteJpg:
-        return "jpg"
-    case firstBytePng:
-        return "png"
-    case firstByteGif:
-        return "gif"
-    default:
-        return "jpg"
+func getMimeType(imageData: Data) -> String? {
+    if let imageDataProvider = CGDataProvider(data: imageData as CFData) {
+        if let imageSource = CGImageSourceCreateWithDataProvider(imageDataProvider, nil) {
+            if let imageType = CGImageSourceGetType(imageSource) {
+                if let imageUTI = UTTypeCopyPreferredTagWithClass(imageType, kUTTagClassMIMEType) {
+                    return imageUTI.takeRetainedValue() as String
+                }
+            }
+        }
     }
+    return nil
 }
 
 func getMimeType(image: UIImage) -> String? {
-    if let imageData = image.jpegData(compressionQuality: 1.0) {
-        if let imageDataProvider = CGDataProvider(data: imageData as CFData) {
-            if let imageSource = CGImageSourceCreateWithDataProvider(imageDataProvider, nil) {
-                if let imageType = CGImageSourceGetType(imageSource) {
-                    if let imageUTI = UTTypeCopyPreferredTagWithClass(imageType, kUTTagClassMIMEType) {
-                        return imageUTI.takeRetainedValue() as String
-                    }
-                }
-            }
+    if image.hasAlpha {
+        // If the image has an alpha channel, use PNG data
+        if let imageData = image.pngData() {
+            return getMimeType(imageData: imageData)
+        }
+    } else {
+        // If the image does not have an alpha channel, use JPEG data
+        if let imageData = image.jpegData(compressionQuality: 1.0) {
+            return getMimeType(imageData: imageData)
         }
     }
 
