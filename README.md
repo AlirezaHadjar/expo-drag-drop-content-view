@@ -12,7 +12,6 @@ A superset of View component that supports ios drag and drop feature.
 
 - Ability to drag and drop images from other apps
 - Support multi-selection
-- 
 
 ## Installation
 
@@ -31,6 +30,7 @@ npx expo install expo-drag-drop-content-view
 - [Basic Example](./example/App.tsx)
 
 ## Usage
+
 #### 🗒️ Since this is an ios (and iPad-os) specific feature, `DragDropContentView` works as a simple `View` on Android and Web
 
 ```tsx
@@ -104,23 +104,23 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 ```
 
 ## Options
+
 `DragDropContentView` supports all `View` Props. Other Props:
-| Option                  | iOS | Android | Web | Description                                                                                                                                                                     |
+| Option | iOS | Android | Web | Description |
 | ----------------------- | --- | ------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| onDropEvent               | OK  | NO      | NO  | A callback that returns an array of assets. [refer to Asset Object](#Asset-Object)                                       
-| includeBase64           | OK  | NO      | NO  | If `true`, creates base64 string of the image (Avoid using on large image files due to performance).                                                        
+| onDropEvent | OK | NO | NO | A callback that returns an array of assets. [refer to Asset Object](#Asset-Object)
+| includeBase64 | OK | NO | NO | If `true`, creates base64 string of the image (Avoid using on large image files due to performance).
 
 ## Asset Object
 
-| key       | iOS | Android | Web | Description                                                                                                                                                                                                                                                                    |
-| --------- | --- | ------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| base64    | OK  | NO      | NO  | The base64 string of the image (Optional)                             
-| uri       | OK  | NO      | NO  | The file uri in app-specific cache storage.                      |
-| width     | OK  | NO      | NO  | Asset dimensions                                                                                                                                                                                                                                                               |
-| height    | OK  | NO      | NO  | Asset dimensions                                                                                                                                                                                                                                                               |
-| type      | OK  | NO      | NO  | The file mime type                                                                                                                                                                                                                                                             |
-| fileName  | OK  | NO      | NO  | The file name                                                              
-
+| key      | iOS | Android | Web | Description                                 |
+| -------- | --- | ------- | --- | ------------------------------------------- |
+| base64   | OK  | NO      | NO  | The base64 string of the image (Optional)   |
+| uri      | OK  | NO      | NO  | The file uri in app-specific cache storage. |
+| width    | OK  | NO      | NO  | Asset dimensions                            |
+| height   | OK  | NO      | NO  | Asset dimensions                            |
+| type     | OK  | NO      | NO  | The file mime type                          |
+| fileName | OK  | NO      | NO  | The file name                               |
 
 ## License
 
