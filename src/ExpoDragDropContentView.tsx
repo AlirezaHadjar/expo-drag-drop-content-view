@@ -1,6 +1,6 @@
-import { ViewProps } from "react-native";
 import { requireNativeViewManager } from "expo-modules-core";
 import * as React from "react";
+import { ViewProps } from "react-native";
 
 export type OnDropEvent = {
   uri: string;
@@ -14,6 +14,8 @@ export type OnDropEvent = {
 
 export type Props = ViewProps & {
   onDropEvent?: (event: { nativeEvent: { assets: OnDropEvent[] } }) => void;
+  onDropStartEvent?: () => void;
+  onDropEndEvent?: () => void;
   includeBase64?: boolean;
 };
 
