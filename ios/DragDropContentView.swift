@@ -5,6 +5,8 @@ import MobileCoreServices
 
 class DragDropContentView: UIView, UIDropInteractionDelegate {
     var onDropEvent: EventDispatcher? = nil
+    var onDropStartEvent: EventDispatcher? = nil
+    var onDropEndEvent: EventDispatcher? = nil
     lazy var includeBase64 = false
 
     func setIncludeBase64(_ includeBase64: Bool) {
@@ -25,8 +27,33 @@ class DragDropContentView: UIView, UIDropInteractionDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func setEventDispatcher(_ eventDispatcher: EventDispatcher) {
+    func setDropEventDispatcher(_ eventDispatcher: EventDispatcher) {
       self.onDropEvent = eventDispatcher
+    }
+    
+    func setDropStartEventDispatcher(_ eventDispatcher: EventDispatcher) {
+      self.onDropStartEvent = eventDispatcher
+    }
+    
+    func setDropEndEventDispatcher(_ eventDispatcher: EventDispatcher) {
+      self.onDropEndEvent = eventDispatcher
+    }
+    
+    func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnter session: UIDropSession) {
+        // Notify when an item is being dragged over the view
+        self.onDropStartEvent?()
+    }
+    
+    func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnd session: UIDropSession) {
+        // Notify when the drop session ends (successfully or not)
+        print("Ending")
+        self.onDropEndEvent?()
+    }
+    
+    func dropInteraction(_ interaction: UIDropInteraction, sessionDidExit session: UIDropSession) {
+        // Notify when an item is being dragged over the view
+        print("Exiting")
+        self.onDropEndEvent?()
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
