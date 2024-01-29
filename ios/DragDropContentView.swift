@@ -46,13 +46,11 @@ class DragDropContentView: UIView, UIDropInteractionDelegate {
     
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnd session: UIDropSession) {
         // Notify when the drop session ends (successfully or not)
-        print("Ending")
         self.onDropEndEvent?()
     }
     
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidExit session: UIDropSession) {
         // Notify when an item is being dragged over the view
-        print("Exiting")
         self.onDropEndEvent?()
     }
 
