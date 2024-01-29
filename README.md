@@ -110,8 +110,10 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 `DragDropContentView` supports all `View` Props. Other Props:
 | Option | iOS | Android | Web | Description |
 | ----------------------- | --- | ------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| onDropEvent | OK | NO | NO | A callback that returns an array of assets. [refer to Asset Object](#Asset-Object)
-| includeBase64 | OK | NO | NO | If `true`, creates base64 string of the image (Avoid using on large image files due to performance).
+| onDropEvent         | ✔️   | ❌  | ❌  | A callback that returns an array of assets. [Refer to Asset Object](#Asset-Object)             |
+| onDropStartEvent    | ✔️   | ❌  | ❌  | A callback that is called when any image is being dragged over                                |
+| onDropEndEvent      | ✔️   | ❌  | ❌  | A callback that is called when any image is dragged out of the view's boundary or released    |
+| includeBase64       | ✔️   | ❌  | ❌  | If `true`, creates a base64 string of the image (Avoid using on large image files due to performance) |
 
 ## Asset Object
 
