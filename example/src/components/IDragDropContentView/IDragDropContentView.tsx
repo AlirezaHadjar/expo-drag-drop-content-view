@@ -3,8 +3,9 @@ import {
   DragDropContentViewProps,
   OnDropEvent,
 } from "expo-drag-drop-content-view";
-import React, { useState } from "react";
-import { Image, StyleSheet } from "react-native";
+import { Image } from "expo-image";
+import React, { useEffect, useState } from "react";
+import { PermissionsAndroid, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 const styles = StyleSheet.create({
@@ -36,12 +37,29 @@ const styles = StyleSheet.create({
 export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
 ) => {
-  const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
+  const [imageData, setImageData] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    const fn = async () => {
+      try {
+        await PermissionsAndroid.request(
+          "android.permission.READ_MEDIA_IMAGES"
+        );
+      } catch (error) {
+        console.log("sdfsa", error);
+      }
+    };
+    fn();
+  }, []);
+
   return (
     <DragDropContentView
       {...props}
       onDropEvent={(event) => {
-        setImageData(event.nativeEvent.assets);
+        console.log(event.nativeEvent.assets);
+        setImageData([
+          "file://" + (event.nativeEvent.assets as unknown as string),
+        ]);
         props.onDropEvent?.(event);
       }}
       style={[styles.container, props.style]}
@@ -50,9 +68,10 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
         imageData.map((asset, index) => {
           const rotation = Math.ceil(index / 2) * 5;
           const direction = index % 2 === 0 ? 1 : -1;
+          console.log("asdfasdf", asset);
           return (
             <Animated.View
-              key={asset.uri}
+              key={asset}
               entering={FadeIn.springify().delay(index * 100)}
               style={[
                 styles.imageContainer,
@@ -61,7 +80,16 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
                 },
               ]}
             >
-              <Image source={{ uri: asset.uri }} style={styles.image} />
+              <Image
+                onError={(e) => {
+                  console.log("xczvxzv", e);
+                }}
+                source={{
+                  uri: asset,
+                }}
+                // source={require("./example.png")}
+                style={styles.image}
+              />
             </Animated.View>
           );
         })}
