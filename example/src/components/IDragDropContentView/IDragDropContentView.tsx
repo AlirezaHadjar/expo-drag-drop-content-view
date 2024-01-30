@@ -11,15 +11,18 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
+
+const borderRadius = 20;
 
 const styles = StyleSheet.create({
   container: {
     width: "100%",
     height: "100%",
     backgroundColor: "#fefefe",
-    borderRadius: 20,
+    borderRadius,
     overflow: "visible",
     justifyContent: "center",
     alignItems: "center",
@@ -31,7 +34,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
-    borderRadius: 20,
+    borderRadius,
     overflow: "hidden",
   },
   image: {
@@ -46,7 +49,7 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
+    borderRadius,
   },
   placeholderText: {
     color: "white",
@@ -74,15 +77,16 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 ) => {
   usePermission();
   const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
-
+  View;
   const handleClear = () => setImageData(null);
   return (
     <DragDropContentView
       {...props}
       includeBase64
+      highlightColor="#2f95dc"
+      highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
-        console.log(event.nativeEvent.assets);
-        const newData = [...(imageData ?? []), ...event.nativeEvent.assets];
+        const newData = [...(imageData ?? []), ...event.assets];
         setImageData(newData);
         props.onDropEvent?.(event);
       }}
@@ -101,7 +105,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
               entering={FadeIn.springify().delay(index * 100)}
               style={[styles.imageContainer, { transform: [{ rotate }] }]}
             >
-              <Image source={{ uri }} style={styles.image} />
+              <Image source={{ uri }} style={styles.image} v />
             </AnimatedTouchable>
           );
         })

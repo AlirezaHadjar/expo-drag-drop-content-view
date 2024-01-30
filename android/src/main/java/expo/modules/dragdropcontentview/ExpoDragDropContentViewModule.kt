@@ -35,6 +35,12 @@ class ExpoDragDropContentViewModule : Module() {
       Prop("includeBase64") {view: ExpoDragDropContentView, value: Boolean? ->
         view.setIncludeBase64(value)
       }
+      Prop("highlightColor") { view: ExpoDragDropContentView, color: Int? ->
+        view.setHighlightColor(color)
+      }
+      Prop("highlightBorderRadius") { view: ExpoDragDropContentView, color: Int? ->
+        view.setHighlightBorderRadius(color)
+      }
       Events("onDropEvent")
     }
   }

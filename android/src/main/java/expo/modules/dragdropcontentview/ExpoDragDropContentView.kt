@@ -1,30 +1,41 @@
 package expo.modules.dragdropcontentview
 
-import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
-import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Base64
-import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.draganddrop.DropHelper
 import expo.modules.kotlin.AppContext
-import android.view.View
-import androidx.core.content.ContextCompat
-import androidx.core.view.ContentInfoCompat
 import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
 import java.io.ByteArrayOutputStream
 
 class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
     private var includeBase64 = false
+    private var highlightColor = ContextCompat.getColor(context, R.color.highlight_color)
+    private var highlightBorderRadius = 0
     private val onDropEvent by EventDispatcher()
 
     fun setIncludeBase64(value: Boolean?) {
         includeBase64 = value ?: false
+    }
+
+    fun setHighlightBorderRadius(value: Int?) {
+        if (value != null) {
+            highlightBorderRadius = value
+            configureDropHelper()
+        }
+    }
+
+    fun setHighlightColor(value: Int?) {
+        if (value != null) {
+            highlightColor = value
+            configureDropHelper()
+        }
     }
 
     private fun getImageDimensions(contentResolver: ContentResolver, contentUri: Uri): Pair<Int, Int> {
@@ -97,29 +108,33 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         return null
     }
 
-    init {
-        var activity = appContext.activityProvider?.currentActivity!!
+    private fun configureDropHelper() {
+        val activity = appContext.activityProvider?.currentActivity!!
         val contentResolver = context.contentResolver
 
         DropHelper.configureView(
-                activity,
-                this,
-                arrayOf ("image/*"),
-                DropHelper.Options.Builder()
-                        .setHighlightColor(ContextCompat.getColor(context, R.color.highlight_color))
-                        .build()) {_, payload ->
-                val clipData = payload.clip
-                val infoList = mutableListOf<Map<String, Any?>>()
+            activity,
+            this,
+            arrayOf("image/*"),
+            DropHelper.Options.Builder()
+                .setHighlightColor(highlightColor)
+                .setHighlightCornerRadiusPx(highlightBorderRadius)
+                .build()
+        ) { _, payload ->
+            val clipData = payload.clip
+            val infoList = mutableListOf<Map<String, Any?>>()
 
-                for (i in 0 until clipData.itemCount) {
-                    val contentUri = clipData.getItemAt(i).uri
-                    val info = getFileInfo(contentResolver, contentUri)
-                    info?.let { infoList.add(it) }
-                }
-                onDropEvent(mapOf("assets" to infoList))
-                return@configureView payload
-
+            for (i in 0 until clipData.itemCount) {
+                val contentUri = clipData.getItemAt(i).uri
+                val info = getFileInfo(contentResolver, contentUri)
+                info?.let { infoList.add(it) }
+            }
+            onDropEvent(mapOf("assets" to infoList))
+            return@configureView payload
         }
+    }
 
+    init {
+        configureDropHelper()
     }
 }
