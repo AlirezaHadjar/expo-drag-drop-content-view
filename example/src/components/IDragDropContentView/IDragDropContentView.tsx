@@ -7,6 +7,7 @@ import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
 import {
   PermissionsAndroid,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -55,34 +56,34 @@ const styles = StyleSheet.create({
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
-export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
-  props
-) => {
-  const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
-
+const usePermission = () => {
   useEffect(() => {
     const fn = async () => {
       try {
         await PermissionsAndroid.request(
           "android.permission.READ_MEDIA_IMAGES"
         );
-      } catch (error) {
-        console.log("sdfsa", error);
-      }
+      } catch (_) {}
     };
-    fn();
+    if (Platform.OS === "android") fn();
   }, []);
+};
+
+export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
+  props
+) => {
+  usePermission();
+  const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
 
   const handleClear = () => setImageData(null);
   return (
     <DragDropContentView
       {...props}
+      includeBase64
       onDropEvent={(event) => {
         console.log(event.nativeEvent.assets);
-        // setImageData([
-        //   "file://" + (event.nativeEvent.assets as unknown as string),
-        // ]);
-        setImageData(event.nativeEvent.assets);
+        const newData = [...(imageData ?? []), ...event.nativeEvent.assets];
+        setImageData(newData);
         props.onDropEvent?.(event);
       }}
       style={[styles.container, props.style]}
@@ -110,5 +111,5 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
         </Animated.View>
       )}
     </DragDropContentView>
-  );
+  ) as React.ReactNode;
 };

@@ -32,7 +32,9 @@ class ExpoDragDropContentViewModule : Module() {
     // Enables the module to be used as a native view. Definition components that are accepted as part of
     // the view definition: Prop, Events.
     View(ExpoDragDropContentView::class) {
-      // Defines a setter for the `name` prop.
+      Prop("includeBase64") {view: ExpoDragDropContentView, value: Boolean? ->
+        view.setIncludeBase64(value)
+      }
       Events("onDropEvent")
     }
   }

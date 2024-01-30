@@ -5,7 +5,6 @@
     "paths": {
       "expo-drag-drop-content-view": ["../src/index"],
       "expo-drag-drop-content-view/*": ["../src/*"],
-      "react": ["./node_modules/@types/react"],
     },
   },
 }
