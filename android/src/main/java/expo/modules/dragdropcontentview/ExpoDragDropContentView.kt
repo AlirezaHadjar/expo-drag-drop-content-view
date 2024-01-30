@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import android.util.Base64
 import androidx.core.content.ContextCompat
@@ -109,6 +110,9 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
     }
 
     private fun configureDropHelper() {
+        // DropHelper is only available on Android N and above
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
+
         val activity = appContext.activityProvider?.currentActivity!!
         val contentResolver = context.contentResolver
 
