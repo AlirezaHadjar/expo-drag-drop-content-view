@@ -4,11 +4,13 @@
 
 ## What
 
-A superset of View component that supports ios drag and drop feature.
+A superset of `View` component that supports iOS & Android Native drag and drop feature.
 
-https://github.com/AlirezaHadjar/expo-drag-drop-content-view/assets/57192409/34a2ee62-88e0-480c-b6ca-5e297954d8ad
 
-https://github.com/AlirezaHadjar/expo-drag-drop-content-view/assets/57192409/ced26cf2-b967-4055-82d9-bc11efeb8ce8
+|iOS|iPadOS|Android|
+|:-:|:-:|:-:|
+|![iOS Screenshot](screenshots/ios.gif)|![iPadOS Screenshot](screenshots/ipados.gif)|![Android Screenshot](screenshots/Android.gif)
+
 
 ## Features
 
@@ -20,6 +22,7 @@ https://github.com/AlirezaHadjar/expo-drag-drop-content-view/assets/57192409/ced
 ### 🔔 You should have expo installed in your project
 
 #### ⚠️ Since it has native code you cannot run it using Expo Go
+#### ✅ Instead use development build
 
 You can install the package using the following command:
 
@@ -31,9 +34,12 @@ npx expo install expo-drag-drop-content-view
 
 - [Basic Example](./example/App.tsx)
 
-## Usage
+### 🤖 Android Specific Cautions
+- Requires SDK >= 24 for Compatibility. It acts as a normal view on SDK < 24
+- Android applies a highlight over the view when an image is being dragged, You can customize it using `highlightColor` and `highlightBorderRadius`
+- `onDropStartEvent` and `onDropEndEvent` events are yet to implement
 
-#### 🗒️ Since this is an ios (and iPad-os) specific feature, `DragDropContentView` works as a simple `View` on Android and Web
+## Usage
 
 ```tsx
 import {
@@ -42,7 +48,49 @@ import {
   OnDropEvent,
 } from "expo-drag-drop-content-view";
 import React, { useState } from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, StyleSheet, View, TouchableOpacity, Text } from "react-native";
+
+export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
+  props
+) => {
+  const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
+
+  const handleClear = () => setImageData(null);
+
+  return (
+    <DragDropContentView
+      {...props}
+      onDropEvent={(event) => {
+        setImageData(event.assets);
+      }}
+      highlightColor="#2f95dc"
+      highlightBorderRadius={20}
+      style={[styles.container, props.style]}
+    >
+      {imageData ? (
+        imageData.map(({ uri }, index) => {
+          const rotation = Math.ceil(index / 2) * 5;
+          const direction = index % 2 === 0 ? 1 : -1;
+          const rotate = `${rotation * direction}deg`;
+
+          return (
+            <TouchableOpacity
+              key={uri}
+              onPress={handleClear}
+              style={[styles.imageContainer, { transform: [{ rotate }] }]}
+            >
+              <Image source={{ uri }} style={styles.image} v />
+            </TouchableOpacity>
+          );
+        })
+      ) : (
+        <View style={styles.placeholderContainer}>
+          <Text style={styles.placeholderText}>Drop any image here!</Text>
+        </View>
+      )}
+    </DragDropContentView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -68,52 +116,34 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  placeholderContainer: {
+    paddingHorizontal: 30,
+    backgroundColor: "#2f95dc",
+    opacity: 0.5,
+    height: "100%",
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+  },
+  placeholderText: {
+    color: "white",
+    textAlign: "center",
+  },
 });
-
-export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
-  props
-) => {
-  const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
-  return (
-    <DragDropContentView
-      {...props}
-      onDropEvent={(event) => {
-        setImageData(event.nativeEvent.assets);
-      }}
-      style={[styles.container, props.style]}
-    >
-      {imageData &&
-        imageData.map((asset, index) => {
-          const rotation = Math.ceil(index / 2) * 5;
-          const direction = index % 2 === 0 ? 1 : -1;
-          return (
-            <View
-              key={asset.uri}
-              style={[
-                styles.imageContainer,
-                {
-                  transform: [{ rotate: `${rotation * direction}deg` }],
-                },
-              ]}
-            >
-              <Image source={{ uri: asset.uri }} style={styles.image} />
-            </View>
-          );
-        })}
-    </DragDropContentView>
-  );
-};
 ```
-
 ## Options
 
 `DragDropContentView` supports all `View` Props. Other Props:
+
 | Option | iOS | Android | Web | Description |
 | ----------------------- | --- | ------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| onDropEvent         | ✔️   | ❌  | ❌  | A callback that returns an array of assets. [Refer to Asset Object](#Asset-Object)             |
+| onDropEvent         | ✔️   | ✔️  | ❌  | A callback that returns an array of assets. [Refer to Asset Object](#Asset-Object)             |
 | onDropStartEvent    | ✔️   | ❌  | ❌  | A callback that is called when any image is being dragged over                                |
 | onDropEndEvent      | ✔️   | ❌  | ❌  | A callback that is called when any image is dragged out of the view's boundary or released    |
-| includeBase64       | ✔️   | ❌  | ❌  | If `true`, creates a base64 string of the image (Avoid using on large image files due to performance) |
+| includeBase64       | ✔️   | ✔️  | ❌  | If `true`, creates a base64 string of the image (Avoid using on large image files due to performance) |
+| highlightColor       | ❌   | ✔️  | ❌  | The background color of overlay that covers the view while content is being dragged [Android Doc](https://developer.android.com/reference/kotlin/androidx/draganddrop/DropHelper.Options.Builder#setHighlightColor(int)) |
+| highlightBorderRadius       | ❌   | ✔️  | ❌  | The border-radius of overlay that covers the view while content is being dragged [Android Doc](https://developer.android.com/reference/kotlin/androidx/draganddrop/DropHelper.Options.Builder#setHighlightCornerRadiusPx(int)) |
 
 ## Asset Object
 
@@ -121,10 +151,22 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 | -------- | --- | ------- | --- | ------------------------------------------- |
 | base64   | OK  | NO      | NO  | The base64 string of the image (Optional)   |
 | uri      | OK  | NO      | NO  | The file uri in app-specific cache storage. |
+| path      | OK  | NO      | NO  | The original file path. |
 | width    | OK  | NO      | NO  | Asset dimensions                            |
 | height   | OK  | NO      | NO  | Asset dimensions                            |
 | type     | OK  | NO      | NO  | The file mime type                          |
 | fileName | OK  | NO      | NO  | The file name                               |
+
+## Todo
+- [x] iOS support
+- [x] Android support
+- [x] Allowing `children` to be touchable
+- [ ] Web support
+- [ ] MacOS support
+- [ ] Adding Drag support 
+
+## Acknowledgment
+❤️ Special thanks to [Ali Nabavi](https://github.com/sali1290) my friend for Android support.
 
 ## License
 
