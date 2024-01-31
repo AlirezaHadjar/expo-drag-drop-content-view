@@ -9,7 +9,7 @@ A superset of `View` component that supports iOS & Android Native drag and drop 
 
 |iOS|iPadOS|Android|
 |:-:|:-:|:-:|
-|![iOS Screenshot](screenshots/ios.gif)|![iPadOS Screenshot](screenshots/ipados.gif)|![Android Screenshot](screenshots/Android.gif)
+|![iOS Screenshot](.github/screenshots/ios.gif)|![iPadOS Screenshot](.github/screenshots/ipados.gif)|![Android Screenshot](.github/screenshots/Android.gif)
 
 
 ## Features
