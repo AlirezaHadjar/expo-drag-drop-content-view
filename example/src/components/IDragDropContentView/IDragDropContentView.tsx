@@ -11,7 +11,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
@@ -77,7 +76,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 ) => {
   usePermission();
   const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
-  View;
+
   const handleClear = () => setImageData(null);
   return (
     <DragDropContentView
