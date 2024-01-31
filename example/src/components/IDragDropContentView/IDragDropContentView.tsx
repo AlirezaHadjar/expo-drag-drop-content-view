@@ -3,16 +3,25 @@ import {
   DragDropContentViewProps,
   OnDropEvent,
 } from "expo-drag-drop-content-view";
-import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
+import React, { useEffect, useState } from "react";
+import {
+  PermissionsAndroid,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
+
+const borderRadius = 20;
 
 const styles = StyleSheet.create({
   container: {
     width: "100%",
     height: "100%",
     backgroundColor: "#fefefe",
-    borderRadius: 20,
+    borderRadius,
     overflow: "visible",
     justifyContent: "center",
     alignItems: "center",
@@ -24,7 +33,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
-    borderRadius: 20,
+    borderRadius,
     overflow: "hidden",
   },
   image: {
@@ -39,7 +48,7 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
+    borderRadius,
   },
   placeholderText: {
     color: "white",
@@ -49,17 +58,35 @@ const styles = StyleSheet.create({
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
+const usePermission = () => {
+  useEffect(() => {
+    const fn = async () => {
+      try {
+        await PermissionsAndroid.request(
+          "android.permission.READ_MEDIA_IMAGES"
+        );
+      } catch (_) {}
+    };
+    if (Platform.OS === "android") fn();
+  }, []);
+};
+
 export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
 ) => {
+  usePermission();
   const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
 
   const handleClear = () => setImageData(null);
   return (
     <DragDropContentView
       {...props}
+      includeBase64
+      highlightColor="#2f95dc"
+      highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
-        setImageData(event.nativeEvent.assets);
+        const newData = [...(imageData ?? []), ...event.assets];
+        setImageData(newData);
         props.onDropEvent?.(event);
       }}
       style={[styles.container, props.style]}
@@ -77,7 +104,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
               entering={FadeIn.springify().delay(index * 100)}
               style={[styles.imageContainer, { transform: [{ rotate }] }]}
             >
-              <Image source={{ uri }} style={styles.image} />
+              <Image source={{ uri }} style={styles.image} v />
             </AnimatedTouchable>
           );
         })
@@ -87,5 +114,5 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
         </Animated.View>
       )}
     </DragDropContentView>
-  );
+  ) as React.ReactNode;
 };

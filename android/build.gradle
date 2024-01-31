@@ -65,6 +65,10 @@ android {
     }
   }
 
+  buildFeatures {
+    viewBinding true
+  }
+
   namespace "expo.modules.dragdropcontentview"
   defaultConfig {
     minSdkVersion safeExtGet("minSdkVersion", 21)
@@ -88,5 +92,6 @@ repositories {
 
 dependencies {
   implementation project(':expo-modules-core')
+  implementation "androidx.draganddrop:draganddrop:1.0.0"
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${getKotlinVersion()}"
 }
