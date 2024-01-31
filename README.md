@@ -39,6 +39,7 @@ npx expo install expo-drag-drop-content-view
 - Requires SDK >= 24 for Compatibility. It acts as a normal view on SDK < 24
 - Android applies a highlight over the view when an image is being dragged, You can customize it using `highlightColor` and `highlightBorderRadius`
 - Remember to add `android.permission.READ_MEDIA_IMAGES` permission since you are accessing an image from disk
+- It only works in multi-window [Reference](https://developer.android.com/develop/ui/views/touch-and-input/drag-drop)
 - `onDropStartEvent` and `onDropEndEvent` events are yet to implement
 
 ## Usage
