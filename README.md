@@ -38,6 +38,7 @@ npx expo install expo-drag-drop-content-view
 #### 🤖 Android Specific Cautions
 - Requires SDK >= 24 for Compatibility. It acts as a normal view on SDK < 24
 - Android applies a highlight over the view when an image is being dragged, You can customize it using `highlightColor` and `highlightBorderRadius`
+- Remember to add `android.permission.READ_MEDIA_IMAGES` permission since you are accessing an image from disk
 - `onDropStartEvent` and `onDropEndEvent` events are yet to implement
 
 ## Usage
@@ -48,12 +49,13 @@ import {
   DragDropContentViewProps,
   OnDropEvent,
 } from "expo-drag-drop-content-view";
-import React, { useState } from "react";
-import { Image, StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Image, StyleSheet, View, TouchableOpacity, Text, PermissionsAndroid, Platform } from "react-native";
 
 export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
 ) => {
+  usePermission()
   const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
 
   const handleClear = () => setImageData(null);
@@ -91,6 +93,19 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       )}
     </DragDropContentView>
   );
+};
+
+const usePermission = () => {
+  useEffect(() => {
+    const fn = async () => {
+      try {
+        await PermissionsAndroid.request(
+          "android.permission.READ_MEDIA_IMAGES"
+        );
+      } catch (_) {}
+    };
+    if (Platform.OS === "android") fn();
+  }, []);
 };
 
 const styles = StyleSheet.create({
