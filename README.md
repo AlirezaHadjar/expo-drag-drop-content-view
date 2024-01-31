@@ -19,10 +19,11 @@ A superset of `View` component that supports iOS & Android Native drag and drop 
 
 ## Installation
 
-### 🔔 You should have expo installed in your project
+#### 🔔 You should have expo installed in your project.
+#### ✅ For Bare RN projects, you need to have [Expo Module](https://docs.expo.dev/bare/installing-expo-modules/) installed.
+#### ⚠️ Expo Go is not supported, use development build instead.
 
-#### ⚠️ Since it has native code you cannot run it using Expo Go
-#### ✅ Instead use development build
+
 
 You can install the package using the following command:
 
@@ -34,7 +35,7 @@ npx expo install expo-drag-drop-content-view
 
 - [Basic Example](./example/App.tsx)
 
-### 🤖 Android Specific Cautions
+#### 🤖 Android Specific Cautions
 - Requires SDK >= 24 for Compatibility. It acts as a normal view on SDK < 24
 - Android applies a highlight over the view when an image is being dragged, You can customize it using `highlightColor` and `highlightBorderRadius`
 - `onDropStartEvent` and `onDropEndEvent` events are yet to implement
