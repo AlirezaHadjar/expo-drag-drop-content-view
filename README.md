@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
 - [ ] Dragging texts and videos support
 
 ## Acknowledgment
-❤️ Special thanks to [Ali Nabavi](https://github.com/sali1290) my friend for Android support.
+❤️ Special thanks to [Ali Nabavi](https://github.com/sali1290) for Android support.
 
 ## License
 
