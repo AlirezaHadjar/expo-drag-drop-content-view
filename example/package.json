@@ -6,14 +6,16 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "macos": "npx react-native run-macos",
     "web": "expo start --web"
   },
   "dependencies": {
-    "expo": "~50.0.2",
-    "expo-image": "~1.10.4",
+    "expo": "~50.0.5",
+    "expo-image": "~1.10.5",
     "react": "18.2.0",
     "react-native": "0.73.2",
-    "react-native-reanimated": "~3.6.0"
+    "react-native-macos": "^0.73.0-0",
+    "react-native-reanimated": "~3.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
