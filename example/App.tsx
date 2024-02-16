@@ -37,10 +37,7 @@ export default function App() {
           gap,
         }}
         renderItem={({ index }) => (
-          <IDragDropContentView
-            id={"drop-view-" + index}
-            style={{ width: boxSize, height: boxSize }}
-          />
+          <IDragDropContentView style={{ width: boxSize, height: boxSize }} />
         )}
         numColumns={2}
       />
