@@ -4,11 +4,15 @@
 
 ## What
 
-A superset of `View` component that supports iOS & Android Native drag and drop feature.
+A superset of `View` component that supports iOS, Android, and Web Native drag and drop feature.
 
 |                      iOS                       |                        iPadOS                        |                        Android                         |
 | :--------------------------------------------: | :--------------------------------------------------: | :----------------------------------------------------: |
 | ![iOS Screenshot](.github/screenshots/ios.gif) | ![iPadOS Screenshot](.github/screenshots/ipados.gif) | ![Android Screenshot](.github/screenshots/Android.gif) |
+
+|                                                                          Web                                                                                   |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|                                                     ![Web Screenshot](.github/screenshots/web.gif)                                                             |
 
 ## Features
 
@@ -163,10 +167,10 @@ const styles = StyleSheet.create({
 
 | Option                | iOS | Android | Web | Description                                                                                                                                                                                                                      |
 | --------------------- | --- | ------- | --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| onDropEvent           | ✔️  | ✔️      | ❌  | A callback that returns an array of assets. [Refer to Asset Object](#Asset-Object)                                                                                                                                               |
-| onDropStartEvent      | ✔️  | ❌      | ❌  | A callback that is called when any image is being dragged over                                                                                                                                                                   |
-| onDropEndEvent        | ✔️  | ❌      | ❌  | A callback that is called when any image is dragged out of the view's boundary or released                                                                                                                                       |
-| includeBase64         | ✔️  | ✔️      | ❌  | If `true`, creates a base64 string of the image (Avoid using on large image files due to performance)                                                                                                                            |
+| onDropEvent           | ✔️  | ✔️      | ✔️  | A callback that returns an array of assets. [Refer to Asset Object](#Asset-Object)                                                                                                                                               |
+| onDropStartEvent      | ✔️  | ❌      | ✔️  | A callback that is called when any image is being dragged over                                                                                                                                                                   |
+| onDropEndEvent        | ✔️  | ❌      | ✔️  | A callback that is called when any image is dragged out of the view's boundary or released                                                                                                                                       |
+| includeBase64         | ✔️  | ✔️      | ❌  | If `true`, creates a base64 string of the image (Avoid using on large image files due to performance). It is always `true` on `Web` since it is the only available source                                                                                                                            |
 | highlightColor        | ❌  | ✔️      | ❌  | The background color of overlay that covers the view while content is being dragged [Android Doc](<https://developer.android.com/reference/kotlin/androidx/draganddrop/DropHelper.Options.Builder#setHighlightColor(int)>)       |
 | highlightBorderRadius | ❌  | ✔️      | ❌  | The border-radius of overlay that covers the view while content is being dragged [Android Doc](<https://developer.android.com/reference/kotlin/androidx/draganddrop/DropHelper.Options.Builder#setHighlightCornerRadiusPx(int)>) |
 
@@ -174,20 +178,20 @@ const styles = StyleSheet.create({
 
 | key      | iOS | Android | Web | Description                                 |
 | -------- | --- | ------- | --- | ------------------------------------------- |
-| base64   | ✔️  | ✔️      | ❌  | The base64 string of the image (Optional)   |
+| base64   | ✔️  | ✔️      | ✔️  | The base64 string of the image (Optional on Android and iOS, but Required on Web)   |
 | uri      | ✔️  | ✔️      | ❌  | The file uri in app-specific cache storage. |
 | path     | ✔️  | ✔️      | ❌  | The original file path.                     |
-| width    | ✔️  | ✔️      | ❌  | Asset dimensions                            |
-| height   | ✔️  | ✔️      | ❌  | Asset dimensions                            |
-| type     | ✔️  | ✔️      | ❌  | The file mime type                          |
-| fileName | ✔️  | ✔️      | ❌  | The file name                               |
+| width    | ✔️  | ✔️      | ✔️  | Asset dimensions                            |
+| height   | ✔️  | ✔️      | ✔️  | Asset dimensions                            |
+| type     | ✔️  | ✔️      | ✔️  | The file mime type                          |
+| fileName | ✔️  | ✔️      | ✔️  | The file name                               |
 
 ## Todo
 
 - [x] iOS support
 - [x] Android support
 - [x] Allowing `children` to be touchable
-- [ ] Web support
+- [x] Web support
 - [ ] MacOS support
 - [ ] Adding Drag support
 - [ ] Dragging texts and videos support
