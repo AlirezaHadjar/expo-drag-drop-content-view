@@ -4,7 +4,7 @@
 
 ## What
 
-A superset of `View` component that supports iOS & Android Native drag and drop feature.
+A superset of `View` component that supports iOS, Android, and Web Native drag and drop feature.
 
 |                      iOS                       |                        iPadOS                        |                        Android                         |
 | :--------------------------------------------: | :--------------------------------------------------: | :----------------------------------------------------: |
