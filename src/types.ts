@@ -2,9 +2,10 @@ import { ViewProps } from "react-native";
 
 export type OnDropEvent = {
   /**
+   * @platform Android, iOS
    * @description The file uri in app-specific cache storage.
    */
-  uri: string;
+  uri: string | undefined;
   /**
    * @description The mime type of the file.
    */
@@ -15,9 +16,10 @@ export type OnDropEvent = {
    */
   base64?: string;
   /**
+   * @platform Android, iOS
    * @description The original file path.
    */
-  path: string;
+  path: string | undefined;
   /**
    * @description Asset height
    */
