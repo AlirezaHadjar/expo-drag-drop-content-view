@@ -36,7 +36,7 @@ export default function App() {
         columnWrapperStyle={{
           gap,
         }}
-        renderItem={() => (
+        renderItem={({ index }) => (
           <IDragDropContentView style={{ width: boxSize, height: boxSize }} />
         )}
         numColumns={2}

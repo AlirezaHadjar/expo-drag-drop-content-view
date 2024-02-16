@@ -5,13 +5,7 @@ import {
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
-import {
-  PermissionsAndroid,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { Platform, Pressable, StyleSheet, Text } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 const borderRadius = 20;
@@ -50,18 +44,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius,
   },
+  activePlaceholderContainer: {
+    backgroundColor: "#2f95dc",
+    opacity: 1,
+  },
   placeholderText: {
     color: "white",
     textAlign: "center",
   },
 });
 
-const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const usePermission = () => {
   useEffect(() => {
     const fn = async () => {
       try {
+        // @ts-ignore
+        const PermissionsAndroid = await import("react-native").then(
+          (module) => module.PermissionsAndroid
+        );
         await PermissionsAndroid.request(
           "android.permission.READ_MEDIA_IMAGES"
         );
@@ -76,12 +78,20 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 ) => {
   usePermission();
   const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
+  const [isActive, setIsActive] = useState(false);
 
   const handleClear = () => setImageData(null);
+
   return (
     <DragDropContentView
       {...props}
       includeBase64
+      onDropStartEvent={() => {
+        setIsActive(true);
+      }}
+      onDropEndEvent={() => {
+        setIsActive(false);
+      }}
       highlightColor="#2f95dc"
       highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
@@ -92,24 +102,34 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       style={[styles.container, props.style]}
     >
       {imageData ? (
-        imageData.map(({ uri }, index) => {
+        imageData.map((image, index) => {
+          const uri = image.uri ? image.uri : image.base64;
           const rotation = Math.ceil(index / 2) * 5;
           const direction = index % 2 === 0 ? 1 : -1;
           const rotate = `${rotation * direction}deg`;
 
           return (
-            <AnimatedTouchable
-              key={uri}
+            <AnimatedPressable
+              key={index}
               onPress={handleClear}
-              entering={FadeIn.springify().delay(index * 100)}
+              entering={
+                Platform.OS === "web"
+                  ? undefined
+                  : FadeIn.springify().delay(index * 100)
+              }
               style={[styles.imageContainer, { transform: [{ rotate }] }]}
             >
-              <Image source={{ uri }} style={styles.image} />
-            </AnimatedTouchable>
+              <Image source={{ uri }} style={[styles.image, {}]} />
+            </AnimatedPressable>
           );
         })
       ) : (
-        <Animated.View style={styles.placeholderContainer}>
+        <Animated.View
+          style={[
+            styles.placeholderContainer,
+            isActive && styles.activePlaceholderContainer,
+          ]}
+        >
           <Text style={styles.placeholderText}>Drop any image here!</Text>
         </Animated.View>
       )}
