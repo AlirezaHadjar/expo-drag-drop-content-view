@@ -1,5 +1,3 @@
-export {
-  default as DragDropContentView,
-  Props as DragDropContentViewProps,
-  OnDropEvent,
-} from "./ExpoDragDropContentView";
+export { default as DragDropContentView } from "./ExpoDragDropContentView";
+
+export type { DragDropContentViewProps, OnDropEvent } from "./types";

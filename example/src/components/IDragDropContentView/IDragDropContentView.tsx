@@ -104,7 +104,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
               entering={FadeIn.springify().delay(index * 100)}
               style={[styles.imageContainer, { transform: [{ rotate }] }]}
             >
-              <Image source={{ uri }} style={styles.image} v />
+              <Image source={{ uri }} style={styles.image} />
             </AnimatedTouchable>
           );
         })

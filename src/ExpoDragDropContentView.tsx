@@ -1,31 +1,9 @@
+/* eslint-disable prettier/prettier */
 import { requireNativeViewManager } from "expo-modules-core";
 import * as React from "react";
-import {
-  NativeSyntheticEvent,
-  StyleSheet,
-  ViewProps,
-  processColor,
-} from "react-native";
+import { NativeSyntheticEvent, StyleSheet, processColor } from "react-native";
 
-export type OnDropEvent = {
-  uri: string;
-  type: string;
-  base64?: string;
-  path: string;
-  height: number;
-  width: number;
-  fileName: string;
-};
-type Assets = { assets: OnDropEvent[] };
-
-export type Props = ViewProps & {
-  onDropEvent?: (event: Assets) => void;
-  onDropStartEvent?: () => void;
-  onDropEndEvent?: () => void;
-  includeBase64?: boolean;
-  highlightColor?: string | null;
-  highlightBorderRadius?: number;
-};
+import { Assets, DragDropContentViewProps } from "./types";
 
 function withDeprecatedNativeEvent<NativeEvent>(
   event: NativeSyntheticEvent<NativeEvent>
@@ -41,10 +19,10 @@ function withDeprecatedNativeEvent<NativeEvent>(
   return event.nativeEvent;
 }
 
-const NativeExpoDragDropContentView: React.ComponentType<Props> =
+const NativeExpoDragDropContentView: React.ComponentType<DragDropContentViewProps> =
   requireNativeViewManager("ExpoDragDropContentView");
 
-export default class ExpoDragDropContentView extends React.PureComponent<Props> {
+export default class ExpoDragDropContentView extends React.PureComponent<DragDropContentViewProps> {
   nativeViewRef;
 
   constructor(props) {
