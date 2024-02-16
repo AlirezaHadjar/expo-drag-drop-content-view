@@ -11,6 +11,7 @@ export type OnDropEvent = {
    */
   type: string;
   /**
+   * @platform Android, iOS
    * @description The base64 string of the image
    * @optional
    */
