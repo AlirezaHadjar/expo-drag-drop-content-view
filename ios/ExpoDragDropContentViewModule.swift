@@ -14,6 +14,9 @@ public class ExpoDragDropContentViewModule: Module {
         Prop("includeBase64") { (view, includeBase64: Bool) in
             view.dragDropContentView.setIncludeBase64(includeBase64)
         }
+        Prop("draggableImageUris") { (view, draggableImageUris: [String]) in
+            view.dragDropContentView.setDraggableImageUris(draggableImageUris)
+        }
     }
   }
 }

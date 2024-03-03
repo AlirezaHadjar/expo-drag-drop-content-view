@@ -86,6 +86,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
     <DragDropContentView
       {...props}
       includeBase64
+      draggableImageUris={imageData?.map((image) => image.uri!)}
       onDropStartEvent={() => {
         setIsActive(true);
       }}
@@ -110,6 +111,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 
           return (
             <AnimatedPressable
+              // pointerEvents="none"
               key={index}
               onPress={handleClear}
               entering={
@@ -119,7 +121,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
               }
               style={[styles.imageContainer, { transform: [{ rotate }] }]}
             >
-              <Image source={{ uri }} style={[styles.image, {}]} />
+              <Image source={{ uri }} style={[styles.image]} />
             </AnimatedPressable>
           );
         })

@@ -137,3 +137,40 @@ func generateAsset (image: UIImage, includeBase64: Bool) -> NSMutableDictionary?
 
     return asset
 }
+
+func loadImage(fromImagePath imagePath: String) -> UIImage? {
+    if let url = URL(string: imagePath) {
+        print("here i am")
+        let filePath = url.path
+
+        if FileManager.default.fileExists(atPath: filePath) {
+            if let image = UIImage(contentsOfFile: filePath) {
+                return image
+            } else {
+                print("Failed to create UIImage from file at path: \(filePath)")
+            }
+        } else {
+            print("Image file does not exist at path: \(filePath)")
+        }
+    } else {
+        print("Invalid URL path: \(imagePath)")
+    }
+
+    return nil
+}
+
+func convertImageToImageView(image: UIImage) -> UIImageView {
+    let imageView = UIImageView(image: image)
+    imageView.contentMode = .scaleAspectFit
+    // Set any additional properties for the UIImageView if needed
+    // For example, setting frame, contentMode, etc.
+//    imageView.frame = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
+    return imageView
+}
+
+func convertPoint(_ point: CGPoint, fromView view: UIView?) -> CGPoint {
+    if let parent = view?.superview {
+        return view?.convert(point, to: parent) ?? CGPoint.zero
+    }
+    return point
+}
