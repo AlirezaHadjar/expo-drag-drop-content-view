@@ -14,6 +14,7 @@ import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.DragStartHelper
@@ -67,6 +68,9 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
         return Pair(0, 0)
     }
+    private fun showToast(message: String) {
+        Toast.makeText(this.context, message, Toast.LENGTH_SHORT).show()
+    }
     private fun getFileInfo(contentResolver: ContentResolver, contentUri: Uri): Map<String, Any?>? {
         val projection = arrayOf(
             MediaStore.Images.Media.MIME_TYPE,
@@ -74,7 +78,12 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
             MediaStore.Images.Media.DATA
         )
 
-        var cursor = contentResolver.query(contentUri, projection, null, null, null)
+        val cursor = contentResolver.query(contentUri, projection, null, null, null)
+
+        if (cursor == null) {
+            showToast("Not supported")
+        }
+
         cursor?.use { cursorInstance ->
             if (cursorInstance.moveToFirst()) {
                 val type = cursorInstance.getString(cursorInstance.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE))
@@ -171,7 +180,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                     info?.let { infoList.add(it) }
                 }
             }
-            onDropEvent(mapOf("assets" to infoList))
+            if (infoList.isNotEmpty()) onDropEvent(mapOf("assets" to infoList))
             return@configureView payload
         }
 
@@ -194,10 +203,6 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
             val shadow = DragShadowBuilder(view)
 
             if (data.isNotEmpty()) {
-//                val clipData = ClipData.newUri(contentResolver, "Image", data[0])
-//                val clipData = ClipData.newIntent("Images", Intent().apply {
-//                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(data))
-//                })
                 val clipData = ClipData.newUri(contentResolver, "Image", data[0])
 
                 for (i in 1 until data.size) {
