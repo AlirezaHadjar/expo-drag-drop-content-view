@@ -16,7 +16,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.core.view.DragStartHelper
 import androidx.draganddrop.DropHelper
 import expo.modules.kotlin.AppContext
@@ -139,8 +138,6 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         val sortOrder = null // You can specify sorting order if needed
 
         val queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        Log.d("Query", queryUri.toString())
-        Log.d("absolutedd", file.absoluteFile.toString())
 
         context.contentResolver.query(queryUri, projection, selection, selectionArgs, sortOrder)?.use { cursor ->
             if (cursor.moveToFirst()) {
@@ -174,7 +171,6 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
             for (i in 0 until clipData.itemCount) {
                 val contentUri = clipData.getItemAt(i).uri
-                Log.d("first item", clipData.getItemAt(i).toString())
                 if (contentUri != null) {
                     val info = getFileInfo(contentResolver, contentUri)
                     info?.let { infoList.add(it) }
@@ -192,9 +188,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
                 if (!path.isNullOrBlank()) {
                     val file = File(path)
-                    Log.d("file is here", file.toString())
                     val uri = getContentUriForFile(this.context, file)
-                    Log.d("uri is here", uri.toString())
                     uri?.let { data.add(it) }
                 }
             }
