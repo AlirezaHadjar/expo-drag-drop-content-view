@@ -85,7 +85,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   return (
     <DragDropContentView
       {...props}
-      // includeBase64
+      includeBase64
       draggableImageUris={imageData?.map((image) => image.uri!)}
       onDropStartEvent={() => {
         setIsActive(true);
@@ -97,7 +97,6 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
         const newData = [...(imageData ?? []), ...event.assets];
-        console.log(newData);
         setImageData(newData);
         props.onDropEvent?.(event);
       }}
