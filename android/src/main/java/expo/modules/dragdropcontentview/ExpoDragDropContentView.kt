@@ -1,28 +1,42 @@
 package expo.modules.dragdropcontentview
 
+import android.content.ClipData
+import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
 import android.content.ContentResolver
+import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Base64
+import android.util.Log
+import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.core.view.DragStartHelper
 import androidx.draganddrop.DropHelper
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
     private var includeBase64 = false
+    private var draggableImageUris: List<String> = emptyList()
     private var highlightColor = ContextCompat.getColor(context, R.color.highlight_color)
     private var highlightBorderRadius = 0
     private val onDropEvent by EventDispatcher()
 
     fun setIncludeBase64(value: Boolean?) {
         includeBase64 = value ?: false
+    }
+
+    fun setDraggableImageUris(value: List<String>?) {
+        draggableImageUris = value ?: emptyList()
     }
 
     fun setHighlightBorderRadius(value: Int?) {
@@ -109,6 +123,27 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         return null
     }
 
+    private fun getContentUriForFile(context: Context, file: File): Uri? {
+        val projection = arrayOf(MediaStore.Images.Media._ID)
+        val selection = "${MediaStore.Images.Media.DATA} = ?"
+        val selectionArgs = arrayOf(file.absolutePath)
+        val sortOrder = null // You can specify sorting order if needed
+
+        val queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        Log.d("Query", queryUri.toString())
+        Log.d("absolutedd", file.absoluteFile.toString())
+
+        context.contentResolver.query(queryUri, projection, selection, selectionArgs, sortOrder)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+                val imageId = cursor.getLong(columnIndex)
+                return ContentUris.withAppendedId(queryUri, imageId)
+            }
+        }
+
+        return null
+    }
+
     private fun configureDropHelper() {
         // DropHelper is only available on Android N and above
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
@@ -130,12 +165,52 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
             for (i in 0 until clipData.itemCount) {
                 val contentUri = clipData.getItemAt(i).uri
-                val info = getFileInfo(contentResolver, contentUri)
-                info?.let { infoList.add(it) }
+                Log.d("first item", clipData.getItemAt(i).toString())
+                if (contentUri != null) {
+                    val info = getFileInfo(contentResolver, contentUri)
+                    info?.let { infoList.add(it) }
+                }
             }
             onDropEvent(mapOf("assets" to infoList))
             return@configureView payload
         }
+
+        DragStartHelper(this) { view, _ ->
+            val data: MutableList<Uri> = mutableListOf()
+
+            for (imageUri in draggableImageUris) {
+                val path = Uri.parse(imageUri).path
+
+                if (!path.isNullOrBlank()) {
+                    val file = File(path)
+                    Log.d("file is here", file.toString())
+                    val uri = getContentUriForFile(this.context, file)
+                    Log.d("uri is here", uri.toString())
+                    uri?.let { data.add(it) }
+                }
+            }
+
+            // Create a drag shadow builder
+            val shadow = DragShadowBuilder(view)
+
+            if (data.isNotEmpty()) {
+//                val clipData = ClipData.newUri(contentResolver, "Image", data[0])
+//                val clipData = ClipData.newIntent("Images", Intent().apply {
+//                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(data))
+//                })
+                val clipData = ClipData.newUri(contentResolver, "Image", data[0])
+
+                for (i in 1 until data.size) {
+                    clipData.addItem(ClipData.Item(data[i]))
+                }
+                // Start the drag and drop operation
+                view.startDragAndDrop(clipData, shadow, null, DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ)
+            }
+           else {
+                val clipData2 = ClipData.newUri(contentResolver, "Image", Uri.parse(""))
+                view.startDragAndDrop(clipData2, shadow, null, DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ)
+            }
+        }.attach()
     }
 
     init {
