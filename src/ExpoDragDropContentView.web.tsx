@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { DragDropContentViewProps, OnDropEvent } from "./types";
 
@@ -170,7 +170,19 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     const dragImage = new Image();
     dragImage.src = preview; // Set the path to your custom image
 
-    event.dataTransfer.setDragImage(dragImage, 0, 0);
+    const parentStyle = StyleSheet.flatten(this.props.style);
+
+    // Limit the dimensions of the preview image
+    const maxWidth = parentStyle?.width || 100;
+    const maxHeight = parentStyle?.height || 100;
+
+    dragImage.onload = () => {
+      //@ts-expect-error
+      dragImage.height = maxHeight;
+      //@ts-expect-error
+      dragImage.width = maxWidth;
+      event.dataTransfer.setDragImage(dragImage, 0, 0);
+    };
   };
 
   setupDragDropListeners() {

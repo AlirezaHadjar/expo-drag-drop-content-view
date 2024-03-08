@@ -123,7 +123,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
               }
               style={[styles.imageContainer, { transform: [{ rotate }] }]}
             >
-              <Image source={{ uri }} style={[styles.image]} />
+              <Image source={{ uri }} style={styles.image} />
             </AnimatedPressable>
           );
         })
