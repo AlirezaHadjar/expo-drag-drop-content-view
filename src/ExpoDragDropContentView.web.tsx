@@ -48,6 +48,8 @@ const getBase64Image = (data: string) => {
   };
 };
 
+const getImageKey = (index: number) => `image-${index}`;
+
 const getAssets = async (dataTransfer: DataTransfer) => {
   const resolvedFiles: (OnDropEvent | null)[] = [];
   const filePromises: Promise<OnDropEvent | null>[] = [];
@@ -77,16 +79,15 @@ const getAssets = async (dataTransfer: DataTransfer) => {
     const droppedImages: string[] = []; // base64 strings
 
     let index = 0;
-    let key = `image-${index}`;
+    let key = getImageKey(index);
 
     while (dataTransfer.getData(key)) {
       const imageSrc = dataTransfer.getData(key);
       droppedImages.push(imageSrc);
 
       index++;
-      key = `image-${index}`;
+      key = getImageKey(index);
     }
-    console.log(droppedImages[0] === droppedImages[1]);
 
     resolvedFiles.push(
       ...droppedImages.map((base64) => getBase64Image(base64))
@@ -158,12 +159,12 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     event: T
   ) => {
     const sources = this.props.draggableImageSources;
-    const preview = sources?.[0];
-    if (!preview) return;
+    const preview = sources?.at(-1);
+    if (!preview || !sources) return;
 
     event.dataTransfer.setData("text/plain", "Custom Drag");
     sources.forEach((source, index) => {
-      event.dataTransfer.setData(`image-${index}`, source);
+      event.dataTransfer.setData(getImageKey(index), source);
     });
 
     const dragImage = new Image();
