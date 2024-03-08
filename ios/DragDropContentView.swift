@@ -4,20 +4,19 @@ import ExpoModulesCore
 import MobileCoreServices
 
 class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionDelegate {
-    
+
     var onDropEvent: EventDispatcher? = nil
     var onDropStartEvent: EventDispatcher? = nil
     var onDropEndEvent: EventDispatcher? = nil
     lazy var includeBase64 = false
-    lazy var draggableImageUris: [String] = []
+    lazy var draggableImageSources: [String] = []
 
     func setIncludeBase64(_ includeBase64: Bool) {
         self.includeBase64 = includeBase64
     }
-    
-    func setDraggableImageUris(_ draggableImageUris: [String]) {
-        print("setting uris", draggableImageUris)
-        self.draggableImageUris = draggableImageUris
+
+    func setdraggableImageSources(_ draggableImageSources: [String]) {
+        self.draggableImageSources = draggableImageSources
     }
 
     private func setupDropInteraction() {
@@ -40,33 +39,33 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     func setDropEventDispatcher(_ eventDispatcher: EventDispatcher) {
       self.onDropEvent = eventDispatcher
     }
-    
+
     func setDropStartEventDispatcher(_ eventDispatcher: EventDispatcher) {
       self.onDropStartEvent = eventDispatcher
     }
-    
+
     func setDropEndEventDispatcher(_ eventDispatcher: EventDispatcher) {
       self.onDropEndEvent = eventDispatcher
     }
-    
+
     func dragInteraction(_ interaction: UIDragInteraction, itemsForBeginning session: UIDragSession) -> [UIDragItem] {
         var dragItems: [UIDragItem] = []
-        print("qqqqq",draggableImageUris)
-        for draggableImageUri in draggableImageUris {
-            guard let image = loadImage(fromImagePath: draggableImageUri) else { return [] }
-            
+
+        for source in draggableImageSources {
+            guard let image = loadImage(fromImagePath: source) else { return [] }
+
             let itemProvider = NSItemProvider(object: image)
             let dragItem = UIDragItem(itemProvider: itemProvider)
-            
+
             // Calculate the new dimensions based on the view's size
             let viewWidth = 200.0
             let viewHeight = self.frame.height
-            
+
             let aspectRatio = image.size.width / image.size.height
-            
+
             var imageViewWidth = viewWidth
             var imageViewHeight = viewWidth / aspectRatio
-            
+
             // Check if the height exceeds the view's height
             if imageViewHeight > viewHeight {
                 imageViewHeight = viewHeight
@@ -76,21 +75,21 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             let convertedPoint = convertPoint(touchedPoint, fromView: self)
             if let rootView = self.window?.rootViewController?.view {
                 let absolutePoint = self.convert(touchedPoint, to: rootView)
-                
+
                 let imageView = convertImageToImageView(image: image)
                 imageView.frame = CGRect(x: absolutePoint.x - imageViewWidth / 2, y: absolutePoint.y - imageViewHeight / 2, width: imageViewWidth, height: imageViewHeight)
                 dragItem.localObject = imageView
-                
+
                 dragItems.append(dragItem)
             }
         }
         return dragItems
     }
-    
+
     func dragInteraction(_ interaction: UIDragInteraction, item: UIDragItem, willAnimateCancelWith animator: UIDragAnimating) {
         self.addSubview(item.localObject as! UIView)
     }
-    
+
     func dragInteraction(_ interaction: UIDragInteraction, willAnimateLiftWith animator: UIDragAnimating, session: UIDragSession) {
         session.items.forEach { dragItem in
             if let touchedImageView = dragItem.localObject as? UIView {
@@ -98,7 +97,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             }
         }
     }
-    
+
     func dragInteraction(_ interaction: UIDragInteraction, previewForLifting item: UIDragItem, session: UIDragSession) -> UITargetedDragPreview? {
 //        return UITargetedDragPreview(view: item.localObject as! UIView)
         if let view = item.localObject as? UIView {
@@ -110,17 +109,17 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             }
             return nil
     }
-    
+
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnter session: UIDropSession) {
         // Notify when an item is being dragged over the view
         self.onDropStartEvent?()
     }
-    
+
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnd session: UIDropSession) {
         // Notify when the drop session ends (successfully or not)
         self.onDropEndEvent?()
     }
-    
+
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidExit session: UIDropSession) {
         // Notify when an item is being dragged over the view
         self.onDropEndEvent?()

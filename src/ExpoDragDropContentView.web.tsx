@@ -157,13 +157,13 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
   handleDrag = async <T extends Event & { dataTransfer: DataTransfer }>(
     event: T
   ) => {
-    const uris = this.props.draggableImageUris;
-    const preview = uris?.[0];
+    const sources = this.props.draggableImageSources;
+    const preview = sources?.[0];
     if (!preview) return;
 
     event.dataTransfer.setData("text/plain", "Custom Drag");
-    uris.forEach((uri, index) => {
-      event.dataTransfer.setData(`image-${index}`, uri);
+    sources.forEach((source, index) => {
+      event.dataTransfer.setData(`image-${index}`, source);
     });
 
     const dragImage = new Image();

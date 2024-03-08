@@ -87,7 +87,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
     <DragDropContentView
       {...props}
       includeBase64
-      draggableImageUris={imageData?.map(
+      draggableImageSources={imageData?.map(
         (image) => (image.uri || image.base64) as string
       )}
       onDropStartEvent={() => {

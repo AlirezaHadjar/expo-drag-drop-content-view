@@ -84,5 +84,5 @@ export type DragDropContentViewProps = ViewProps & {
    * @platform iOS
    * @description The uri of the image that can be dragged around the screen.
    */
-  draggableImageUris?: string[];
+  draggableImageSources?: string[];
 };

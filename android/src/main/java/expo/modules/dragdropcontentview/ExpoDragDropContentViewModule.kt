@@ -13,8 +13,8 @@ class ExpoDragDropContentViewModule : Module() {
       Prop("includeBase64") {view: ExpoDragDropContentView, value: Boolean? ->
         view.setIncludeBase64(value)
       }
-      Prop("draggableImageUris") {view: ExpoDragDropContentView, value: List<String>? ->
-        view.setDraggableImageUris(value)
+      Prop("draggableImageSources") {view: ExpoDragDropContentView, value: List<String>? ->
+        view.setdraggableImageSources(value)
       }
       Prop("highlightColor") { view: ExpoDragDropContentView, color: Int? ->
         view.setHighlightColor(color)
