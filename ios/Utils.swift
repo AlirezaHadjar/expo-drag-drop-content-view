@@ -159,9 +159,7 @@ func loadImage(fromImagePath imagePath: String) -> UIImage? {
 func convertImageToImageView(image: UIImage) -> UIImageView {
     let imageView = UIImageView(image: image)
     imageView.contentMode = .scaleAspectFit
-    // Set any additional properties for the UIImageView if needed
-    // For example, setting frame, contentMode, etc.
-//    imageView.frame = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
+    
     return imageView
 }
 
