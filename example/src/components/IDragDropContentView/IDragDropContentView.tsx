@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+    overflow: "hidden",
   },
   placeholderContainer: {
     paddingHorizontal: 30,
@@ -111,7 +112,6 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 
           return (
             <AnimatedPressable
-              pointerEvents="none"
               key={index}
               onPress={handleClear}
               entering={
