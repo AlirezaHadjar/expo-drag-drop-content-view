@@ -5,6 +5,9 @@ import android.content.ClipData
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.view.MotionEvent
 import androidx.core.content.ContextCompat
 import androidx.core.view.DragStartHelper
 import androidx.draganddrop.DropHelper
@@ -78,48 +81,66 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         }
     }
 
-    private fun configureDragHelper(frame: View) {
+    private fun dragImages(view: View, context: Context) {
         // DropHelper is only available on Android N and above
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return;
 
-        val contentResolver = context.contentResolver
+        val data: MutableList<Uri> = mutableListOf()
 
+        for (imageUri in draggableImageUris) {
+            val path = Uri.parse(imageUri).path
+
+            if (!path.isNullOrBlank()) {
+                val file = File(path)
+                val uri = utils.getContentUriForFile(context, file)
+                uri?.let { data.add(it) }
+            }
+        }
+
+        val shadow = DragShadowBuilder(view)
+
+        if (data.isNotEmpty()) {
+            val clipData = ClipData.newUri(context.contentResolver, "Image", data[0])
+
+            for (i in 1 until data.size) {
+                clipData.addItem(ClipData.Item(data[i]))
+            }
+
+            view.startDragAndDrop(clipData, shadow, null, DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ)
+        }
+    }
+
+    private fun configureDragHelper(frame: View) {
         DragStartHelper(frame) { view, _ ->
-            val data: MutableList<Uri> = mutableListOf()
-
-            for (imageUri in draggableImageUris) {
-                val path = Uri.parse(imageUri).path
-
-                if (!path.isNullOrBlank()) {
-                    val file = File(path)
-                    val uri = utils.getContentUriForFile(frame.context, file)
-                    uri?.let { data.add(it) }
-                }
-            }
-
-            val shadow = DragShadowBuilder(view)
-
-            if (data.isNotEmpty()) {
-                val clipData = ClipData.newUri(contentResolver, "Image", data[0])
-
-                for (i in 1 until data.size) {
-                    clipData.addItem(ClipData.Item(data[i]))
-                }
-
-                view.startDragAndDrop(clipData, shadow, null, DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ)
-            }
-            else {
-                return@DragStartHelper false
-            }
+            dragImages(view, frame.context)
+            return@DragStartHelper false
         }.attach()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun addDragToChild(view: View) {
-        configureDragHelper(view)
-
-        if (view is ViewGroup) {
+        if (view is ViewGroup && view.childCount > 0) {
+            // If the current view is a ViewGroup and has children, recursively check its children
+            var deepestChild: View = view.getChildAt(0)
             for (i in 0 until view.childCount) {
-                addDragToChild(view.getChildAt(i))
+                val child = view.getChildAt(i)
+                if (child.height > deepestChild.height) {
+                    deepestChild = child
+                }
+            }
+            addDragToChild(deepestChild)
+        } else {
+            // Configure DragHelper for the deepest child
+            val longPressDuration = 500L
+            view.setOnTouchListener{ _, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        Handler(Looper.getMainLooper()).postDelayed({
+                                dragImages(view, view.context)
+                        }, longPressDuration)
+                    }
+                }
+                true
             }
         }
     }
