@@ -45,6 +45,10 @@ npx expo install expo-drag-drop-content-view
 - It only works in multi-window [Reference](https://developer.android.com/develop/ui/views/touch-and-input/drag-drop)
 - `onDropStartEvent` and `onDropEndEvent` events are yet to implement
 
+#### 🌐 Web Specific Cautions
+
+- If you're using `Image` component from `react-native`, you need to set `draggable=true`. `Expo Image` handles this automatically
+
 ## Usage
 
 ```tsx
@@ -53,16 +57,17 @@ import {
   DragDropContentViewProps,
   OnDropEvent,
 } from "expo-drag-drop-content-view";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Text,
-  PermissionsAndroid,
   Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
+
+const borderRadius = 20;
 
 export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
@@ -74,28 +79,32 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 
   return (
     <DragDropContentView
-      {...props}
-      onDropEvent={(event) => {
-        setImageData(event.assets);
-      }}
+      draggableImageSources={imageData?.map(
+        (image) => (image.uri || image.base64) as string
+      )}
       highlightColor="#2f95dc"
-      highlightBorderRadius={20}
-      style={[styles.container, props.style]}
+      highlightBorderRadius={borderRadius}
+      onDropEvent={(event) => {
+        const newData = [...(imageData ?? []), ...event.assets];
+        setImageData(newData);
+      }}
+      style={styles.container}
     >
       {imageData ? (
-        imageData.map(({ uri }, index) => {
+        imageData.map((image, index) => {
+          const uri = image.uri ? image.uri : image.base64;
           const rotation = Math.ceil(index / 2) * 5;
           const direction = index % 2 === 0 ? 1 : -1;
           const rotate = `${rotation * direction}deg`;
 
           return (
-            <TouchableOpacity
-              key={uri}
+            <Pressable
+              key={index}
               onPress={handleClear}
               style={[styles.imageContainer, { transform: [{ rotate }] }]}
             >
-              <Image source={{ uri }} style={styles.image} v />
-            </TouchableOpacity>
+              <Image draggable source={{ uri }} style={styles.image} />
+            </Pressable>
           );
         })
       ) : (
@@ -111,6 +120,10 @@ const usePermission = () => {
   useEffect(() => {
     const fn = async () => {
       try {
+        // @ts-ignore
+        const PermissionsAndroid = await import("react-native").then(
+          (module) => module.PermissionsAndroid
+        );
         await PermissionsAndroid.request(
           "android.permission.READ_MEDIA_IMAGES"
         );
@@ -125,7 +138,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     backgroundColor: "#fefefe",
-    borderRadius: 20,
+    borderRadius,
     overflow: "visible",
     justifyContent: "center",
     alignItems: "center",
@@ -137,12 +150,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
-    borderRadius: 20,
+    borderRadius,
     overflow: "hidden",
   },
   image: {
     width: "100%",
     height: "100%",
+    overflow: "hidden",
   },
   placeholderContainer: {
     paddingHorizontal: 30,
@@ -152,7 +166,11 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
+    borderRadius,
+  },
+  activePlaceholderContainer: {
+    backgroundColor: "#2f95dc",
+    opacity: 1,
   },
   placeholderText: {
     color: "white",
@@ -171,6 +189,7 @@ const styles = StyleSheet.create({
 | onDropStartEvent      | ✔️  | ❌      | ✔️  | A callback that is called when any image is being dragged over                                                                                                                                                                   |
 | onDropEndEvent        | ✔️  | ❌      | ✔️  | A callback that is called when any image is dragged out of the view's boundary or released                                                                                                                                       |
 | includeBase64         | ✔️  | ✔️      | ❌  | If `true`, creates a base64 string of the image (Avoid using on large image files due to performance). It is always `true` on `Web` since it is the only available source                                                                                                                            |
+| draggableImageSources           | ✔️  | ✔️      | ✔️  | Sources of the images that can be dragged around the screen. Pass Image Uri on iOS and Android, and base64 on Web.
 | highlightColor        | ❌  | ✔️      | ❌  | The background color of overlay that covers the view while content is being dragged [Android Doc](<https://developer.android.com/reference/kotlin/androidx/draganddrop/DropHelper.Options.Builder#setHighlightColor(int)>)       |
 | highlightBorderRadius | ❌  | ✔️      | ❌  | The border-radius of overlay that covers the view while content is being dragged [Android Doc](<https://developer.android.com/reference/kotlin/androidx/draganddrop/DropHelper.Options.Builder#setHighlightCornerRadiusPx(int)>) |
 
@@ -192,8 +211,9 @@ const styles = StyleSheet.create({
 - [x] Android support
 - [x] Allowing `children` to be touchable
 - [x] Web support
+- [x] Adding Drag support
+- [ ] Documentation
 - [ ] MacOS support
-- [ ] Adding Drag support
 - [ ] Dragging texts and videos support
 
 ## Acknowledgment
