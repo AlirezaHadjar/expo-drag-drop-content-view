@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.1.3",
-    "expo": "~50.0.2",
-    "expo-image": "~1.10.4",
+    "expo": "^50.0.11",
+    "expo-image": "~1.10.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-native": "0.73.2",
-    "react-native-reanimated": "~3.6.0",
+    "react-native": "0.73.4",
+    "react-native-reanimated": "~3.6.2",
     "react-native-web": "~0.19.6"
   },
   "devDependencies": {

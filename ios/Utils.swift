@@ -21,10 +21,8 @@ func extractImageData(image: UIImage) -> Data? {
     var destination: CGImageDestination?
 
     if image.hasAlpha {
-        print("alpha")
         destination = CGImageDestinationCreateWithData(imageData as CFMutableData, kUTTypePNG, 1, nil)
     } else {
-        print("no alpha")
         destination = CGImageDestinationCreateWithData(imageData as CFMutableData, kUTTypeJPEG, 1, nil)
     }
 
@@ -136,4 +134,38 @@ func generateAsset (image: UIImage, includeBase64: Bool) -> NSMutableDictionary?
     }
 
     return asset
+}
+
+func loadImage(fromImagePath imagePath: String) -> UIImage? {
+    if let url = URL(string: imagePath) {
+        let filePath = url.path
+
+        if FileManager.default.fileExists(atPath: filePath) {
+            if let image = UIImage(contentsOfFile: filePath) {
+                return image
+            } else {
+                print("Failed to create UIImage from file at path: \(filePath)")
+            }
+        } else {
+            print("Image file does not exist at path: \(filePath)")
+        }
+    } else {
+        print("Invalid URL path: \(imagePath)")
+    }
+
+    return nil
+}
+
+func convertImageToImageView(image: UIImage) -> UIImageView {
+    let imageView = UIImageView(image: image)
+    imageView.contentMode = .scaleAspectFit
+    
+    return imageView
+}
+
+func convertPoint(_ point: CGPoint, fromView view: UIView?) -> CGPoint {
+    if let parent = view?.superview {
+        return view?.convert(point, to: parent) ?? CGPoint.zero
+    }
+    return point
 }
