@@ -134,7 +134,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                 info?.let { infoList.add(it) }
             }
             onDropEvent(mapOf("assets" to infoList))
-            return@configureView payload
+            return@configureView null
         }
     }
 
