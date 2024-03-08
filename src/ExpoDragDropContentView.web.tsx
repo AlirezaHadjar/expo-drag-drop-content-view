@@ -31,10 +31,34 @@ const handleFile = (file: File) => {
   });
 };
 
-const getAssets = async (dataTransfer: DataTransfer) => {
-  const filePromises: Promise<OnDropEvent | null>[] = [];
+const getBase64Image = (data: string) => {
+  const extension =
+    data?.split(";")?.[0]?.split(":")?.[1]?.split("/")?.[1] || "jpeg";
+  const type = `image/${extension}`;
+  const fileName = `image.${extension}`;
 
-  if (dataTransfer.items) {
+  return {
+    uri: undefined,
+    path: undefined,
+    type,
+    base64: data,
+    fileName,
+    width: 200,
+    height: 200,
+  };
+};
+
+const getImageKey = (index: number) => `image-${index}`;
+
+const getAssets = async (dataTransfer: DataTransfer) => {
+  const resolvedFiles: (OnDropEvent | null)[] = [];
+  const filePromises: Promise<OnDropEvent | null>[] = [];
+  const textData = dataTransfer.getData("text/plain");
+  const htmlData = dataTransfer.getData("text/html");
+  const isCustomDrag = textData === "Custom Drag";
+
+  // Dragging from the file system
+  if (dataTransfer.items && dataTransfer.items.length > 0) {
     for (let i = 0; i < dataTransfer.items.length; i++) {
       const item = dataTransfer.items[i];
       if (item.kind === "file") {
@@ -43,14 +67,46 @@ const getAssets = async (dataTransfer: DataTransfer) => {
         filePromises.push(handleFile(file));
       }
     }
-  } else {
+  } else if (dataTransfer.files && dataTransfer.files.length > 0) {
     for (let i = 0; i < dataTransfer.files.length; i++) {
       const file = dataTransfer.files[i];
       filePromises.push(handleFile(file));
     }
   }
 
-  const resolvedFiles = await Promise.all(filePromises);
+  // Dragging from current web page
+  if (isCustomDrag) {
+    const droppedImages: string[] = []; // base64 strings
+
+    let index = 0;
+    let key = getImageKey(index);
+
+    while (dataTransfer.getData(key)) {
+      const imageSrc = dataTransfer.getData(key);
+      droppedImages.push(imageSrc);
+
+      index++;
+      key = getImageKey(index);
+    }
+
+    resolvedFiles.push(
+      ...droppedImages.map((base64) => getBase64Image(base64))
+    );
+  }
+  // Dragging from other web pages
+  else if (htmlData) {
+    // Extract the image source from the HTML data (you may need to adjust this based on your HTML structure)
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlData, "text/html");
+    const base64 = doc.querySelector("img")?.getAttribute("src");
+
+    if (base64) {
+      const file = getBase64Image(base64);
+      resolvedFiles.push(file);
+    }
+  }
+
+  resolvedFiles.push(...(await Promise.all(filePromises)));
 
   // Filter out null values (failed handleFile calls)
   return resolvedFiles.filter((file) => file !== null) as OnDropEvent[];
@@ -96,7 +152,25 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     this.props.onDropEndEvent?.();
 
     const assets = await getAssets(event.dataTransfer);
-    this.props.onDropEvent?.({ assets });
+    if (assets.length > 0) this.props.onDropEvent?.({ assets });
+  };
+
+  handleDrag = async <T extends Event & { dataTransfer: DataTransfer }>(
+    event: T
+  ) => {
+    const sources = this.props.draggableImageSources;
+    const preview = sources?.at(-1);
+    if (!preview || !sources) return;
+
+    event.dataTransfer.setData("text/plain", "Custom Drag");
+    sources.forEach((source, index) => {
+      event.dataTransfer.setData(getImageKey(index), source);
+    });
+
+    const dragImage = new Image();
+    dragImage.src = preview; // Set the path to your custom image
+
+    event.dataTransfer.setDragImage(dragImage, 0, 0);
   };
 
   setupDragDropListeners() {
@@ -104,6 +178,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
 
     if (!domElement) return;
 
+    domElement.addEventListener("dragstart", this.handleDrag as any);
     domElement.addEventListener("dragenter", this.handleDragEnter);
     domElement.addEventListener("dragleave", this.handleDragLeave);
     domElement.addEventListener("dragover", this.handleDragOver);

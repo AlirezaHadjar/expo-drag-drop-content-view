@@ -12,7 +12,7 @@ class ExpoDragDropContentView: ExpoView {
         super.init(appContext: appContext)
         clipsToBounds = true
         addSubview(dragDropContentView)
-        
+
         dragDropContentView.setDropEventDispatcher(onDropEvent)
         dragDropContentView.setDropStartEventDispatcher(onDropStartEvent)
         dragDropContentView.setDropEndEventDispatcher(onDropEndEvent)
@@ -21,7 +21,7 @@ class ExpoDragDropContentView: ExpoView {
     override func layoutSubviews() {
         dragDropContentView.frame = bounds
     }
-    
+
     override func addSubview(_ view: UIView) {
         super.addSubview(view)
 
@@ -30,8 +30,11 @@ class ExpoDragDropContentView: ExpoView {
     }
 
     func handleSubviewAdded(_ subview: UIView) {
-        // Enable drop interaction for each subview
+        // Enable drop/drop interaction for each subview
+
         let dropInteraction = UIDropInteraction(delegate: dragDropContentView)
+        let dragInteraction = UIDragInteraction(delegate: dragDropContentView)
         subview.addInteraction(dropInteraction)
+        subview.addInteraction(dragInteraction)
     }
 }

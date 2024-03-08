@@ -80,4 +80,9 @@ export type DragDropContentViewProps = ViewProps & {
    * @link https://developer.android.com/reference/androidx/draganddrop/DropHelper.Options.Builder#setHighlightCornerRadiusPx(int)
    */
   highlightBorderRadius?: number;
+  /**
+   * @description The source of the image that can be dragged around the screen.
+   * @description Pass Image Uri on iOS and Android, and base64 on Web.
+   */
+  draggableImageSources?: string[];
 };

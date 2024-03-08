@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+    overflow: "hidden",
   },
   placeholderContainer: {
     paddingHorizontal: 30,
@@ -86,6 +87,9 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
     <DragDropContentView
       {...props}
       includeBase64
+      draggableImageSources={imageData?.map(
+        (image) => (image.uri || image.base64) as string
+      )}
       onDropStartEvent={() => {
         setIsActive(true);
       }}
@@ -119,7 +123,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
               }
               style={[styles.imageContainer, { transform: [{ rotate }] }]}
             >
-              <Image source={{ uri }} style={[styles.image, {}]} />
+              <Image source={{ uri }} style={[styles.image]} />
             </AnimatedPressable>
           );
         })

@@ -11,8 +11,13 @@ public class ExpoDragDropContentViewModule: Module {
     View(ExpoDragDropContentView.self) {
         Events(IOnDropEvent, IOnDropStartEvent, IOnDropEndEvent)
 
-        Prop("includeBase64") { (view, includeBase64: Bool) in
-            view.dragDropContentView.setIncludeBase64(includeBase64)
+        Prop("includeBase64") { (view, includeBase64: Bool?) in
+            let include = includeBase64 ?? false
+            view.dragDropContentView.setIncludeBase64(include)
+        }
+        Prop("draggableImageSources") { (view, draggableImageSources: [String]?) in
+            let sources = draggableImageSources ?? []
+            view.dragDropContentView.setdraggableImageSources(sources)
         }
     }
   }
