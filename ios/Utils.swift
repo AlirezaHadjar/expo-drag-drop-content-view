@@ -21,10 +21,8 @@ func extractImageData(image: UIImage) -> Data? {
     var destination: CGImageDestination?
 
     if image.hasAlpha {
-        print("alpha")
         destination = CGImageDestinationCreateWithData(imageData as CFMutableData, kUTTypePNG, 1, nil)
     } else {
-        print("no alpha")
         destination = CGImageDestinationCreateWithData(imageData as CFMutableData, kUTTypeJPEG, 1, nil)
     }
 
@@ -140,7 +138,6 @@ func generateAsset (image: UIImage, includeBase64: Bool) -> NSMutableDictionary?
 
 func loadImage(fromImagePath imagePath: String) -> UIImage? {
     if let url = URL(string: imagePath) {
-        print("here i am")
         let filePath = url.path
 
         if FileManager.default.fileExists(atPath: filePath) {

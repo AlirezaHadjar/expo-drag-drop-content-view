@@ -147,7 +147,6 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                 }
 
                 if let err = err {
-                    print("Failed to load our dragged item:", err)
                 } else {
                     if let draggedImage = obj as? UIImage {
                         DispatchQueue.main.async {
