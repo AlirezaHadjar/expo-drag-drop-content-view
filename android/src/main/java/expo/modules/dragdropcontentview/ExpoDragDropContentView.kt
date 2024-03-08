@@ -177,7 +177,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                 }
             }
             if (infoList.isNotEmpty()) onDropEvent(mapOf("assets" to infoList))
-            return@configureView payload
+            return@configureView null
         }
 
         DragStartHelper(this) { view, _ ->
