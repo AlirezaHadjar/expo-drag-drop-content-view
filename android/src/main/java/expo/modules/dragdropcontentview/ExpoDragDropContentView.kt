@@ -2,28 +2,15 @@ package expo.modules.dragdropcontentview
 
 import android.annotation.SuppressLint
 import android.content.ClipData
-import android.content.ClipDescription.MIMETYPE_TEXT_PLAIN
-import android.content.ContentResolver
-import android.content.ContentUris
 import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
-import android.util.Base64
-import android.util.Log
-import android.view.View
-import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.DragStartHelper
 import androidx.draganddrop.DropHelper
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
-import java.io.ByteArrayOutputStream
 import java.io.File
 
 @SuppressLint("ViewConstructor")
