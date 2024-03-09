@@ -1,43 +1,34 @@
 {
-  "name": "expo-drag-drop-content-view",
-  "version": "0.4.1",
-  "description": "A Superset of View which listens for dragged contents",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
-  "scripts": {
-    "build": "expo-module build",
-    "clean": "expo-module clean",
-    "lint": "expo-module lint",
-    "test": "expo-module test",
-    "prepare": "expo-module prepare",
-    "prepublishOnly": "expo-module prepublishOnly",
-    "expo-module": "expo-module",
-    "open:ios": "open -a \"Xcode\" example/ios",
-    "open:android": "open -a \"Android Studio\" example/android"
-  },
-  "keywords": [
-    "react-native",
-    "expo",
-    "expo-drag-drop-content-view",
-    "ExpoDragDropContentView"
-  ],
-  "repository": "https://github.com/AlirezaHadjar/expo-drag-drop-content-view",
-  "bugs": {
-    "url": "https://github.com/AlirezaHadjar/expo-drag-drop-content-view/issues"
-  },
-  "author": "Alireza Hadjar <asiahadjar@gmail.com> (https://github.com/AlirezaHadjar)",
-  "license": "MIT",
-  "homepage": "https://github.com/AlirezaHadjar/expo-drag-drop-content-view#readme",
-  "dependencies": {},
-  "devDependencies": {
-    "@types/react": "^18.0.25",
-    "expo-module-scripts": "^3.4.0",
-    "expo-modules-core": "^1.11.7"
-  },
-  "peerDependencies": {
-    "expo": "*",
-    "react": "*",
-    "react-native": "*",
-    "react-native-web": "*"
-  }
+    "name": "@alirezahadjar/monorepo",
+    "private": true,
+    "version": "0.4.2",
+    "scripts": {
+        "build": "turbo build",
+        "clean": "turbo clean && rm -rf node_modules",
+        "docs": "turbo docs --filter=docs",
+        "dev": "turbo dev",
+        "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+        "lint": "turbo lint",
+        "typecheck": "turbo typecheck",
+        "test": "turbo test",
+        "postinstall": "manypkg check"
+    },
+    "dependencies": {
+        "@changesets/cli": "^2.27.1",
+        "@manypkg/cli": "^0.21.2",
+        "@typescript-eslint/typescript-estree": "^7.1.1",
+        "eslint-plugin-import": "^2.29.1",
+        "prettier": "^3.2.5",
+        "react-loadable": "npm:@docusaurus/react-loadable@5.5.2",
+        "turbo": "^1.12.5",
+        "typescript": "^5.4.2"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/AlirezaHadjar/expo-drag-drop-content-view.git"
+    },
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ]
 }
