@@ -1,0 +1,15 @@
+---
+sidebar_position: 4
+---
+
+# Limitations
+
+## Android:
+
+- This library requires `SDK >= 24` for Compatibility. It acts as a normal `<View />` on `SDK < 24`
+- If you want to drag and drop across different apps, you'll need to have both apps open in `multi-window` mode. Here is a [link](https://developer.android.com/develop/ui/views/touch-and-input/drag-drop) to the official documentation.
+- `onDropStartEvent` and `onDropEndEvent` events are yet to implement
+
+## Web:
+
+- Dragging multiple images is supported across different `<DragDropContentView />` components, but if you want to drag images to other websites or to your machine, only the last image will be dropped.

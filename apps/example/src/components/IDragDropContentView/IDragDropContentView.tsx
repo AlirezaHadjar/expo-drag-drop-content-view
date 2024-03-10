@@ -138,5 +138,5 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
         </Animated.View>
       )}
     </DragDropContentView>
-  ) as React.ReactNode;
+  );
 };

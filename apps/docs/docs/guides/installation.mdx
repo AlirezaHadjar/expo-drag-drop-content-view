@@ -1,0 +1,48 @@
+---
+sidebar_position: 1
+---
+
+# Installation
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+## Installing the library
+
+Install [expo-drag-drop-content-view](https://www.npmjs.com/package/expo-drag-drop-content-view) through npm:
+
+<Tabs
+groupId="environment"
+defaultValue="expo"
+values={[
+{label: 'Expo', value: 'expo'},
+{label: 'React Native', value: 'rn'}
+]}>
+<TabItem value="rn">
+
+```bash
+yarn add expo-drag-drop-content-view
+```
+
+:::tip[Installing Expo]
+
+You'll need to have Expo installed. You can install it using [Expo modules](https://docs.expo.dev/bare/installing-expo-modules/)
+
+:::
+
+</TabItem>
+
+<TabItem value="expo">
+
+```bash
+npx expo install expo-drag-drop-content-view
+```
+
+:::info[Important Note]
+
+Expo Go is not supported due to the usage of native code. Please use the [development build](https://docs.expo.dev/develop/development-builds/create-a-build/) instead.
+
+:::
+
+</TabItem>
+</Tabs>
