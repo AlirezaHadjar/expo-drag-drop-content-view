@@ -1,6 +1,6 @@
 # Expo Drag Drop Content View
 
-![Untitled Project-2](https://github.com/AlirezaHadjar/expo-drag-drop-content-view/assets/57192409/86663ea3-d749-4518-80eb-68e3c4ebcf43)
+![Untitled Project-2](apps/docs/static/img/social-card.png)
 
 ## What
 
