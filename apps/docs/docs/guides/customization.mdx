@@ -1,0 +1,49 @@
+---
+sidebar_position: 4
+---
+
+# Customization
+
+You can customize the `<DragDropContentView />` component using `style` props, just like `<View />` component. Here's an example of how you can customize the component when an content is being dragged over it:
+
+:::tip[Android Customization]
+Android applies a highlight over the container when an image is being dragged, You can customize it using `highlightColor` and `highlightBorderRadius`
+:::
+
+```tsx
+export const IDragDropContentView = (props) => {
+  const [isActive, setIsActive] = useState(false);
+
+  return (
+    <DragDropContentView
+      onDropEvent={(event) => {
+        setImageData(event.assets);
+      }}
+      onDropStartEvent={() => {
+        setIsActive(true);
+      }}
+      onDropEndEvent={() => {
+        setIsActive(false);
+      }}
+      highlightColor="#95d2fc"
+      highlightBorderRadius={20}
+      style={[styles.container, isActive && styles.activeContainer]}
+    />
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    width: 200,
+    height: 200,
+    backgroundColor: "#2f95dc",
+    borderRadius,
+    overflow: "visible",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  activeContainer: {
+    backgroundColor: "#95d2fc",
+  },
+});
+```

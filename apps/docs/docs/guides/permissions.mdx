@@ -1,0 +1,36 @@
+---
+sidebar_position: 2
+---
+
+# Permissions
+
+## Android Specific Permissions
+
+In order to get Android's image drag and drop to work, you'll need to get media permission. You can do this by opening your project's `AndroidManifest.xml` and add the following lines inside the `<manifest>` tag:
+
+```xml
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+```
+
+### Getting Permission
+
+You can use `react-native-permissions` or any other method to get the permission. Here's an example using `react-native-permissions`:
+
+```tsx
+const useMediaPermission = () => {
+  useEffect(() => {
+    const fn = async () => {
+      try {
+        const permission =
+          // Android 11 and above
+          ANDROID_API_LEVEL >= 33
+            ? PERMISSIONS_LIB.ANDROID.READ_MEDIA_IMAGES
+            : PERMISSIONS_LIB.ANDROID.READ_EXTERNAL_STORAGE;
+        await request(permission);
+      } catch (_) {}
+    };
+    if (Platform.OS === "android") fn();
+  }, []);
+};
+```

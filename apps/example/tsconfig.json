@@ -1,0 +1,15 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-drag-drop-content-view": [
+        "../../packages/expo-drag-drop-content-view/src/index"
+      ],
+      "expo-drag-drop-content-view/*": [
+        "../../packages/expo-drag-drop-content-view/src/*"
+      ]
+    }
+  },
+  "exclude": ["node_modules"]
+}

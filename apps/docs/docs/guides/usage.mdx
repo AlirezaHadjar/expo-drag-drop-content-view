@@ -1,0 +1,68 @@
+---
+sidebar_position: 3
+---
+
+import useBaseUrl from '@docusaurus/useBaseUrl'
+import {Horizontal} from '@site/src/components/Horizontal'
+
+# Usage
+
+## Basic Drop Feature
+
+<Horizontal>
+<div style={{maxWidth: '70%'}}>
+```tsx
+export const IDragDropContentView = (props) => {
+  const [images, setImages] = useState<OnDropEvent[] | null>(null);
+
+  return (
+    <DragDropContentView
+      onDropEvent={(event) => {
+        setImageData(event.assets);
+      }}
+      style={styles.container}
+    />
+  );
+};
+```
+</div>
+<svg xmlns="http://www.w3.org/2000/svg" width="250" height="535">
+  <image href={useBaseUrl("img/drop.gif")} width="100%" height="100%" />
+</svg>
+</Horizontal>
+
+## Basic Drag Feature
+
+<Horizontal>
+<div style={{maxWidth: '70%'}}>
+You can drag images to a `<DragDropContentView />` component or any other app that supports drag and drop.
+```tsx
+export const IDragDropContentView = (props) => {
+  const [images, setImages] = useState<OnDropEvent[] | null>(null);
+  const sources = images?.map((image) => image.uri || image.base64);
+
+  return (
+    <DragDropContentView
+      draggableImageSources={sources}
+      style={styles.container}
+    >
+      <Image {...props} />
+    </DragDropContentView>
+  );
+};
+```
+</div>
+<svg xmlns="http://www.w3.org/2000/svg" width="250" height="535">
+  <image href={useBaseUrl("img/drag.gif")} width="100%" height="100%" />
+</svg>
+</Horizontal>
+
+### Web Specific Caution:
+
+- If you're using `<Image />` component from `react-native`, you need to set `draggable=true`.`Expo Image` handles this automatically.
+
+```tsx
+import { Image } from "react-native";
+
+<Image {...props} draggable={true} />;
+```
