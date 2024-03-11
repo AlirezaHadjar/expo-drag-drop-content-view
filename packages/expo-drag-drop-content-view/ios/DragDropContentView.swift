@@ -1,3 +1,5 @@
+#if os(iOS)
+
 import UIKit
 import ImageIO
 import ExpoModulesCore
@@ -169,3 +171,91 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
         }
     }
 }
+
+#elseif os(macOS)
+
+import AppKit
+import ExpoModulesCore
+
+class DragDropContentView: ExpoView {
+    var onDropEvent: EventDispatcher? = nil
+    var onDropStartEvent: EventDispatcher? = nil
+    var onDropEndEvent: EventDispatcher? = nil
+    lazy var includeBase64 = false
+
+    func setIncludeBase64(_ includeBase64: Bool) {
+        self.includeBase64 = includeBase64
+    }
+
+    required init(appContext: AppContext? = nil) {
+        super.init(appContext: appContext)
+    }
+
+    override func addSubview(_ view: NSView) {
+        super.addSubview(view)
+
+        // Call your custom function when a subview is added
+        handleSubviewAdded(view)
+    }
+
+    func handleSubviewAdded(_ subview: NSView) {
+        // Enable drop interaction for each subview
+        subview.registerForDraggedTypes([.fileURL])
+    }
+
+    func setDropEventDispatcher(_ eventDispatcher: EventDispatcher) {
+      self.onDropEvent = eventDispatcher
+    }
+
+    func setDropStartEventDispatcher(_ eventDispatcher: EventDispatcher) {
+      self.onDropStartEvent = eventDispatcher
+    }
+
+    func setDropEndEventDispatcher(_ eventDispatcher: EventDispatcher) {
+      self.onDropEndEvent = eventDispatcher
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        // Notify when an item is being dragged over the view
+        self.onDropStartEvent?()
+        return .copy
+    }
+
+    override func draggingExited(_ sender: NSDraggingInfo?) {
+        // Notify when an item is being dragged over the view
+        self.onDropEndEvent?()
+    }
+
+    override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        return true
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        // Handle drag operation
+        var assets: [NSMutableDictionary] = []
+
+        sender.enumerateDraggingItems(options: [], for: self, classes: [NSURL.self], searchOptions: [:]) { dragItem, _, _ in
+            if let fileURL = dragItem.item as? NSURL,
+                let draggedImage = NSImage(contentsOf: fileURL as URL) {
+                if let asset = generateAsset(image: draggedImage, includeBase64: self.includeBase64) {
+                    assets.append(asset)
+                }
+            }
+        }
+
+        // Notify when all dragged items are processed
+        if !assets.isEmpty {
+            self.onDropEvent?([
+                "assets": assets
+            ])
+        }
+
+        return true
+    }
+
+    override func concludeDragOperation(_ sender: NSDraggingInfo?) {
+        // Notify when the drop session ends (successfully or not)
+        self.onDropEndEvent?()
+    }
+}
+#endif

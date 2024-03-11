@@ -17,7 +17,7 @@ public class ExpoDragDropContentViewModule: Module {
         }
         Prop("draggableImageSources") { (view, draggableImageSources: [String]?) in
             let sources = draggableImageSources ?? []
-            view.dragDropContentView.setdraggableImageSources(sources)
+//            view.dragDropContentView.setdraggableImageSources(sources)
         }
     }
   }

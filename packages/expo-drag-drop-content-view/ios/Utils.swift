@@ -5,8 +5,11 @@
 //  Created by Alireza Hadjar on 8/23/23.
 //
 
+#if os(iOS)
+
 import Foundation
 import MobileCoreServices
+
 import ImageIO
 
 extension UIImage {
@@ -159,7 +162,7 @@ func loadImage(fromImagePath imagePath: String) -> UIImage? {
 func convertImageToImageView(image: UIImage) -> UIImageView {
     let imageView = UIImageView(image: image)
     imageView.contentMode = .scaleAspectFit
-    
+
     return imageView
 }
 
@@ -169,3 +172,118 @@ func convertPoint(_ point: CGPoint, fromView view: UIView?) -> CGPoint {
     }
     return point
 }
+
+#elseif os(macOS)
+
+    import AppKit
+    import CoreServices
+
+    extension NSImage {
+        var hasAlpha: Bool {
+            guard let imageData = tiffRepresentation else { return false }
+            guard let imageSource = CGImageSourceCreateWithData(imageData as CFData, nil) else { return false }
+            let properties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, nil) as NSDictionary?
+            return properties?[kCGImagePropertyHasAlpha] as? Bool ?? false
+        }
+    }
+
+    func extractImageData(image: NSImage) -> Data? {
+        let imageData = NSMutableData()
+        var destination: CGImageDestination?
+
+        if image.hasAlpha {
+            print("alpha")
+            destination = CGImageDestinationCreateWithData(imageData as CFMutableData, kUTTypePNG, 1, nil)
+        } else {
+            print("no alpha")
+            destination = CGImageDestinationCreateWithData(imageData as CFMutableData, kUTTypeJPEG, 1, nil)
+        }
+
+        guard let finalDestination = destination else {
+            return nil
+        }
+
+        // Map NSImage.Orientation to CGImagePropertyOrientation
+        let orientation: CGImagePropertyOrientation = .up
+
+        let orientationKey = kCGImagePropertyOrientation as String
+        let orientationNumber = orientation.rawValue as CFNumber
+        let orientationDictionary = [orientationKey: orientationNumber]
+
+        let imageProps = orientationDictionary as CFDictionary
+
+        let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil)
+        CGImageDestinationAddImage(finalDestination, cgImage!, imageProps)
+
+        CGImageDestinationFinalize(finalDestination)
+
+        return imageData as Data
+    }
+
+    func getImageFileName(fileType: String) -> String {
+        var fileName = UUID().uuidString
+        fileName.append(".")
+        return fileName.appending(fileType)
+    }
+
+    func getMimeType(imageData: Data) -> String? {
+        if let imageSource = CGImageSourceCreateWithData(imageData as CFData, nil) {
+            if let imageType = CGImageSourceGetType(imageSource) {
+                if let imageUTI = UTTypeCopyPreferredTagWithClass(imageType, kUTTagClassMIMEType) {
+                    return imageUTI.takeRetainedValue() as String
+                }
+            }
+        }
+        return nil
+    }
+
+    func getMimeType(image: NSImage) -> String? {
+        if image.hasAlpha {
+            // If the image has an alpha channel, use PNG data
+            if let imageData = image.tiffRepresentation {
+                return getMimeType(imageData: imageData as Data)
+            }
+        } else {
+            // If the image does not have an alpha channel, use JPEG data
+            if let imageData = image.representations.first as? NSBitmapImageRep {
+                return getMimeType(imageData: imageData.representation(using: .jpeg, properties: [:])!)
+            }
+        }
+
+        return nil
+    }
+
+    func generateAsset(image: NSImage, includeBase64: Bool) -> NSMutableDictionary? {
+        let asset = NSMutableDictionary()
+
+        let _mimeType = getMimeType(image: image)
+        guard let mimeType = _mimeType else { return nil }
+        let fileType = mimeType.split(separator: "/")[1]
+
+        let data = extractImageData(image: image)
+        let fileName = getImageFileName(fileType: String(fileType))
+
+        asset["fileName"] = fileName
+
+        asset["type"] = mimeType
+
+        if let data = data {
+            let path = (NSTemporaryDirectory() as NSString).appendingPathComponent(fileName)
+            asset["path"] = path
+            try? data.write(to: URL(fileURLWithPath: path), options: .atomic)
+
+            if includeBase64 {
+                asset["base64"] = data.base64EncodedString()
+            }
+
+            let fileURL = URL(fileURLWithPath: path)
+            asset["uri"] = fileURL.absoluteString
+
+            asset["width"] = image.size.width
+            asset["height"] = image.size.height
+        }
+
+        return asset
+    }
+
+#endif
