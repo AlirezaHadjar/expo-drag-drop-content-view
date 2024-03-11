@@ -10,8 +10,7 @@
         "format": "prettier --write \"**/*.{ts,tsx,md}\"",
         "lint": "turbo lint",
         "typecheck": "turbo typecheck",
-        "test": "turbo test",
-        "postinstall": "manypkg check"
+        "test": "turbo test"
     },
     "dependencies": {
         "@changesets/cli": "^2.27.1",
@@ -30,5 +29,6 @@
     "workspaces": [
         "apps/*",
         "packages/*"
-    ]
+    ],
+    "packageManager": "yarn@4.1.1"
 }
