@@ -28,7 +28,6 @@
   "author": "Alireza Hadjar <asiahadjar@gmail.com> (https://github.com/AlirezaHadjar)",
   "license": "MIT",
   "homepage": "https://github.com/AlirezaHadjar/expo-drag-drop-content-view#readme",
-  "dependencies": {},
   "devDependencies": {
     "@types/react": "^18.2.25",
     "expo": "^50.0.11",
