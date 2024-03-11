@@ -9,53 +9,53 @@ import {Horizontal} from '@site/src/components/Horizontal'
 
 ## Basic Drop Feature
 
-<Horizontal>
-<div style={{maxWidth: '70%'}}>
-```tsx
-export const IDragDropContentView = (props) => {
-  const [images, setImages] = useState<OnDropEvent[] | null>(null);
+<div className="row-container">
+  <svg xmlns="http://www.w3.org/2000/svg" width="250" height="535">
+    <image href={useBaseUrl("img/drop.gif")} width="100%" height="100%" />
+  </svg>
+  <div className='code-container'>
+  ```tsx
+  export const IDragDropContentView = (props) => {
+    const [images, setImages] = useState<OnDropEvent[] | null>(null);
 
-  return (
-    <DragDropContentView
-      onDropEvent={(event) => {
-        setImageData(event.assets);
-      }}
-      style={styles.container}
-    />
-  );
-};
-```
+    return (
+      <DragDropContentView
+        onDropEvent={(event) => {
+          setImageData(event.assets);
+        }}
+        style={styles.container}
+      />
+    );
+  };
+  ```
+  </div>
 </div>
-<svg xmlns="http://www.w3.org/2000/svg" width="250" height="535">
-  <image href={useBaseUrl("img/drop.gif")} width="100%" height="100%" />
-</svg>
-</Horizontal>
 
 ## Basic Drag Feature
 
-<Horizontal>
-<div style={{maxWidth: '70%'}}>
-You can drag images to a `<DragDropContentView />` component or any other app that supports drag and drop.
-```tsx
-export const IDragDropContentView = (props) => {
-  const [images, setImages] = useState<OnDropEvent[] | null>(null);
-  const sources = images?.map((image) => image.uri || image.base64);
+<div className="row-container">
+  <svg xmlns="http://www.w3.org/2000/svg" width="250" height="535">
+    <image href={useBaseUrl("img/drag.gif")} width="100%" height="100%" />
+  </svg>
+  <div className='code-container'>
+    <p>You can drag images to a `<DragDropContentView />` component or any other app that supports drag and drop.</p>
+    ```tsx
+    export const IDragDropContentView = (props) => {
+      const [images, setImages] = useState<OnDropEvent[] | null>(null);
+      const sources = images?.map((image) => image.uri || image.base64);
 
-  return (
-    <DragDropContentView
-      draggableImageSources={sources}
-      style={styles.container}
-    >
-      <Image {...props} />
-    </DragDropContentView>
-  );
-};
-```
+      return (
+        <DragDropContentView
+          draggableImageSources={sources}
+          style={styles.container}
+        >
+          <Image {...props} />
+        </DragDropContentView>
+      );
+    };
+    ```
+  </div>
 </div>
-<svg xmlns="http://www.w3.org/2000/svg" width="250" height="535">
-  <image href={useBaseUrl("img/drag.gif")} width="100%" height="100%" />
-</svg>
-</Horizontal>
 
 ### Web Specific Caution:
 

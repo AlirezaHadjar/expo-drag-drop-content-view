@@ -30,26 +30,28 @@
 }
 
 /* align image to the right */
-.image-container {
-  float: right;
+.code-container {
+  overflow: auto;
+}
+.row-container {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  gap: 16px;
 }
 /* mobile screen; align center */
 @media (max-width: 600px) {
-  .image-container {
-      float: none;
-      text-align: center;
-  }
-}
-/* wider screen; align right again */
-@media (min-width: 600px) and (max-width: 997px) {
-  .image-container {
-    float: right;
+  .row-container {
+    flex-direction: column;
+    align-items: unset;
   }
 }
 /* even wider screen but with sidebars; align center cuz we dont have enough space for right */
-@media (min-width: 997px) and (max-width: 1145px) {
-  .image-container {
-    float: none;
-    text-align: center;
+@media (min-width: 997px) and (max-width: 1200px) {
+  .row-container {
+    flex-direction: column;
+    align-items: unset;
   }
 }
