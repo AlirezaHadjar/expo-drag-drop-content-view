@@ -24,7 +24,7 @@ A superset of `View` component that supports iOS, Android, and Web Native drag a
 - [Installation](https://expo-drag-drop-content-view.vercel.app/docs/guides/installation)
 - [Usage](https://expo-drag-drop-content-view.vercel.app/docs/guides/usage)
 - [API](https://expo-drag-drop-content-view.vercel.app/docs/api/overview)
-- [Example](https://github.com/AlirezaHadjar/expo-drag-drop-content-view/tree/main/example)
+- [Example](https://github.com/AlirezaHadjar/expo-drag-drop-content-view/tree/main/apps/example)
 
 ## Todo
 
