@@ -72,7 +72,7 @@ const config: Config = {
           label: "Tutorial",
         },
         {
-          href: "https://github.com/AlirezaHadjar/expo-drag-drop-content-view/tree/main/example",
+          href: "https://github.com/AlirezaHadjar/expo-drag-drop-content-view/tree/main/apps/example",
           label: "Example App",
           position: "left",
         },
