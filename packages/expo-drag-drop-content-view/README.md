@@ -4,12 +4,11 @@ A Superset of View which listens for dragged contents
 
 # API documentation
 
-- [Documentation for the main branch](https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/drag-drop-content-view.md)
-- [Documentation for the latest stable release](https://docs.expo.dev/versions/latest/sdk/drag-drop-content-view/)
+- [Documentation for the latest stable release](https://expo-drag-drop-content-view.vercel.app/docs/category/guides)
 
 # Installation in managed Expo projects
 
-For [managed](https://docs.expo.dev/archive/managed-vs-bare/) Expo projects, please follow the installation instructions in the [API documentation for the latest stable release](#api-documentation). If you follow the link and there is no documentation available then this library is not yet usable within managed projects &mdash; it is likely to be included in an upcoming Expo SDK release.
+For [managed](https://docs.expo.dev/archive/managed-vs-bare/) Expo projects, please follow the installation instructions in the [API documentation for the latest stable release](https://expo-drag-drop-content-view.vercel.app/docs/category/guides). If you follow the link and there is no documentation available then this library is not yet usable within managed projects &mdash; it is likely to be included in an upcoming Expo SDK release.
 
 # Installation in bare React Native projects
 
@@ -18,16 +17,12 @@ For bare React Native projects, you must ensure that you have [installed and con
 ### Add the package to your npm dependencies
 
 ```
-npm install expo-drag-drop-content-view
+yarn add expo-drag-drop-content-view
 ```
 
 ### Configure for iOS
 
 Run `npx pod-install` after installing the npm package.
-
-
-### Configure for Android
-
 
 
 # Contributing
