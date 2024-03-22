@@ -9,14 +9,15 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     var onDropStartEvent: EventDispatcher? = nil
     var onDropEndEvent: EventDispatcher? = nil
     lazy var includeBase64 = false
-    lazy var draggableImageSources: [String] = []
+    lazy var draggableMediaSources: [String] = []
+    var fileSystem: EXFileSystemInterface?
 
     func setIncludeBase64(_ includeBase64: Bool) {
         self.includeBase64 = includeBase64
     }
 
     func setdraggableImageSources(_ draggableImageSources: [String]) {
-        self.draggableImageSources = draggableImageSources
+        self.draggableMediaSources = draggableImageSources
     }
 
     private func setupDropInteraction() {
@@ -51,36 +52,37 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     func dragInteraction(_ interaction: UIDragInteraction, itemsForBeginning session: UIDragSession) -> [UIDragItem] {
         var dragItems: [UIDragItem] = []
 
-        for source in draggableImageSources {
-            guard let image = loadImage(fromImagePath: source) else { return [] }
+        for source in draggableMediaSources {
+            var finalImage: UIImage?
+            var itemProvider: NSItemProvider?
 
-            let itemProvider = NSItemProvider(object: image)
-            let dragItem = UIDragItem(itemProvider: itemProvider)
+            if let image = loadImage(fromImagePath: source) {
+                // If the source is an image
+                finalImage = image
+                if let finalImage = finalImage {
+                    itemProvider = NSItemProvider(object: finalImage)
+                }
+            } else if let videoURL = loadVideoURL(fromVideoPath: source) {
+                // If the source is a video, generate a thumbnail
 
-            // Calculate the new dimensions based on the view's size
-            let viewWidth = 200.0
-            let viewHeight = self.frame.height
-
-            let aspectRatio = image.size.width / image.size.height
-
-            var imageViewWidth = viewWidth
-            var imageViewHeight = viewWidth / aspectRatio
-
-            // Check if the height exceeds the view's height
-            if imageViewHeight > viewHeight {
-                imageViewHeight = viewHeight
-                imageViewWidth = viewHeight * aspectRatio
+                finalImage = generateThumbnail(fromVideoURL: videoURL)
+                if let provider = NSItemProvider(contentsOf: videoURL) {
+                    itemProvider = provider
+                } else {
+                    print("Failed to create item provider for video at \(videoURL)")
+                }
             }
-            let touchedPoint = session.location(in: self)
-            let convertedPoint = convertPoint(touchedPoint, fromView: self)
-            if let rootView = self.window?.rootViewController?.view {
-                let absolutePoint = self.convert(touchedPoint, to: rootView)
 
-                let imageView = convertImageToImageView(image: image)
-                imageView.frame = CGRect(x: absolutePoint.x - imageViewWidth / 2, y: absolutePoint.y - imageViewHeight / 2, width: imageViewWidth, height: imageViewHeight)
-                dragItem.localObject = imageView
-
+            if let itemProvider = itemProvider {
+                let dragItem = UIDragItem(itemProvider: itemProvider)
+                // Check if finalImage is not nil
+                if let finalImage = finalImage {
+                    let imageView = resizeImageAndConvertToImageView(image: finalImage, session: session, view: self)
+                    dragItem.localObject = imageView
+                }
                 dragItems.append(dragItem)
+            } else {
+                print("Skipping \(source) due to missing image or video.")
             }
         }
         return dragItems
@@ -99,7 +101,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     }
 
     func dragInteraction(_ interaction: UIDragInteraction, previewForLifting item: UIDragItem, session: UIDragSession) -> UITargetedDragPreview? {
-//        return UITargetedDragPreview(view: item.localObject as! UIView)
+
         if let view = item.localObject as? UIView {
                 if view.window == nil {
                     // The view is not in a window, add it to the main window
@@ -126,7 +128,11 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        return session.canLoadObjects(ofClass: UIImage.self)
+        if #available(iOS 14.0, *) {
+            return session.canLoadObjects(ofClass: UIImage.self) || session.hasItemsConforming(toTypeIdentifiers: [UTType.movie.identifier])
+        } else {
+            return session.canLoadObjects(ofClass: UIImage.self)
+        }
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
@@ -136,36 +142,51 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         var assets: [NSMutableDictionary] = []
 
-        let dispatchGroup = DispatchGroup()
+       let dispatchGroup = DispatchGroup()
 
-        for dragItem in session.items {
-            dispatchGroup.enter()
+       for dragItem in session.items {
+           dispatchGroup.enter()
 
-            dragItem.itemProvider.loadObject(ofClass: UIImage.self, completionHandler: { (obj, err) in
-                defer {
-                    dispatchGroup.leave()
-                }
+           // Load objects asynchronously and handle both images and videos
+           dragItem.itemProvider.loadObject(ofClass: UIImage.self) { (obj, err) in
+               if let image = obj as? UIImage {
+                   DispatchQueue.main.async {
+                       if let asset = generateImageAsset(image: image, includeBase64: self.includeBase64) {
+                           assets.append(asset)
+                       }
+                       dispatchGroup.leave()
+                   }
+               } else {
+                   if #available(iOS 14.0, *) {
+                       dragItem.itemProvider.loadInPlaceFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { (url, bool, err) in
+                           if let videoURL = url {
+                               DispatchQueue.main.async {
+                                   if let fileSystem = self.fileSystem {
+                                       if let asset = generateVideoAsset(from: videoURL, includeBase64: self.includeBase64, fileSystem: fileSystem) {
+                                           assets.append(asset)
+                                       }
+                                   }
+                                   dispatchGroup.leave()
+                               }
+                           } else {
+                               dispatchGroup.leave()
+                           }
+                       }
+                   } else {
+                       dispatchGroup.leave()
+                   }
+               }
+           }
+       }
 
-                if let err = err {
-                } else {
-                    if let draggedImage = obj as? UIImage {
-                        DispatchQueue.main.async {
-                            if let asset = generateAsset(image: draggedImage, includeBase64: self.includeBase64) {
-                                assets.append(asset)
-                            }
-                        }
-                    }
-                }
-            })
-        }
-
-        // Notify when all asynchronous tasks are completed
-        dispatchGroup.notify(queue: DispatchQueue.main) {
-            if !assets.isEmpty {
-                self.onDropEvent?([
-                    "assets": assets
-                ])
-            }
-        }
+       // Notify when all asynchronous tasks are completed
+       dispatchGroup.notify(queue: DispatchQueue.main) {
+           print("wqerqwer", assets)
+           if !assets.isEmpty {
+               self.onDropEvent?([
+                   "assets": assets
+               ])
+           }
+       }
     }
 }

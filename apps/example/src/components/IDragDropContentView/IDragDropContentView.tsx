@@ -7,6 +7,7 @@ import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { Video, ResizeMode } from "expo-av";
 
 const borderRadius = 20;
 
@@ -86,8 +87,8 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   return (
     <DragDropContentView
       {...props}
-      includeBase64
-      draggableImageSources={imageData?.map(
+      includeBase64={false}
+      draggableMediaSources={imageData?.map(
         (image) => (image.uri || image.base64) as string
       )}
       onDropStartEvent={() => {
@@ -99,6 +100,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       highlightColor="#2f95dc"
       highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
+        console.log(JSON.stringify(event.assets));
         const newData = [...(imageData ?? []), ...event.assets];
         setImageData(newData);
         props.onDropEvent?.(event);
@@ -107,10 +109,11 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
     >
       {imageData ? (
         imageData.map((image, index) => {
-          const uri = image.uri ? image.uri : image.base64;
+          const uri = (image.uri ? image.uri : image.base64) || "";
           const rotation = Math.ceil(index / 2) * 5;
           const direction = index % 2 === 0 ? 1 : -1;
           const rotate = `${rotation * direction}deg`;
+          const isImage = image.type?.startsWith("image");
 
           return (
             <AnimatedPressable
@@ -123,7 +126,18 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
               }
               style={[styles.imageContainer, { transform: [{ rotate }] }]}
             >
-              <Image source={{ uri }} style={styles.image} />
+              {isImage ? (
+                <Image source={{ uri }} style={styles.image} />
+              ) : (
+                <Video
+                  style={styles.image}
+                  shouldPlay
+                  onError={(error) => console.log(JSON.stringify(error))}
+                  source={{ uri }}
+                  resizeMode={ResizeMode.COVER}
+                  isLooping
+                />
+              )}
             </AnimatedPressable>
           );
         })

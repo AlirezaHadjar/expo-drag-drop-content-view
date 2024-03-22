@@ -158,7 +158,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
   handleDrag = async <T extends Event & { dataTransfer: DataTransfer }>(
     event: T
   ) => {
-    const sources = this.props.draggableImageSources;
+    const sources = this.props.draggableMediaSources;
     const preview = sources?.at(-1);
     if (!preview || !sources) return;
 

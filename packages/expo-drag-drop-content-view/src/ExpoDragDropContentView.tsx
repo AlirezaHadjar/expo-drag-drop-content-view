@@ -25,7 +25,7 @@ const NativeExpoDragDropContentView: React.ComponentType<DragDropContentViewProp
 export default class ExpoDragDropContentView extends React.PureComponent<DragDropContentViewProps> {
   nativeViewRef;
 
-  constructor(props) {
+  constructor(props: DragDropContentViewProps) {
     super(props);
     this.nativeViewRef = React.createRef();
   }
