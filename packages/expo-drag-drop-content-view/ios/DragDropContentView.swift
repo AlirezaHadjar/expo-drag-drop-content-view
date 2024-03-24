@@ -1,4 +1,5 @@
 import UIKit
+import UniformTypeIdentifiers
 import ImageIO
 import ExpoModulesCore
 import MobileCoreServices
