@@ -100,7 +100,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       highlightColor="#2f95dc"
       highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
-        console.log(JSON.stringify(event.assets));
+        console.log(JSON.stringify(event.assets.length));
         const newData = [...(imageData ?? []), ...event.assets];
         setImageData(newData);
         props.onDropEvent?.(event);

@@ -447,3 +447,11 @@ private struct VideoUtils {
         }
     }
 }
+
+enum SessionItemType {
+    case image
+    case video
+    case text
+    case file
+    case unknown
+}

@@ -116,7 +116,6 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnd session: UIDropSession) {
         // Notify when the drop session ends (successfully or not)
-        self.onDropEndEvent?()
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidExit session: UIDropSession) {
@@ -125,94 +124,144 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
+        var typeIdentifiers: [String] = []
+        
         if #available(iOS 14.0, *) {
-            return session.hasItemsConforming(toTypeIdentifiers: [
+            typeIdentifiers = [
                 UTType.image.identifier,
                 UTType.video.identifier,
                 UTType.movie.identifier
-            ])
+            ]
+        } else {
+            typeIdentifiers = [
+                kUTTypeImage as String,
+                kUTTypeMovie as String,
+                kUTTypeVideo as String
+            ]
         }
-        return session.hasItemsConforming(toTypeIdentifiers: [
-            kUTTypeImage as String,
-            kUTTypeMovie as String,
-            kUTTypeVideo as String
-        ])
+        
+        return session.hasItemsConforming(toTypeIdentifiers: typeIdentifiers)
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
         return UIDropProposal(operation: .copy)
     }
+    
+    func getSessionItemType(itemProvider: NSItemProvider) -> SessionItemType {
+        if #available(iOS 14.0, *) {
+            switch true {
+            case itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) || itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier):
+                return .video
+            case itemProvider.hasItemConformingToTypeIdentifier(UTType.item.identifier):
+                return .file
+            case itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier):
+                return .image
+            case itemProvider.hasItemConformingToTypeIdentifier(UTType.text.identifier):
+                return .text
+            default:
+                return .unknown
+            }
+        } else {
+            if let suggestedName = itemProvider.suggestedName {
+                let components = suggestedName.components(separatedBy: ".")
+                if let fileExtension = components.last {
+                    switch fileExtension.lowercased() {
+                    case "mov", "mp4":
+                        return .video
+                    case "jpg", "jpeg", "png", "gif":
+                        return .image
+                    case "txt":
+                        return .text
+                    default:
+                        return .file
+                    }
+                }
+            }
+            
+            // If file extension is not available or cannot be determined, return "unknown"
+            return .unknown
+        }
+    }
 
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
-       var assets: [NSMutableDictionary] = []
+        var assets: [NSMutableDictionary] = []
+        let dispatchGroup = DispatchGroup()
+        
+        self.onDropEndEvent?()
 
-       let dispatchGroup = DispatchGroup()
-
-        for dragItem in session.items {
+        for (index, dragItem) in session.items.enumerated() {
             dispatchGroup.enter()
+            if #available(iOS 14.0, *) {
+                let hasVideo = dragItem.itemProvider.canLoadObject(ofClass: UIImage.self)
+                
+                print("index: \(index), has image: \(hasVideo)")
+            } else {
+            }
+            
+            let itemType = getSessionItemType(itemProvider: dragItem.itemProvider)
             
             if #available(iOS 15.0, *) {
-                 if session.hasItemsConforming(toTypeIdentifiers: [UTType.image.identifier]) {
-                     loadImageObject(dragItem: dragItem) { asset in
-                         if let asset = asset {
-                             assets.append(asset)
-                         }
-                         dispatchGroup.leave()
-                     }
-                 } else if session.hasItemsConforming(toTypeIdentifiers: [UTType.movie.identifier, UTType.video.identifier]) {
-                     loadFileObject(dragItem: dragItem, isVideo: true) { asset in
-                         if let asset = asset {
-                              assets.append(asset)
-                          }
-                          dispatchGroup.leave()
-                     }
-                 } else if session.hasItemsConforming(toTypeIdentifiers: [UTType.item.identifier]) {
-                     loadFileObject(dragItem: dragItem) { asset in
-                         if let asset = asset {
-                              assets.append(asset)
-                          }
-                          dispatchGroup.leave()
-                     }
-                 } else if session.hasItemsConforming(toTypeIdentifiers: [UTType.text.identifier]) {
-   //                  loadTextObjects(session: session, dispatch: dispatchGroup)
-                 }
-             } else {
-                 if session.hasItemsConforming(toTypeIdentifiers: [kUTTypeImage as String]) {
-                     loadImageObject(dragItem: dragItem) { asset in
-                         if let asset = asset {
-                             assets.append(asset)
-                         }
-                         dispatchGroup.leave()
-                     }
-                 } else if session.hasItemsConforming(toTypeIdentifiers: [kUTTypeMovie as String, kUTTypeVideo as String]) {
-                     loadFileObject(dragItem: dragItem, isVideo: true) { asset in
-                         if let asset = asset {
-                              assets.append(asset)
-                          }
-                          dispatchGroup.leave()
-                     }
-                 } else if session.hasItemsConforming(toTypeIdentifiers: [kUTTypeItem as String]) {
-                     loadFileObject(dragItem: dragItem) { asset in
-                         if let asset = asset {
-                              assets.append(asset)
-                          }
-                          dispatchGroup.leave()
-                     }
-                 } else if session.hasItemsConforming(toTypeIdentifiers: [kUTTypeText as String]) {
-   //                  loadTextObjects(session: session, dispatch: dispatchGroup)
-                 }
-             }
-          }
+                if itemType == SessionItemType.image {
+                    loadImageObject(dragItem: dragItem) { asset in
+                        if let asset = asset {
+                            assets.append(asset)
+                        }
+                        dispatchGroup.leave() // Leave the group inside the completion handler
+                    }
+                } else if itemType == SessionItemType.video {
+                    loadFileObject(dragItem: dragItem, isVideo: true) { asset in
+                        if let asset = asset {
+                            assets.append(asset)
+                        }
+                        dispatchGroup.leave() // Leave the group inside the completion handler
+                    }
+                } else if itemType == SessionItemType.file {
+                    loadFileObject(dragItem: dragItem) { asset in
+                        if let asset = asset {
+                            assets.append(asset)
+                        }
+                        dispatchGroup.leave() // Leave the group inside the completion handler
+                    }
+                } else if itemType == SessionItemType.text {
+                    // loadTextObjects(session: session, dispatch: dispatchGroup)
+                }
+            } else {
+                if itemType == SessionItemType.image {
+                    loadImageObject(dragItem: dragItem) { asset in
+                        if let asset = asset {
+                            assets.append(asset)
+                        }
+                        dispatchGroup.leave() // Leave the group inside the completion handler
+                    }
+                } else if itemType == SessionItemType.video {
+                    loadFileObject(dragItem: dragItem, isVideo: true) { asset in
+                        if let asset = asset {
+                            assets.append(asset)
+                        }
+                        dispatchGroup.leave() // Leave the group inside the completion handler
+                    }
+                } else if itemType == SessionItemType.file {
+                    loadFileObject(dragItem: dragItem) { asset in
+                        if let asset = asset {
+                            assets.append(asset)
+                        }
+                        dispatchGroup.leave() // Leave the group inside the completion handler
+                    }
+                } else if itemType == SessionItemType.text {
+                    // loadTextObjects(session: session, dispatch: dispatchGroup)
+                }
+            }
+        }
 
-       // Notify when all asynchronous tasks are completed
-       dispatchGroup.notify(queue: DispatchQueue.main) {
-           print("Assets: \(assets)")
-           if !assets.isEmpty {
-               self.onDropEvent?([
-                   "assets": assets
-               ])
-           }
-       }
+        // Notify when all asynchronous tasks are completed
+        dispatchGroup.notify(queue: DispatchQueue.main) {
+            print("Assets: \(assets)")
+            if !assets.isEmpty {
+                self.onDropEvent?([
+                    "assets": assets
+                ])
+            }
+        }
     }
 
     private func loadImageObject(dragItem: UIDragItem, completion: @escaping (NSMutableDictionary?) -> Void) {
@@ -241,6 +290,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             DispatchQueue.main.async {
                if let fileSystem = self.fileSystem {
                    if let asset = generateVideoAsset(from: url, includeBase64: self.includeBase64, fileSystem: fileSystem) {
+//                       print("Video asset: \(asset)")
                        completion(asset)
                    }
                } else {
