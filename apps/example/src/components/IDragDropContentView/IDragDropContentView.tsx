@@ -130,6 +130,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
                 <Image source={{ uri }} style={styles.image} />
               ) : (
                 <Video
+                  isMuted
                   style={styles.image}
                   shouldPlay
                   onError={(error) => console.log(JSON.stringify(error))}
