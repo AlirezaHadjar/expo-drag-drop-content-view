@@ -35,8 +35,10 @@ A superset of `View` component that supports iOS, Android, and Web Native drag a
 - [x] Adding Drag support
 - [x] Documentation
 - [ ] MacOS support
-- [ ] Adding dragging/dropping video support
+- [ ] Adding dragging/dropping video support (🚧 In Progress)
 - [ ] Adding dragging/dropping text support
+- [ ] Applying limitations on drop targets (types / number of items)
+- [ ] Adding progress
 
 ## Acknowledgment
 
