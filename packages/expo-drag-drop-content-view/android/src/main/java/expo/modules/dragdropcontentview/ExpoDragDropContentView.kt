@@ -60,7 +60,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         DropHelper.configureView(
             activity,
             frame,
-            arrayOf("image/*"),
+            arrayOf("image/*", "video/*"),
             DropHelper.Options.Builder()
                 .setHighlightColor(highlightColor)
                 .setHighlightCornerRadiusPx(highlightBorderRadius)

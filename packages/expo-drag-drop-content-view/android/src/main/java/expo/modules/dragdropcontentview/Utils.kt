@@ -5,12 +5,14 @@ import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Toast
 import java.io.ByteArrayOutputStream
 import android.util.Base64
 import java.io.File
+import java.io.FileInputStream
 
 class Utils {
     private fun getImageDimensions(contentResolver: ContentResolver, contentUri: Uri): Pair<Int, Int> {
@@ -30,11 +32,53 @@ class Utils {
     private fun showToast(message: String, context: Context) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
+    private fun getFilePathFromContentUri(contentResolver: ContentResolver, contentUri: Uri): String? {
+        val projection = arrayOf(MediaStore.MediaColumns.DATA)
+        val cursor = contentResolver.query(contentUri, projection, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val columnIndex = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
+                return it.getString(columnIndex)
+            }
+        }
+        return null
+    }
+    private fun getVideoDimensions(contentResolver: ContentResolver, contentUri: Uri): Pair<Int, Int> {
+        val retriever = MediaMetadataRetriever()
+        val filePath = getFilePathFromContentUri(contentResolver, contentUri)
+        retriever.setDataSource(filePath)
+        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt() ?: 0
+        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt() ?: 0
+        return Pair(width, height)
+    }
+
+    fun getVideoDuration(contentResolver: ContentResolver, contentUri: Uri): Long {
+        var duration: Long = 0
+        try {
+            val inputStream = contentResolver.openInputStream(contentUri)
+            inputStream?.use { stream ->
+                val fileDescriptor = (stream as? FileInputStream)?.fd
+                if (fileDescriptor != null) {
+                    val retriever = MediaMetadataRetriever()
+                    retriever.setDataSource(fileDescriptor)
+                    duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
+                    retriever.release()
+                }
+            }
+        } catch (e: Exception) {
+            // Handle exceptions
+            e.printStackTrace()
+        }
+        return duration
+    }
+
+
     fun getFileInfo(contentResolver: ContentResolver, contentUri: Uri, includeBase64: Boolean, context: Context): Map<String, Any?>? {
         val projection = arrayOf(
-            MediaStore.Images.Media.MIME_TYPE,
-            MediaStore.Images.Media.DISPLAY_NAME,
-            MediaStore.Images.Media.DATA
+            MediaStore.MediaColumns.MIME_TYPE,
+            MediaStore.MediaColumns.DISPLAY_NAME,
+            MediaStore.MediaColumns.DATA,
+            MediaStore.Video.Media.DURATION
         )
 
         val cursor = contentResolver.query(contentUri, projection, null, null, null)
@@ -45,12 +89,14 @@ class Utils {
 
         cursor?.use { cursorInstance ->
             if (cursorInstance.moveToFirst()) {
-                val type = cursorInstance.getString(cursorInstance.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE))
-                val fileName = cursorInstance.getString(cursorInstance.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME))
-                val uri = "file://" + cursorInstance.getString(cursorInstance.getColumnIndexOrThrow(MediaStore.Images.Media.DATA))
-                val dimensions = getImageDimensions(contentResolver, contentUri)
+                val type = cursorInstance.getString(cursorInstance.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE))
+                val fileName = cursorInstance.getString(cursorInstance.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
+                val uri = "file://" + cursorInstance.getString(cursorInstance.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA))
+                val dimensions = if (type.startsWith("image/")) getImageDimensions(contentResolver, contentUri) else getVideoDimensions(contentResolver, contentUri)
+                val duration = if (type.startsWith("video/")) getVideoDuration(contentResolver, contentUri) else 0
                 val base64 = if (includeBase64) getBase64Data(contentResolver, contentUri) else null
-                val path = contentUri.path?.replace("/-1/1/", "")
+                val path =  "content://" + contentUri.path?.substringAfter("content://")
+
 
                 val fileInfoMap = mutableMapOf(
                     "width" to dimensions.first,
@@ -58,17 +104,16 @@ class Utils {
                     "type" to type,
                     "fileName" to fileName,
                     "uri" to uri,
-                    "path" to path
+                    "path" to path,
                 )
 
                 // Conditionally add base64 to the map if it's not null
                 base64?.let { fileInfoMap["base64"] = it }
+                if (type.startsWith("video/")) fileInfoMap["duration"] = duration
 
                 return fileInfoMap
             }
         }
-
-
         return null
     }
 

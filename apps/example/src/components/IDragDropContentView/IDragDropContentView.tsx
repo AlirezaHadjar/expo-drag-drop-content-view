@@ -5,7 +5,13 @@ import {
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
-import { Platform, Pressable, StyleSheet, Text } from "react-native";
+import {
+  PermissionsAndroid,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+} from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Video, ResizeMode } from "expo-av";
 
@@ -62,13 +68,10 @@ const usePermission = () => {
   useEffect(() => {
     const fn = async () => {
       try {
-        // @ts-ignore
-        const PermissionsAndroid = await import("react-native").then(
-          (module) => module.PermissionsAndroid
-        );
-        await PermissionsAndroid.request(
-          "android.permission.READ_MEDIA_IMAGES"
-        );
+        await PermissionsAndroid.requestMultiple([
+          "android.permission.READ_MEDIA_IMAGES",
+          "android.permission.READ_MEDIA_VIDEO",
+        ]);
       } catch (_) {}
     };
     if (Platform.OS === "android") fn();
@@ -100,7 +103,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       highlightColor="#2f95dc"
       highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
-        console.log(JSON.stringify(event.assets.length));
+        console.log(JSON.stringify(event.assets));
         const newData = [...(imageData ?? []), ...event.assets];
         setImageData(newData);
         props.onDropEvent?.(event);
