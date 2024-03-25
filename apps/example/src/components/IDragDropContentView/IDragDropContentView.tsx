@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Video, ResizeMode } from "expo-av";
+import { usePermission } from "../../hooks/permission";
 
 const borderRadius = 20;
 
@@ -63,20 +64,6 @@ const styles = StyleSheet.create({
 });
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-const usePermission = () => {
-  useEffect(() => {
-    const fn = async () => {
-      try {
-        await PermissionsAndroid.requestMultiple([
-          "android.permission.READ_MEDIA_IMAGES",
-          "android.permission.READ_MEDIA_VIDEO",
-        ]);
-      } catch (_) {}
-    };
-    if (Platform.OS === "android") fn();
-  }, []);
-};
 
 export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
