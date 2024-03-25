@@ -21,7 +21,7 @@ import java.io.File
 @SuppressLint("ViewConstructor")
 class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
     private var includeBase64 = false
-    private var draggableImageSources: List<String> = emptyList()
+    private var draggableMediaSources: List<String> = emptyList()
     private var highlightColor = ContextCompat.getColor(context, R.color.highlight_color)
     private var highlightBorderRadius = 0
     private val onDropEvent by EventDispatcher()
@@ -32,8 +32,8 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         includeBase64 = value ?: false
     }
 
-    fun setdraggableImageSources(value: List<String>?) {
-        draggableImageSources = value ?: emptyList()
+    fun setDraggableMediaSources(value: List<String>?) {
+        draggableMediaSources = value ?: emptyList()
     }
 
     fun setHighlightBorderRadius(value: Int?) {
@@ -87,7 +87,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
         val data: MutableList<Uri> = mutableListOf()
 
-        for (imageSource in draggableImageSources) {
+        for (imageSource in draggableMediaSources) {
             val path = Uri.parse(imageSource).path
 
             if (!path.isNullOrBlank()) {
