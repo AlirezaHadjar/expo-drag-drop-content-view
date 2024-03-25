@@ -137,18 +137,18 @@ class Utils {
     }
 
     fun getContentUriForFile(context: Context, file: File): Uri? {
-        val projection = arrayOf(MediaStore.Images.Media._ID)
-        val selection = "${MediaStore.Images.Media.DATA} = ?"
+        val projection = arrayOf(MediaStore.MediaColumns._ID)
+        val selection = "${MediaStore.MediaColumns.DATA} = ?"
         val selectionArgs = arrayOf(file.absolutePath)
-        val sortOrder = null // You can specify sorting order if needed
+        val sortOrder: String? = null // You can specify sorting order if needed
 
-        val queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        val queryUri = MediaStore.Files.getContentUri("external")
 
         context.contentResolver.query(queryUri, projection, selection, selectionArgs, sortOrder)?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-                val imageId = cursor.getLong(columnIndex)
-                return ContentUris.withAppendedId(queryUri, imageId)
+                val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+                val mediaId = cursor.getLong(columnIndex)
+                return ContentUris.withAppendedId(queryUri, mediaId)
             }
         }
 
