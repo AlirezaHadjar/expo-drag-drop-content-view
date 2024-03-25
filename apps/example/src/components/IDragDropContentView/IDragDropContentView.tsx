@@ -4,14 +4,8 @@ import {
   OnDropEvent,
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
-import React, { useEffect, useState } from "react";
-import {
-  PermissionsAndroid,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-} from "react-native";
+import React, { useState } from "react";
+import { Platform, Pressable, StyleSheet, Text } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Video, ResizeMode } from "expo-av";
 import { usePermission } from "../../hooks/permission";
@@ -90,7 +84,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       highlightColor="#2f95dc"
       highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
-        console.log(JSON.stringify(event.assets));
+        // console.log(JSON.stringify(event.assets));
         const newData = [...(imageData ?? []), ...event.assets];
         setImageData(newData);
         props.onDropEvent?.(event);
@@ -127,6 +121,11 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
                   source={{ uri }}
                   resizeMode={ResizeMode.COVER}
                   isLooping
+                  onReadyForDisplay={(videoData) => {
+                    if (Platform.OS === "web")
+                      //@ts-ignore
+                      videoData.srcElement.style.position = "initial";
+                  }}
                 />
               )}
             </AnimatedPressable>
