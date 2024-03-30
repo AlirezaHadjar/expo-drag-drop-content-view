@@ -16,11 +16,12 @@ A superset of `View` component that supports iOS, Android, and Web Native drag a
 
 ## Features
 
-- 📤 Drag images to other apps
-- 📬 Drag images within the app
-- 📥 Drop images from other apps
+- 📤 Drag images/videos to other apps
+- 📬 Drag images/videos within the app
+- 📥 Drop images/videos from other apps
 
 ## Documentation
+
 - [Installation](https://expo-drag-drop-content-view.vercel.app/docs/guides/installation)
 - [Usage](https://expo-drag-drop-content-view.vercel.app/docs/guides/usage)
 - [API](https://expo-drag-drop-content-view.vercel.app/docs/api/overview)
@@ -34,11 +35,9 @@ A superset of `View` component that supports iOS, Android, and Web Native drag a
 - [x] Web support
 - [x] Adding Drag support
 - [x] Documentation
-- [ ] MacOS support
-- [ ] Adding dragging/dropping video support (🚧 In Progress)
+- [x] Adding dragging/dropping video support
 - [ ] Adding dragging/dropping text support
-- [ ] Applying limitations on drop targets (types / number of items)
-- [ ] Adding progress
+- [ ] MacOS support
 
 ## Acknowledgment
 

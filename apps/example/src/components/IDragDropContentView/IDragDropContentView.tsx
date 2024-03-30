@@ -4,9 +4,11 @@ import {
   OnDropEvent,
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { Video, ResizeMode } from "expo-av";
+import { usePermission } from "../../hooks/permission";
 
 const borderRadius = 20;
 
@@ -57,37 +59,20 @@ const styles = StyleSheet.create({
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const usePermission = () => {
-  useEffect(() => {
-    const fn = async () => {
-      try {
-        // @ts-ignore
-        const PermissionsAndroid = await import("react-native").then(
-          (module) => module.PermissionsAndroid
-        );
-        await PermissionsAndroid.request(
-          "android.permission.READ_MEDIA_IMAGES"
-        );
-      } catch (_) {}
-    };
-    if (Platform.OS === "android") fn();
-  }, []);
-};
-
 export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
 ) => {
   usePermission();
-  const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
+  const [sources, setSources] = useState<OnDropEvent[] | null>(null);
   const [isActive, setIsActive] = useState(false);
 
-  const handleClear = () => setImageData(null);
+  const handleClear = () => setSources(null);
 
   return (
     <DragDropContentView
       {...props}
-      includeBase64
-      draggableImageSources={imageData?.map(
+      includeBase64={false}
+      draggableSources={sources?.map(
         (image) => (image.uri || image.base64) as string
       )}
       onDropStartEvent={() => {
@@ -99,18 +84,20 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       highlightColor="#2f95dc"
       highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
-        const newData = [...(imageData ?? []), ...event.assets];
-        setImageData(newData);
+        // console.log(JSON.stringify(event.assets));
+        const newData = [...(sources ?? []), ...event.assets];
+        setSources(newData);
         props.onDropEvent?.(event);
       }}
       style={[styles.container, props.style]}
     >
-      {imageData ? (
-        imageData.map((image, index) => {
-          const uri = image.uri ? image.uri : image.base64;
+      {sources ? (
+        sources.map((image, index) => {
+          const uri = (image.uri ? image.uri : image.base64) || "";
           const rotation = Math.ceil(index / 2) * 5;
           const direction = index % 2 === 0 ? 1 : -1;
           const rotate = `${rotation * direction}deg`;
+          const isImage = image.type?.startsWith("image");
 
           return (
             <AnimatedPressable
@@ -123,7 +110,24 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
               }
               style={[styles.imageContainer, { transform: [{ rotate }] }]}
             >
-              <Image source={{ uri }} style={styles.image} />
+              {isImage ? (
+                <Image source={{ uri }} style={styles.image} />
+              ) : (
+                <Video
+                  isMuted
+                  style={styles.image}
+                  shouldPlay
+                  onError={(error) => console.log(JSON.stringify(error))}
+                  source={{ uri }}
+                  resizeMode={ResizeMode.COVER}
+                  isLooping
+                  onReadyForDisplay={(videoData) => {
+                    if (Platform.OS === "web")
+                      //@ts-ignore
+                      videoData.srcElement.style.position = "initial";
+                  }}
+                />
+              )}
             </AnimatedPressable>
           );
         })

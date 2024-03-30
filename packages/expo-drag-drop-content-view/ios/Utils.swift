@@ -8,6 +8,11 @@
 import Foundation
 import MobileCoreServices
 import ImageIO
+import AVFoundation
+import ExpoModulesCore
+
+import Photos
+import PhotosUI
 
 extension UIImage {
     var hasAlpha: Bool {
@@ -101,7 +106,105 @@ func getMimeType(image: UIImage) -> String? {
     return nil
 }
 
-func generateAsset (image: UIImage, includeBase64: Bool) -> NSMutableDictionary? {
+private func getMimeType(from pathExtension: String) -> String? {
+  let filenameExtension = String(pathExtension.dropFirst())
+  if #available(iOS 14, *) {
+    return UTType(filenameExtension: filenameExtension)?.preferredMIMEType
+  }
+  if let uti = UTTypeCreatePreferredIdentifierForTag(
+    kUTTagClassFilenameExtension,
+    pathExtension as NSString, nil
+  )?.takeRetainedValue() {
+    if let mimetype = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
+      return mimetype as String
+    }
+  }
+  return nil
+}
+
+func determineTranscodeFileType(from originalExtension: String) -> AVFileType {
+    switch originalExtension.lowercased() {
+    case ".mp4":
+        return .mp4
+    case ".mov":
+        return .mov
+    default:
+        // Use mp4 as default
+        return .mp4
+    }
+}
+
+func getVideoDimensions(from url: URL) -> (width: Int, height: Int)? {
+    guard let track = AVAsset(url: url).tracks(withMediaType: .video).first else {
+        return nil
+    }
+
+    let size = track.naturalSize.applying(track.preferredTransform)
+    let width = Int(abs(size.width))
+    let height = Int(abs(size.height))
+
+    return (width, height)
+}
+
+func generateVideoAsset(from mediaURL: URL, includeBase64: Bool, fileSystem: EXFileSystemInterface) -> NSMutableDictionary? {
+    let asset = NSMutableDictionary()
+
+    do {
+        // In case of pass-through, we want the original file extension; otherwise, use mp4
+        let originalExtension = ".\(mediaURL.pathExtension)"
+        let transcodeFileType = determineTranscodeFileType(from: originalExtension)
+        let transcodeFileExtension = originalExtension
+        let mimeType = getMimeType(from: originalExtension)
+
+        // Copy the video to a location controlled by us to ensure it's not removed during conversion
+        let assetUrl = try generateUrl(withFileExtension: originalExtension, fileSystem: fileSystem)
+        let transcodedUrl = try generateUrl(withFileExtension: transcodeFileExtension, fileSystem: fileSystem)
+        try FileManager.default.copyItem(at: mediaURL, to: assetUrl)
+
+        // Transcode the video asynchronously
+        VideoUtils.transcodeVideoAsync(sourceAssetUrl: assetUrl,
+                                       destinationUrl: transcodedUrl,
+                                       outputFileType: transcodeFileType,
+                                       exportPreset: VideoUtils.VideoExportPreset.passthrough
+        ) { result in
+            switch result {
+            case .failure(let exception):
+                print("Failed to transcode video:", exception.description)
+            case .success(let targetUrl):
+                let fileName = mediaURL.lastPathComponent
+                asset["fileName"] = fileName
+                asset["type"] = mimeType
+                asset["duration"] = VideoUtils.readDurationFrom(url: mediaURL)
+                asset["path"] = targetUrl.absoluteString.replacingOccurrences(of: "file://", with: "")
+                asset["uri"] = targetUrl.absoluteString
+
+                // Get video dimensions
+                if let dimensions = getVideoDimensions(from: targetUrl) {
+                    asset["width"] = dimensions.width
+                    asset["height"] = dimensions.height
+                } else {
+                    asset["width"] = 0
+                    asset["height"] = 0
+                    print("Failed to get video dimensions")
+                }
+
+                if includeBase64 {
+                    if let videoData = try? Data(contentsOf: targetUrl) {
+                        asset["base64"] = videoData.base64EncodedString()
+                    } else {
+                        print("Error converting video data to base64")
+                    }
+                }
+            }
+        }
+    } catch {
+        print("Error processing video:", error.localizedDescription)
+    }
+
+    return asset
+}
+
+func generateImageAsset (image: UIImage, includeBase64: Bool) -> NSMutableDictionary? {
     let asset = NSMutableDictionary()
 
     let _mimeType = getMimeType(image: image)
@@ -156,11 +259,66 @@ func loadImage(fromImagePath imagePath: String) -> UIImage? {
     return nil
 }
 
+func generateThumbnail(fromVideoURL videoURL: URL) -> UIImage? {
+    let asset = AVURLAsset(url: videoURL)
+    let generator = AVAssetImageGenerator(asset: asset)
+    generator.appliesPreferredTrackTransform = true
+
+    let time = CMTime(seconds: 1, preferredTimescale: 60) // Capture thumbnail at 1 second into the video
+
+    do {
+        let cgImage = try generator.copyCGImage(at: time, actualTime: nil)
+        return UIImage(cgImage: cgImage)
+    } catch {
+        print("Error generating thumbnail: \(error)")
+        return nil
+    }
+}
+
+func loadVideoURL(fromVideoPath videoPath: String) -> URL? {
+    if let url = URL(string: videoPath) {
+        return url
+    } else {
+        print("Invalid URL path: \(videoPath)")
+        return nil
+    }
+}
+
 func convertImageToImageView(image: UIImage) -> UIImageView {
     let imageView = UIImageView(image: image)
     imageView.contentMode = .scaleAspectFit
-    
+
     return imageView
+}
+
+func resizeImageAndConvertToImageView(image: UIImage, session: UIDragSession, view: UIView) -> UIImageView {
+    // Calculate the new dimensions based on the view's size
+    let viewWidth = 200.0
+    let viewHeight = view.frame.height
+
+    let aspectRatio = image.size.width / image.size.height
+
+    var imageViewWidth = viewWidth
+    var imageViewHeight = viewWidth / aspectRatio
+
+    // Check if the height exceeds the view's height
+    if imageViewHeight > viewHeight {
+        imageViewHeight = viewHeight
+        imageViewWidth = viewHeight * aspectRatio
+    }
+    let touchedPoint = session.location(in: view)
+
+    if let rootView = view.window?.rootViewController?.view {
+        let absolutePoint = view.convert(touchedPoint, to: rootView)
+
+        let imageView = UIImageView(image: image)
+        imageView.contentMode = .scaleAspectFit
+        imageView.frame = CGRect(x: absolutePoint.x - imageViewWidth / 2, y: absolutePoint.y - imageViewHeight / 2, width: imageViewWidth, height: imageViewHeight)
+        return imageView
+    }
+
+    // Return an empty image view if rootView is not accessible
+    return UIImageView()
 }
 
 func convertPoint(_ point: CGPoint, fromView view: UIView?) -> CGPoint {
@@ -168,4 +326,132 @@ func convertPoint(_ point: CGPoint, fromView view: UIView?) -> CGPoint {
         return view?.convert(point, to: parent) ?? CGPoint.zero
     }
     return point
+}
+
+private func generateUrl(withFileExtension: String, fileSystem: EXFileSystemInterface) throws -> URL {
+    let directory =  fileSystem.cachesDirectory.appending(
+        fileSystem.cachesDirectory.hasSuffix("/") ? "" : "/" + "ImagePicker"
+    )
+    let path = fileSystem.generatePath(inDirectory: directory, withExtension: withFileExtension)
+    let url = URL(fileURLWithPath: path)
+    return url
+}
+
+private struct VideoUtils {
+    static func tryCopyingVideo(at: URL, to: URL) throws {
+        do {
+            // we copy the file as `moveItem(at:,to:)` throws an error in iOS 13 due to missing permissions
+            try FileManager.default.copyItem(at: at, to: to)
+        } catch {
+            throw Exception()
+                .causedBy(error)
+        }
+    }
+
+    /**
+     @returns duration in milliseconds
+     */
+    static func readDurationFrom(url: URL) -> Double {
+        let asset = AVURLAsset(url: url)
+        return Double(asset.duration.value) / Double(asset.duration.timescale) * 1_000
+    }
+
+    static func readSizeFrom(url: URL) -> CGSize? {
+        let asset = AVURLAsset(url: url)
+        guard let assetTrack = asset.tracks(withMediaType: .video).first else {
+            return nil
+        }
+        // The video could be rotated and the resulting transform can result in a negative width/height.
+        let size = assetTrack.naturalSize.applying(assetTrack.preferredTransform)
+        return CGSize(width: abs(size.width), height: abs(size.height))
+    }
+
+    internal enum VideoExportPreset: Int, Enumerable {
+        case passthrough = 0
+        case lowQuality = 1
+        case mediumQuality = 2
+        case highestQuality = 3
+        case h264_640x480 = 4
+        case h264_960x540 = 5
+        case h264_1280x720 = 6
+        case h264_1920x1080 = 7
+        case h264_3840x2160 = 8
+        case hevc_1920x1080 = 9
+        case hevc_3840_2160 = 10
+
+        func toAVAssetExportPreset() -> String {
+            switch self {
+            case .passthrough:
+              return AVAssetExportPresetPassthrough
+            case .lowQuality:
+              return AVAssetExportPresetLowQuality
+            case .mediumQuality:
+              return AVAssetExportPresetMediumQuality
+            case .highestQuality:
+              return AVAssetExportPresetHighestQuality
+            case .h264_640x480:
+              return AVAssetExportPreset640x480
+            case .h264_960x540:
+              return AVAssetExportPreset960x540
+            case .h264_1280x720:
+              return AVAssetExportPreset1280x720
+            case .h264_1920x1080:
+              return AVAssetExportPreset1920x1080
+            case .h264_3840x2160:
+              return AVAssetExportPreset3840x2160
+            case .hevc_1920x1080:
+              return AVAssetExportPresetHEVC1920x1080
+            case .hevc_3840_2160:
+              return AVAssetExportPresetHEVC3840x2160
+            }
+          }
+    }
+    /**
+     Asynchronously transcodes asset provided as `sourceAssetUrl` according to `exportPreset`.
+     Result URL is returned to the `completion` closure.
+     Transcoded video is saved at `destinationUrl`, unless `exportPreset` is set to `passthrough`.
+     In this case, `sourceAssetUrl` is returned.
+     */
+    static func transcodeVideoAsync(sourceAssetUrl: URL,
+                                    destinationUrl: URL,
+                                    outputFileType: AVFileType,
+                                    exportPreset: VideoExportPreset,
+                                    completion: @escaping (Result<URL, Exception>) -> Void) {
+        if case .passthrough = exportPreset {
+            return completion(.success((sourceAssetUrl)))
+        }
+
+        let asset = AVURLAsset(url: sourceAssetUrl)
+        let preset = exportPreset.toAVAssetExportPreset()
+        AVAssetExportSession.determineCompatibility(ofExportPreset: preset,
+                                                    with: asset,
+                                                    outputFileType: outputFileType) { canBeTranscoded in
+            guard canBeTranscoded else {
+                return completion(.failure(Exception()))
+            }
+            guard let exportSession = AVAssetExportSession(asset: asset,
+                                                           presetName: preset) else {
+                return completion(.failure(Exception()))
+            }
+            exportSession.outputFileType = outputFileType
+            exportSession.outputURL = destinationUrl
+            exportSession.exportAsynchronously {
+                switch exportSession.status {
+                case .failed:
+                    let error = exportSession.error
+                    completion(.failure(Exception().causedBy(error)))
+                default:
+                    completion(.success((destinationUrl)))
+                }
+            }
+        }
+    }
+}
+
+enum SessionItemType {
+    case image
+    case video
+    case text
+    case file
+    case unknown
 }

@@ -21,7 +21,7 @@ import java.io.File
 @SuppressLint("ViewConstructor")
 class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
     private var includeBase64 = false
-    private var draggableImageSources: List<String> = emptyList()
+    private var draggableSources: List<String> = emptyList()
     private var highlightColor = ContextCompat.getColor(context, R.color.highlight_color)
     private var highlightBorderRadius = 0
     private val onDropEvent by EventDispatcher()
@@ -32,8 +32,8 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         includeBase64 = value ?: false
     }
 
-    fun setdraggableImageSources(value: List<String>?) {
-        draggableImageSources = value ?: emptyList()
+    fun setDraggableSources(value: List<String>?) {
+        draggableSources = value ?: emptyList()
     }
 
     fun setHighlightBorderRadius(value: Int?) {
@@ -60,7 +60,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         DropHelper.configureView(
             activity,
             frame,
-            arrayOf("image/*"),
+            arrayOf("image/*", "video/*"),
             DropHelper.Options.Builder()
                 .setHighlightColor(highlightColor)
                 .setHighlightCornerRadiusPx(highlightBorderRadius)
@@ -81,13 +81,13 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         }
     }
 
-    private fun dragImages(view: View, context: Context) {
+    private fun dragSources(view: View, context: Context) {
         // DropHelper is only available on Android N and above
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return;
 
         val data: MutableList<Uri> = mutableListOf()
 
-        for (imageSource in draggableImageSources) {
+        for (imageSource in draggableSources) {
             val path = Uri.parse(imageSource).path
 
             if (!path.isNullOrBlank()) {
@@ -100,7 +100,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         val shadow = DragShadowBuilder(view)
 
         if (data.isNotEmpty()) {
-            val clipData = ClipData.newUri(context.contentResolver, "Image", data[0])
+            val clipData = ClipData.newUri(context.contentResolver, "Media", data[0])
 
             for (i in 1 until data.size) {
                 clipData.addItem(ClipData.Item(data[i]))
@@ -112,7 +112,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
     private fun configureDragHelper(frame: View) {
         DragStartHelper(frame) { view, _ ->
-            dragImages(view, frame.context)
+            dragSources(view, frame.context)
             return@DragStartHelper false
         }.attach()
     }
@@ -136,7 +136,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
                         Handler(Looper.getMainLooper()).postDelayed({
-                                dragImages(view, view.context)
+                                dragSources(view, view.context)
                         }, longPressDuration)
                     }
                 }

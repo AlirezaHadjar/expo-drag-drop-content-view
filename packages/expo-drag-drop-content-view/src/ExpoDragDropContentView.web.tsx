@@ -11,18 +11,18 @@ const handleFile = (file: File) => {
     reader.onload = (e) => {
       const dataURL = e.target?.result;
 
-      const img = new Image();
-      img.src = dataURL as string;
+      const media = new Image();
+      media.src = dataURL as string;
 
-      img.onload = () => {
+      media.onload = () => {
         resolve({
           uri: undefined,
           path: undefined,
           type: file.type,
-          base64: img.src,
+          base64: media.src,
           fileName: file.name,
-          width: img.naturalWidth,
-          height: img.naturalHeight,
+          width: media.naturalWidth,
+          height: media.naturalHeight,
         });
       };
     };
@@ -31,11 +31,14 @@ const handleFile = (file: File) => {
   });
 };
 
-const getBase64Image = (data: string) => {
+const getBase64 = (data: string) => {
   const extension =
     data?.split(";")?.[0]?.split(":")?.[1]?.split("/")?.[1] || "jpeg";
-  const type = `image/${extension}`;
-  const fileName = `image.${extension}`;
+  const kind =
+    data?.split(";")?.[0]?.split(":")?.[1]?.split("/")?.[0] || "image";
+
+  const type = `${kind}/${extension}`;
+  const fileName = `${kind}.${extension}`;
 
   return {
     uri: undefined,
@@ -48,7 +51,7 @@ const getBase64Image = (data: string) => {
   };
 };
 
-const getImageKey = (index: number) => `image-${index}`;
+const getKey = (index: number) => `media-${index}`;
 
 const getAssets = async (dataTransfer: DataTransfer) => {
   const resolvedFiles: (OnDropEvent | null)[] = [];
@@ -76,32 +79,30 @@ const getAssets = async (dataTransfer: DataTransfer) => {
 
   // Dragging from current web page
   if (isCustomDrag) {
-    const droppedImages: string[] = []; // base64 strings
+    const droppedSources: string[] = []; // base64 strings
 
     let index = 0;
-    let key = getImageKey(index);
+    let key = getKey(index);
 
     while (dataTransfer.getData(key)) {
-      const imageSrc = dataTransfer.getData(key);
-      droppedImages.push(imageSrc);
+      const src = dataTransfer.getData(key);
+      droppedSources.push(src);
 
       index++;
-      key = getImageKey(index);
+      key = getKey(index);
     }
 
-    resolvedFiles.push(
-      ...droppedImages.map((base64) => getBase64Image(base64))
-    );
+    resolvedFiles.push(...droppedSources.map((base64) => getBase64(base64)));
   }
   // Dragging from other web pages
   else if (htmlData) {
-    // Extract the image source from the HTML data (you may need to adjust this based on your HTML structure)
+    // Extract the media source from the HTML data (you may need to adjust this based on your HTML structure)
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlData, "text/html");
     const base64 = doc.querySelector("img")?.getAttribute("src");
 
     if (base64) {
-      const file = getBase64Image(base64);
+      const file = getBase64(base64);
       resolvedFiles.push(file);
     }
   }
@@ -158,17 +159,18 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
   handleDrag = async <T extends Event & { dataTransfer: DataTransfer }>(
     event: T
   ) => {
-    const sources = this.props.draggableImageSources;
+    const sources = this.props.draggableSources;
     const preview = sources?.at(-1);
     if (!preview || !sources) return;
 
     event.dataTransfer.setData("text/plain", "Custom Drag");
     sources.forEach((source, index) => {
-      event.dataTransfer.setData(getImageKey(index), source);
+      event.dataTransfer.setData(getKey(index), source);
     });
 
-    const dragImage = new Image();
-    dragImage.src = preview; // Set the path to your custom image
+    // Both images and videos can be dragged
+    const dragMedia = new Image();
+    dragMedia.src = preview; // Set the path to your custom image
 
     const parentStyle = StyleSheet.flatten(this.props.style);
 
@@ -176,12 +178,12 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     const maxWidth = parentStyle?.width || 100;
     const maxHeight = parentStyle?.height || 100;
 
-    dragImage.onload = () => {
+    dragMedia.onload = () => {
       //@ts-expect-error
-      dragImage.height = maxHeight;
+      dragMedia.height = maxHeight;
       //@ts-expect-error
-      dragImage.width = maxWidth;
-      event.dataTransfer.setDragImage(dragImage, 0, 0);
+      dragMedia.width = maxWidth;
+      event.dataTransfer.setDragImage(dragMedia, 0, 0);
     };
   };
 
