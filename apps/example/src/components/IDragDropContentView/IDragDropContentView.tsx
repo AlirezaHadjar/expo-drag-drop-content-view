@@ -5,7 +5,7 @@ import {
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
 import React, { useState } from "react";
-import { Platform, Pressable, StyleSheet, Text } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, TextInput } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Video, ResizeMode } from "expo-av";
 import { usePermission } from "../../hooks/permission";
@@ -59,10 +59,24 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: "center",
+    fontSize: 25,
+    padding: 10,
+    color: "white",
+    backgroundColor: "#2f95dc",
+    borderRadius: 10,
+    overflow: "hidden",
+    borderWidth: 3,
+    borderColor: "blue",
   },
 });
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const getSourceType = (source: OnDropEvent) => {
+  if (source.type.startsWith("image")) return "image";
+  if (source.type.startsWith("video")) return "video";
+  if (source.type.startsWith("text")) return "text";
+};
 
 export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
@@ -77,9 +91,12 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
     <DragDropContentView
       {...props}
       includeBase64={false}
-      draggableSources={sources?.map(
-        (source) => (source.uri || source.base64 || source.text) as string
-      )}
+      draggableSources={sources
+        ?.filter((source) => getSourceType(source) !== undefined)
+        ?.map((source) => ({
+          type: getSourceType(source)!,
+          value: source.uri || source.base64 || source.text || "",
+        }))}
       onDropStartEvent={() => {
         setIsActive(true);
       }}
@@ -102,9 +119,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
           const rotation = Math.ceil(index / 2) * 5;
           const direction = index % 2 === 0 ? 1 : -1;
           const rotate = `${rotation * direction}deg`;
-          const isImage = source.type?.startsWith("image");
-          const isVideo = source.type?.startsWith("video");
-          const isText = source.type?.startsWith("text");
+          const type = getSourceType(source);
 
           return (
             <AnimatedPressable
@@ -117,9 +132,9 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
               }
               style={[styles.sourceContainer, { transform: [{ rotate }] }]}
             >
-              {isImage ? (
+              {type === "image" ? (
                 <Image source={{ uri }} style={styles.image} />
-              ) : isVideo ? (
+              ) : type === "video" ? (
                 <Video
                   isMuted
                   style={styles.image}
@@ -134,7 +149,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
                       videoData.srcElement.style.position = "initial";
                   }}
                 />
-              ) : isText ? (
+              ) : type === "text" ? (
                 <Text style={styles.text}>{source.text}</Text>
               ) : null}
             </AnimatedPressable>

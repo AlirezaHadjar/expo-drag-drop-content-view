@@ -4,6 +4,7 @@ let IOnDropEvent = "onDropEvent"
 let IOnDropStartEvent = "onDropStartEvent"
 let IOnDropEndEvent = "onDropEndEvent"
 
+
 public class ExpoDragDropContentViewModule: Module {
   public func definition() -> ModuleDefinition {
     Name("ExpoDragDropContentView")
@@ -19,9 +20,9 @@ public class ExpoDragDropContentViewModule: Module {
             view.dragDropContentView.setIncludeBase64(include)
             view.dragDropContentView.fileSystem = fileSystem
         }
-        Prop("draggableSources") { (view, draggableSources: [String]?) in
+        Prop("draggableSources") { (view, draggableSources: [DraggableSource]?) in
             let sources = draggableSources ?? []
-            view.dragDropContentView.setDraggableImageSources(sources)
+            view.dragDropContentView.setDraggableSources(sources)
         }
     }
   }

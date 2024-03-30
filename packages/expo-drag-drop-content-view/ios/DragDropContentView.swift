@@ -10,14 +10,14 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     var onDropStartEvent: EventDispatcher? = nil
     var onDropEndEvent: EventDispatcher? = nil
     lazy var includeBase64 = false
-    lazy var draggableSources: [String] = []
+    lazy var draggableSources: [DraggableSource] = []
     var fileSystem: EXFileSystemInterface?
 
     func setIncludeBase64(_ includeBase64: Bool) {
         self.includeBase64 = includeBase64
     }
 
-    func setDraggableImageSources(_ draggableSources: [String]) {
+    func setDraggableSources(_ draggableSources: [DraggableSource]) {
         self.draggableSources = draggableSources
     }
 
@@ -57,18 +57,36 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             var finalImage: UIImage?
             var itemProvider: NSItemProvider?
 
-            if let image = loadImage(fromImagePath: source) {
-                finalImage = image
-                if let finalImage = finalImage {
-                    itemProvider = NSItemProvider(object: finalImage)
+            let sourceType = getSessionItemType(from: source.type)
+
+            if (sourceType == .image) {
+                if let image = loadImage(fromImagePath: source.value) {
+                    finalImage = image
+                    if let finalImage = finalImage {
+                        itemProvider = NSItemProvider(object: finalImage)
+                    }
                 }
-            } else if let videoURL = loadVideoURL(fromVideoPath: source) {
-                finalImage = generateThumbnail(fromVideoURL: videoURL)
-                if let provider = NSItemProvider(contentsOf: videoURL) {
-                    itemProvider = provider
-                } else {
-                    print("Failed to create item provider for video at \(videoURL)")
+            } else if (sourceType == .video) {
+                if let videoURL = loadVideoURL(fromVideoPath: source.value) {
+                    finalImage = generateThumbnail(fromVideoURL: videoURL)
+                    if let provider = NSItemProvider(contentsOf: videoURL) {
+                        itemProvider = provider
+                    } else {
+                        print("Failed to create item provider for video at \(videoURL)")
+                    }
                 }
+            } else if (sourceType == .text) {
+                itemProvider = NSItemProvider(object: source.value as NSItemProviderWriting)
+
+                let label = UILabel()
+                label.text = source.value
+                label.sizeToFit() // Adjust label size to fit its content
+
+                // Convert the UILabel to an image for drag visualization
+                UIGraphicsBeginImageContextWithOptions(label.bounds.size, false, 0)
+                label.layer.render(in: UIGraphicsGetCurrentContext()!)
+                finalImage = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
             }
 
             if let itemProvider = itemProvider {
@@ -87,7 +105,9 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     }
 
     func dragInteraction(_ interaction: UIDragInteraction, item: UIDragItem, willAnimateCancelWith animator: UIDragAnimating) {
-        self.addSubview(item.localObject as! UIView)
+        if let localObject = item.localObject {
+            self.addSubview(item.localObject as! UIView)
+        }
     }
 
     func dragInteraction(_ interaction: UIDragInteraction, willAnimateLiftWith animator: UIDragAnimating, session: UIDragSession) {
@@ -160,7 +180,6 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             dispatchGroup.enter()
 
             let itemType = getSessionItemType(itemProvider: dragItem.itemProvider)
-            print("type is here \(itemType)")
 
             if #available(iOS 15.0, *) {
                 if itemType == SessionItemType.image {
@@ -168,29 +187,28 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                         if let asset = asset {
                             assets.append(asset)
                         }
-                        dispatchGroup.leave() // Leave the group inside the completion handler
+                        dispatchGroup.leave()
                     }
                 } else if itemType == SessionItemType.video {
                     loadFileObject(dragItem: dragItem, isVideo: true) { asset in
                         if let asset = asset {
                             assets.append(asset)
                         }
-                        dispatchGroup.leave() // Leave the group inside the completion handler
+                        dispatchGroup.leave()
                     }
                 } else if itemType == SessionItemType.file {
                     loadFileObject(dragItem: dragItem) { asset in
                         if let asset = asset {
                             assets.append(asset)
                         }
-                        dispatchGroup.leave() // Leave the group inside the completion handler
+                        dispatchGroup.leave()
                     }
                 } else if itemType == SessionItemType.text {
                     loadTextObject(dragItem: dragItem) { asset in
                         if let asset = asset {
                             assets.append(asset)
-                            print("THISODF \(asset)")
                         }
-                        dispatchGroup.leave() // Leave the group inside the completion handler
+                        dispatchGroup.leave()
                     }
                 }
             } else {
@@ -199,28 +217,28 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                         if let asset = asset {
                             assets.append(asset)
                         }
-                        dispatchGroup.leave() // Leave the group inside the completion handler
+                        dispatchGroup.leave()
                     }
                 } else if itemType == SessionItemType.video {
                     loadFileObject(dragItem: dragItem, isVideo: true) { asset in
                         if let asset = asset {
                             assets.append(asset)
                         }
-                        dispatchGroup.leave() // Leave the group inside the completion handler
+                        dispatchGroup.leave()
                     }
                 } else if itemType == SessionItemType.file {
                     loadFileObject(dragItem: dragItem) { asset in
                         if let asset = asset {
                             assets.append(asset)
                         }
-                        dispatchGroup.leave() // Leave the group inside the completion handler
+                        dispatchGroup.leave()
                     }
                 } else if itemType == SessionItemType.text {
                     loadTextObject(dragItem: dragItem) { asset in
                         if let asset = asset {
                             assets.append(asset)
                         }
-                        dispatchGroup.leave() // Leave the group inside the completion handler
+                        dispatchGroup.leave()
                     }
                 }
             }
@@ -228,7 +246,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
         // Notify when all asynchronous tasks are completed
         dispatchGroup.notify(queue: DispatchQueue.main) {
-            print("Assets: \(assets)")
+            // print("Assets: \(assets)")
             if !assets.isEmpty {
                 self.onDropEvent?([
                     "assets": assets
@@ -236,7 +254,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             }
         }
     }
-    
+
     private func loadTextObject(dragItem: UIDragItem, completion: @escaping (NSMutableDictionary?) -> Void) {
         _ = dragItem.itemProvider.loadObject(ofClass: String.self) { (text, _) in
                 if let text = text {
@@ -273,7 +291,6 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             DispatchQueue.main.async {
                if let fileSystem = self.fileSystem {
                    if let asset = generateVideoAsset(from: url, includeBase64: self.includeBase64, fileSystem: fileSystem) {
-//                       print("Video asset: \(asset)")
                        completion(asset)
                    }
                } else {

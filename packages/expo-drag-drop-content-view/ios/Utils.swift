@@ -454,6 +454,31 @@ enum SessionItemType {
     case text
     case file
     case unknown
+    
+    var stringValue: String {
+        switch self {
+        case .text: return "text"
+        case .image: return "image"
+        case .video: return "video"
+        case .file: return "file"
+        case .unknown: return "unknown"
+        }
+    }
+}
+
+func getSessionItemType(from stringValue: String) -> SessionItemType {
+    switch stringValue {
+    case SessionItemType.text.stringValue:
+        return .text
+    case SessionItemType.image.stringValue:
+        return .image
+    case SessionItemType.video.stringValue:
+        return .video
+    case SessionItemType.file.stringValue:
+        return .file
+    default:
+        return .unknown
+    }
 }
 
 func getSessionItemType(itemProvider: NSItemProvider) -> SessionItemType {
@@ -490,4 +515,12 @@ func getSessionItemType(itemProvider: NSItemProvider) -> SessionItemType {
         // If file extension is not available or cannot be determined, return "unknown"
         return .unknown
     }
+}
+
+struct DraggableSource: Record {
+  @Field
+  var type: String
+
+  @Field
+  var value: String
 }
