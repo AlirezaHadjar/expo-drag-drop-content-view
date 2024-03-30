@@ -9,8 +9,9 @@ sidebar_position: 2
 In order to get Android's image drag and drop to work, you'll need to get media permission. You can do this by opening your project's `AndroidManifest.xml` and add the following lines inside the `<manifest>` tag:
 
 ```xml
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 ```
 
 ### Getting Permission
@@ -22,12 +23,15 @@ const useMediaPermission = () => {
   useEffect(() => {
     const fn = async () => {
       try {
-        const permission =
-          // Android 11 and above
-          ANDROID_API_LEVEL >= 33
-            ? PERMISSIONS_LIB.ANDROID.READ_MEDIA_IMAGES
-            : PERMISSIONS_LIB.ANDROID.READ_EXTERNAL_STORAGE;
-        await request(permission);
+        if (ANDROID_API_LEVEL >= 33) {
+          await requestMultiple([
+            PERMISSIONS_LIB.ANDROID.READ_MEDIA_IMAGES,
+            PERMISSIONS_LIB.ANDROID.READ_MEDIA_VIDEO,
+          ]);
+        }
+        else {
+          await request(PERMISSIONS_LIB.ANDROID.READ_EXTERNAL_STORAGE);
+        }
       } catch (_) {}
     };
     if (Platform.OS === "android") fn();
