@@ -455,3 +455,39 @@ enum SessionItemType {
     case file
     case unknown
 }
+
+func getSessionItemType(itemProvider: NSItemProvider) -> SessionItemType {
+    if #available(iOS 14.0, *) {
+        switch true {
+        case itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) || itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier):
+            return .video
+        case itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier):
+            return .image
+        case itemProvider.hasItemConformingToTypeIdentifier(UTType.text.identifier):
+            return .text
+        case itemProvider.hasItemConformingToTypeIdentifier(UTType.item.identifier):
+            return .file
+        default:
+            return .unknown
+        }
+    } else {
+        if let suggestedName = itemProvider.suggestedName {
+            let components = suggestedName.components(separatedBy: ".")
+            if let fileExtension = components.last {
+                switch fileExtension.lowercased() {
+                case "mov", "mp4":
+                    return .video
+                case "jpg", "jpeg", "png", "gif":
+                    return .image
+                case "txt":
+                    return .text
+                default:
+                    return .unknown
+                }
+            }
+        }
+
+        // If file extension is not available or cannot be determined, return "unknown"
+        return .unknown
+    }
+}

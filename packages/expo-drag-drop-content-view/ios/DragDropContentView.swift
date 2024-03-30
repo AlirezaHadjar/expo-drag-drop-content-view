@@ -131,13 +131,15 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             typeIdentifiers = [
                 UTType.image.identifier,
                 UTType.video.identifier,
-                UTType.movie.identifier
+                UTType.movie.identifier,
+                UTType.text.identifier
             ]
         } else {
             typeIdentifiers = [
                 kUTTypeImage as String,
                 kUTTypeMovie as String,
-                kUTTypeVideo as String
+                kUTTypeVideo as String,
+                kUTTypeText as String
             ]
         }
 
@@ -148,42 +150,6 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
         return UIDropProposal(operation: .copy)
     }
 
-    func getSessionItemType(itemProvider: NSItemProvider) -> SessionItemType {
-        if #available(iOS 14.0, *) {
-            switch true {
-            case itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) || itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier):
-                return .video
-            case itemProvider.hasItemConformingToTypeIdentifier(UTType.item.identifier):
-                return .file
-            case itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier):
-                return .image
-            case itemProvider.hasItemConformingToTypeIdentifier(UTType.text.identifier):
-                return .text
-            default:
-                return .unknown
-            }
-        } else {
-            if let suggestedName = itemProvider.suggestedName {
-                let components = suggestedName.components(separatedBy: ".")
-                if let fileExtension = components.last {
-                    switch fileExtension.lowercased() {
-                    case "mov", "mp4":
-                        return .video
-                    case "jpg", "jpeg", "png", "gif":
-                        return .image
-                    case "txt":
-                        return .text
-                    default:
-                        return .file
-                    }
-                }
-            }
-
-            // If file extension is not available or cannot be determined, return "unknown"
-            return .unknown
-        }
-    }
-
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         var assets: [NSMutableDictionary] = []
         let dispatchGroup = DispatchGroup()
@@ -192,14 +158,9 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
         for (index, dragItem) in session.items.enumerated() {
             dispatchGroup.enter()
-            if #available(iOS 14.0, *) {
-                let hasVideo = dragItem.itemProvider.canLoadObject(ofClass: UIImage.self)
-
-                print("index: \(index), has image: \(hasVideo)")
-            } else {
-            }
 
             let itemType = getSessionItemType(itemProvider: dragItem.itemProvider)
+            print("type is here \(itemType)")
 
             if #available(iOS 15.0, *) {
                 if itemType == SessionItemType.image {
@@ -224,7 +185,13 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                         dispatchGroup.leave() // Leave the group inside the completion handler
                     }
                 } else if itemType == SessionItemType.text {
-                    // loadTextObjects(session: session, dispatch: dispatchGroup)
+                    loadTextObject(dragItem: dragItem) { asset in
+                        if let asset = asset {
+                            assets.append(asset)
+                            print("THISODF \(asset)")
+                        }
+                        dispatchGroup.leave() // Leave the group inside the completion handler
+                    }
                 }
             } else {
                 if itemType == SessionItemType.image {
@@ -249,7 +216,12 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                         dispatchGroup.leave() // Leave the group inside the completion handler
                     }
                 } else if itemType == SessionItemType.text {
-                    // loadTextObjects(session: session, dispatch: dispatchGroup)
+                    loadTextObject(dragItem: dragItem) { asset in
+                        if let asset = asset {
+                            assets.append(asset)
+                        }
+                        dispatchGroup.leave() // Leave the group inside the completion handler
+                    }
                 }
             }
         }
@@ -262,6 +234,16 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                     "assets": assets
                 ])
             }
+        }
+    }
+    
+    private func loadTextObject(dragItem: UIDragItem, completion: @escaping (NSMutableDictionary?) -> Void) {
+        _ = dragItem.itemProvider.loadObject(ofClass: String.self) { (text, _) in
+                if let text = text {
+                    completion(["type": "text", "text": text])
+                } else {
+                    completion(nil)
+                }
         }
     }
 

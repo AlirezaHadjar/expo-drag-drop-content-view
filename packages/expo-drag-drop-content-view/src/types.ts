@@ -33,6 +33,10 @@ export type OnDropEvent = {
    * @description Asset file name
    */
   fileName: string;
+  /**
+   * @description text value if the type is text
+   */
+  text?: string;
 };
 
 export type Assets = { assets: OnDropEvent[] };

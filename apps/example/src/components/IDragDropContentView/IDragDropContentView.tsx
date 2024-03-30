@@ -25,12 +25,14 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
     borderColor: "#2f95dc",
   },
-  imageContainer: {
+  sourceContainer: {
     position: "absolute",
     width: "100%",
     height: "100%",
     borderRadius,
     overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
   },
   image: {
     width: "100%",
@@ -55,6 +57,9 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
   },
+  text: {
+    textAlign: "center",
+  },
 });
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -73,7 +78,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       {...props}
       includeBase64={false}
       draggableSources={sources?.map(
-        (image) => (image.uri || image.base64) as string
+        (source) => (source.uri || source.base64 || source.text) as string
       )}
       onDropStartEvent={() => {
         setIsActive(true);
@@ -84,7 +89,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       highlightColor="#2f95dc"
       highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
-        // console.log(JSON.stringify(event.assets));
+        console.log(JSON.stringify(event.assets));
         const newData = [...(sources ?? []), ...event.assets];
         setSources(newData);
         props.onDropEvent?.(event);
@@ -92,12 +97,14 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       style={[styles.container, props.style]}
     >
       {sources ? (
-        sources.map((image, index) => {
-          const uri = (image.uri ? image.uri : image.base64) || "";
+        sources.map((source, index) => {
+          const uri = (source.uri ? source.uri : source.base64) || "";
           const rotation = Math.ceil(index / 2) * 5;
           const direction = index % 2 === 0 ? 1 : -1;
           const rotate = `${rotation * direction}deg`;
-          const isImage = image.type?.startsWith("image");
+          const isImage = source.type?.startsWith("image");
+          const isVideo = source.type?.startsWith("video");
+          const isText = source.type?.startsWith("text");
 
           return (
             <AnimatedPressable
@@ -108,11 +115,11 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
                   ? undefined
                   : FadeIn.springify().delay(index * 100)
               }
-              style={[styles.imageContainer, { transform: [{ rotate }] }]}
+              style={[styles.sourceContainer, { transform: [{ rotate }] }]}
             >
               {isImage ? (
                 <Image source={{ uri }} style={styles.image} />
-              ) : (
+              ) : isVideo ? (
                 <Video
                   isMuted
                   style={styles.image}
@@ -127,7 +134,9 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
                       videoData.srcElement.style.position = "initial";
                   }}
                 />
-              )}
+              ) : isText ? (
+                <Text style={styles.text}>{source.text}</Text>
+              ) : null}
             </AnimatedPressable>
           );
         })
@@ -138,7 +147,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
             isActive && styles.activePlaceholderContainer,
           ]}
         >
-          <Text style={styles.placeholderText}>Drop any image here!</Text>
+          <Text style={styles.placeholderText}>Drop here!</Text>
         </Animated.View>
       )}
     </DragDropContentView>
