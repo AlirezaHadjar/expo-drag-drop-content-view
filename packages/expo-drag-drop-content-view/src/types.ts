@@ -81,8 +81,8 @@ export type DragDropContentViewProps = ViewProps & {
    */
   highlightBorderRadius?: number;
   /**
-   * @description The source of the image that can be dragged around the screen.
-   * @description Pass Image Uri on iOS and Android, and base64 on Web.
+   * @description The source of the image or/and video that can be dragged around the screen.
+   * @description Pass Uri on iOS and Android, and base64 on Web.
    */
-  draggableMediaSources?: string[];
+  draggableSources?: string[];
 };

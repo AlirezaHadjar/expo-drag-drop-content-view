@@ -63,16 +63,16 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
 ) => {
   usePermission();
-  const [imageData, setImageData] = useState<OnDropEvent[] | null>(null);
+  const [sources, setSources] = useState<OnDropEvent[] | null>(null);
   const [isActive, setIsActive] = useState(false);
 
-  const handleClear = () => setImageData(null);
+  const handleClear = () => setSources(null);
 
   return (
     <DragDropContentView
       {...props}
       includeBase64={false}
-      draggableMediaSources={imageData?.map(
+      draggableSources={sources?.map(
         (image) => (image.uri || image.base64) as string
       )}
       onDropStartEvent={() => {
@@ -85,14 +85,14 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       highlightBorderRadius={borderRadius}
       onDropEvent={(event) => {
         // console.log(JSON.stringify(event.assets));
-        const newData = [...(imageData ?? []), ...event.assets];
-        setImageData(newData);
+        const newData = [...(sources ?? []), ...event.assets];
+        setSources(newData);
         props.onDropEvent?.(event);
       }}
       style={[styles.container, props.style]}
     >
-      {imageData ? (
-        imageData.map((image, index) => {
+      {sources ? (
+        sources.map((image, index) => {
           const uri = (image.uri ? image.uri : image.base64) || "";
           const rotation = Math.ceil(index / 2) * 5;
           const direction = index % 2 === 0 ? 1 : -1;

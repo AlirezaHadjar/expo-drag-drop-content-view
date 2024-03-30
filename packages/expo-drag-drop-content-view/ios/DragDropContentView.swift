@@ -10,15 +10,15 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     var onDropStartEvent: EventDispatcher? = nil
     var onDropEndEvent: EventDispatcher? = nil
     lazy var includeBase64 = false
-    lazy var draggableMediaSources: [String] = []
+    lazy var draggableSources: [String] = []
     var fileSystem: EXFileSystemInterface?
 
     func setIncludeBase64(_ includeBase64: Bool) {
         self.includeBase64 = includeBase64
     }
 
-    func setdraggableImageSources(_ draggableImageSources: [String]) {
-        self.draggableMediaSources = draggableImageSources
+    func setDraggableImageSources(_ draggableSources: [String]) {
+        self.draggableSources = draggableSources
     }
 
     private func setupDropInteraction() {
@@ -53,7 +53,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     func dragInteraction(_ interaction: UIDragInteraction, itemsForBeginning session: UIDragSession) -> [UIDragItem] {
         var dragItems: [UIDragItem] = []
 
-        for source in draggableMediaSources {
+        for source in draggableSources {
             var finalImage: UIImage?
             var itemProvider: NSItemProvider?
 
@@ -126,7 +126,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
         var typeIdentifiers: [String] = []
-        
+
         if #available(iOS 14.0, *) {
             typeIdentifiers = [
                 UTType.image.identifier,
@@ -140,14 +140,14 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                 kUTTypeVideo as String
             ]
         }
-        
+
         return session.hasItemsConforming(toTypeIdentifiers: typeIdentifiers)
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
         return UIDropProposal(operation: .copy)
     }
-    
+
     func getSessionItemType(itemProvider: NSItemProvider) -> SessionItemType {
         if #available(iOS 14.0, *) {
             switch true {
@@ -178,7 +178,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                     }
                 }
             }
-            
+
             // If file extension is not available or cannot be determined, return "unknown"
             return .unknown
         }
@@ -187,20 +187,20 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         var assets: [NSMutableDictionary] = []
         let dispatchGroup = DispatchGroup()
-        
+
         self.onDropEndEvent?()
 
         for (index, dragItem) in session.items.enumerated() {
             dispatchGroup.enter()
             if #available(iOS 14.0, *) {
                 let hasVideo = dragItem.itemProvider.canLoadObject(ofClass: UIImage.self)
-                
+
                 print("index: \(index), has image: \(hasVideo)")
             } else {
             }
-            
+
             let itemType = getSessionItemType(itemProvider: dragItem.itemProvider)
-            
+
             if #available(iOS 15.0, *) {
                 if itemType == SessionItemType.image {
                     loadImageObject(dragItem: dragItem) { asset in
@@ -277,7 +277,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             }
         }
     }
-    
+
     private func loadFileObject(dragItem: UIDragItem, isVideo: Bool = false, completion: @escaping (NSMutableDictionary?) -> Void) {
         dragItem.itemProvider.loadInPlaceFileRepresentation(forTypeIdentifier: kUTTypeItem as String) { (url, bool, error) in
             guard let url = url else {
@@ -287,7 +287,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                 completion(nil)
                 return
             }
-            
+
             DispatchQueue.main.async {
                if let fileSystem = self.fileSystem {
                    if let asset = generateVideoAsset(from: url, includeBase64: self.includeBase64, fileSystem: fileSystem) {
