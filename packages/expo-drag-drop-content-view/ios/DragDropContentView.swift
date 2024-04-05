@@ -268,10 +268,8 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     private func loadImageObject(dragItem: UIDragItem, completion: @escaping (NSMutableDictionary?) -> Void) {
         dragItem.itemProvider.loadObject(ofClass: UIImage.self) { (image, err) in
             if let image = image as? UIImage {
-                DispatchQueue.main.async {
                     let asset = generateImageAsset(image: image, includeBase64: self.includeBase64)
                     completion(asset)
-                }
             } else {
                 completion(nil)
             }
@@ -288,7 +286,6 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                 return
             }
 
-            DispatchQueue.main.async {
                if let fileSystem = self.fileSystem {
                    if let asset = generateVideoAsset(from: url, includeBase64: self.includeBase64, fileSystem: fileSystem) {
                        completion(asset)
@@ -297,7 +294,6 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                    completion(nil)
                }
            }
-        }
     }
 
 }
