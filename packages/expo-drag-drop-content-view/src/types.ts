@@ -5,7 +5,7 @@ export type OnDropEvent = {
    * @platform Android, iOS
    * @description The file uri in app-specific cache storage.
    */
-  uri: string | undefined;
+  uri?: string | undefined;
   /**
    * @description The mime type of the file.
    */
@@ -20,19 +20,19 @@ export type OnDropEvent = {
    * @platform Android, iOS
    * @description The original file path.
    */
-  path: string | undefined;
+  path?: string | undefined;
   /**
    * @description Asset height
    */
-  height: number;
+  height?: number;
   /**
    * @description Asset width
    */
-  width: number;
+  width?: number;
   /**
    * @description Asset file name
    */
-  fileName: string;
+  fileName?: string;
   /**
    * @description text value if the type is text
    */
