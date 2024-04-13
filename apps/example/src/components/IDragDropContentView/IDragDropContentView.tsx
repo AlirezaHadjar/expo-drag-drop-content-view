@@ -150,7 +150,13 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
                   }}
                 />
               ) : type === "text" ? (
-                <Text style={styles.text}>{source.text}</Text>
+                <Text
+                  //@ts-ignore
+                  draggable
+                  style={styles.text}
+                >
+                  {source.text}
+                </Text>
               ) : null}
             </AnimatedPressable>
           );
