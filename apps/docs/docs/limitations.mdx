@@ -13,3 +13,4 @@ sidebar_position: 4
 ## Web:
 
 - Dropping multiple media files is fully supported. However, for dragging, it is only available across different instances of `<DragDropContentView />`. For external dragging (to other websites or the desktop), you must pass only a single media file to the `draggableSources`.
+- The dropped files will not have `uri` or `path` properties. You can use `base64` or `text` properties to get the file content.

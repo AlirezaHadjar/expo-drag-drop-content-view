@@ -5,7 +5,7 @@ export type OnDropEvent = {
    * @platform Android, iOS
    * @description The file uri in app-specific cache storage.
    */
-  uri: string | undefined;
+  uri?: string | undefined;
   /**
    * @description The mime type of the file.
    */
@@ -20,19 +20,23 @@ export type OnDropEvent = {
    * @platform Android, iOS
    * @description The original file path.
    */
-  path: string | undefined;
+  path?: string | undefined;
   /**
    * @description Asset height
    */
-  height: number;
+  height?: number;
   /**
    * @description Asset width
    */
-  width: number;
+  width?: number;
   /**
    * @description Asset file name
    */
-  fileName: string;
+  fileName?: string;
+  /**
+   * @description If the dropped file is text, this key contains its value
+   */
+  text?: string;
 };
 
 export type Assets = { assets: OnDropEvent[] };
@@ -84,5 +88,8 @@ export type DragDropContentViewProps = ViewProps & {
    * @description The source of the image or/and video that can be dragged around the screen.
    * @description Pass Uri on iOS and Android, and base64 on Web.
    */
-  draggableSources?: string[];
+  draggableSources?: {
+    type: "text" | "image" | "video";
+    value: string;
+  }[];
 };

@@ -1,5 +1,6 @@
 package expo.modules.dragdropcontentview
 
+import expo.modules.dragdropcontentview.records.DraggableItem
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
@@ -13,8 +14,8 @@ class ExpoDragDropContentViewModule : Module() {
       Prop("includeBase64") {view: ExpoDragDropContentView, value: Boolean? ->
         view.setIncludeBase64(value)
       }
-      Prop("draggableSources") {view: ExpoDragDropContentView, value: List<String>? ->
-        view.setDraggableSources(value)
+      Prop("draggableSources") {view: ExpoDragDropContentView, value: List<DraggableItem>? ->
+         view.setDraggableSources(value)
       }
       Prop("highlightColor") { view: ExpoDragDropContentView, color: Int? ->
         view.setHighlightColor(color)

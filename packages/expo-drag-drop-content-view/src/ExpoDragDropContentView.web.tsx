@@ -51,14 +51,31 @@ const getBase64 = (data: string) => {
   };
 };
 
-const getKey = (index: number) => `media-${index}`;
+const handleText = (text: string) => {
+  return new Promise<OnDropEvent>((resolve) => {
+    resolve({
+      type: "text",
+      text,
+    });
+  });
+};
+
+const getKey = (index: number) => ({
+  type: `custom-type-${index}`,
+  value: `custom-value-${index}`,
+});
 
 const getAssets = async (dataTransfer: DataTransfer) => {
   const resolvedFiles: (OnDropEvent | null)[] = [];
   const filePromises: Promise<OnDropEvent | null>[] = [];
+  const type = dataTransfer.getData("text/type");
   const textData = dataTransfer.getData("text/plain");
   const htmlData = dataTransfer.getData("text/html");
-  const isCustomDrag = textData === "Custom Drag";
+  const isCustomDrag = type === "Custom Drag";
+
+  if (textData && !isCustomDrag) {
+    filePromises.push(handleText(textData));
+  }
 
   // Dragging from the file system
   if (dataTransfer.items && dataTransfer.items.length > 0) {
@@ -79,20 +96,26 @@ const getAssets = async (dataTransfer: DataTransfer) => {
 
   // Dragging from current web page
   if (isCustomDrag) {
-    const droppedSources: string[] = []; // base64 strings
-
     let index = 0;
     let key = getKey(index);
 
-    while (dataTransfer.getData(key)) {
-      const src = dataTransfer.getData(key);
-      droppedSources.push(src);
+    const droppedSources: { type: string; value: string }[] = []; // base64 strings
+
+    while (dataTransfer.getData(key.value)) {
+      const value = dataTransfer.getData(key.value);
+      const type = dataTransfer.getData(key.type);
+      droppedSources.push({ type, value });
 
       index++;
       key = getKey(index);
     }
 
-    resolvedFiles.push(...droppedSources.map((base64) => getBase64(base64)));
+    resolvedFiles.push(
+      ...droppedSources.map((item) => {
+        if (item.type === "text") return { type: item.type, text: item.value };
+        return getBase64(item.value);
+      })
+    );
   }
   // Dragging from other web pages
   else if (htmlData) {
@@ -163,14 +186,16 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     const preview = sources?.at(-1);
     if (!preview || !sources) return;
 
-    event.dataTransfer.setData("text/plain", "Custom Drag");
+    event.dataTransfer.setData("text/type", "Custom Drag");
     sources.forEach((source, index) => {
-      event.dataTransfer.setData(getKey(index), source);
+      const key = getKey(index);
+      event.dataTransfer.setData(key.value, source.value);
+      event.dataTransfer.setData(key.type, source.type);
     });
 
     // Both images and videos can be dragged
     const dragMedia = new Image();
-    dragMedia.src = preview; // Set the path to your custom image
+    dragMedia.src = preview.value; // Set the path to your custom image
 
     const parentStyle = StyleSheet.flatten(this.props.style);
 

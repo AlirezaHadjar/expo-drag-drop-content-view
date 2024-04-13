@@ -16,12 +16,14 @@ import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
 import android.view.View
 import android.view.ViewGroup
+import expo.modules.dragdropcontentview.records.DraggableItem
+import expo.modules.dragdropcontentview.records.DraggableType
 import java.io.File
 
 @SuppressLint("ViewConstructor")
 class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
     private var includeBase64 = false
-    private var draggableSources: List<String> = emptyList()
+    private var draggableSources: List<DraggableItem> = emptyList()
     private var highlightColor = ContextCompat.getColor(context, R.color.highlight_color)
     private var highlightBorderRadius = 0
     private val onDropEvent by EventDispatcher()
@@ -32,7 +34,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         includeBase64 = value ?: false
     }
 
-    fun setDraggableSources(value: List<String>?) {
+    fun setDraggableSources(value: List<DraggableItem>?) {
         draggableSources = value ?: emptyList()
     }
 
@@ -52,7 +54,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
     private fun configureDropHelper(frame: View) {
         // DropHelper is only available on Android N and above
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
 
         val activity = appContext.activityProvider?.currentActivity!!
         val contentResolver = context.contentResolver
@@ -60,7 +62,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         DropHelper.configureView(
             activity,
             frame,
-            arrayOf("image/*", "video/*"),
+            arrayOf("image/*", "video/*", "text/plain"),
             DropHelper.Options.Builder()
                 .setHighlightColor(highlightColor)
                 .setHighlightCornerRadiusPx(highlightBorderRadius)
@@ -71,9 +73,20 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
             for (i in 0 until clipData.itemCount) {
                 val contentUri = clipData.getItemAt(i).uri
+                val text = clipData.getItemAt(i).text // Get text data
+
                 if (contentUri != null) {
                     val info = utils.getFileInfo(contentResolver, contentUri, includeBase64, frame.context)
                     info?.let { infoList.add(it) }
+                } else if (!text.isNullOrEmpty()) {
+                    // Handle text data
+                    if (text.trim().isNotEmpty()) {
+                        val textInfo = mapOf(
+                            "type" to DraggableType.TEXT,
+                            "text" to text
+                        )
+                        infoList.add(textInfo)
+                    }
                 }
             }
             if (infoList.isNotEmpty()) onDropEvent(mapOf("assets" to infoList))
@@ -83,31 +96,41 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
     private fun dragSources(view: View, context: Context) {
         // DropHelper is only available on Android N and above
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
 
         val data: MutableList<Uri> = mutableListOf()
+        val textData: MutableList<String> = mutableListOf()
 
-        for (imageSource in draggableSources) {
-            val path = Uri.parse(imageSource).path
-
-            if (!path.isNullOrBlank()) {
-                val file = File(path)
-                val uri = utils.getContentUriForFile(context, file)
-                uri?.let { data.add(it) }
+        for (source in draggableSources) {
+            when (source.type) {
+                DraggableType.IMAGE, DraggableType.VIDEO -> {
+                    val path = Uri.parse(source.value).path
+                    if (!path.isNullOrBlank()) {
+                        val file = File(path)
+                        val uri = utils.getContentUriForFile(context, file)
+                        uri?.let { data.add(it) }
+                    }
+                }
+                DraggableType.TEXT -> {
+                    // For text sources, add the text value directly to the textData list
+                    textData.add(source.value)
+                }
             }
         }
 
         val shadow = DragShadowBuilder(view)
 
-        if (data.isNotEmpty()) {
-            val clipData = ClipData.newUri(context.contentResolver, "Media", data[0])
+        // Create ClipData with both URI data and text data
+        val clipData = ClipData.newPlainText("Text", textData.joinToString("\n"))
 
+        if (data.isNotEmpty()) {
+            clipData.addItem(ClipData.Item(data[0]))
             for (i in 1 until data.size) {
                 clipData.addItem(ClipData.Item(data[i]))
             }
-
-            view.startDragAndDrop(clipData, shadow, null, DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ)
         }
+
+        view.startDragAndDrop(clipData, shadow, null, DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ)
     }
 
     private fun configureDragHelper(frame: View) {

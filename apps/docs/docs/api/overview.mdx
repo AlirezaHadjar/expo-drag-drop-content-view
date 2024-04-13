@@ -10,7 +10,7 @@
 | onDropStartEvent      | ✅  | ❌      | ✅  | A callback that is called when any source is being dragged over                                                                                                                                                                   |
 | onDropEndEvent        | ✅  | ❌      | ✅  | A callback that is called when any source is dragged out of the view's boundary or released                                                                                                                                       |
 | includeBase64         | ✅  | ✅      | ❌  | If `true`, creates a base64 string of the media (Avoid using on large media files due to performance). It is always `true` on `Web` since it is the only available source                                                                                                                            |
-| draggableSources | ✅  | ✅      | ✅  | Sources that can be dragged around the screen. Pass Uri on iOS and Android, and base64 on Web.
+| draggableSources      | ✅  | ✅      | ✅  | Sources that can be dragged around the screen. Refer to [Draggable Source](#draggable-source)                                                                                                                                     |
 | highlightColor        | ❌  | ✅      | ❌  | The background color of overlay that covers the view while content is being dragged [Android Doc](<https://developer.android.com/reference/kotlin/androidx/draganddrop/DropHelper.Options.Builder#setHighlightColor(int)>)       |
 | highlightBorderRadius | ❌  | ✅      | ❌  | The border-radius of overlay that covers the view while content is being dragged [Android Doc](<https://developer.android.com/reference/kotlin/androidx/draganddrop/DropHelper.Options.Builder#setHighlightCornerRadiusPx(int)>) |
 
@@ -25,3 +25,11 @@
 | height   | ✅  | ✅      | ✅  | Asset dimensions                            |
 | type     | ✅  | ✅      | ✅  | The file mime type                           |
 | fileName  | ✅  | ✅      | ✅  | The file name                                |
+| text     | ✅  | ✅      | ✅  | If the dropped file is text, this key contains its value   |
+
+## Draggable Source
+
+| key      | iOS | Android | Web | Description                                 |
+| -------- | --- | ------- | --- | ------------------------------------------- |
+| type     | ✅  | ✅      | ✅  | `Image`, `Video` or `Text`   |
+| value    | ✅  | ✅      | ✅  | For `Image` and `Video`, pass file uri or their base64 string. And for `Text` pass the text value    |

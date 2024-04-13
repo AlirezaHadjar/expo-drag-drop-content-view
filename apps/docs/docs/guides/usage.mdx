@@ -16,12 +16,12 @@ import {Horizontal} from '@site/src/components/Horizontal'
   <div className='code-container'>
   ```tsx
   export const IDragDropContentView = (props) => {
-    const [images, setImages] = useState<OnDropEvent[] | null>(null);
+    const [sources, setSources] = useState<OnDropEvent[] | null>(null);
 
     return (
       <DragDropContentView
         onDropEvent={(event) => {
-          setImageData(event.assets);
+          setSources(event.assets);
         }}
         style={styles.container}
       />
@@ -39,21 +39,46 @@ import {Horizontal} from '@site/src/components/Horizontal'
   </svg>
   <div className='code-container'>
     <p>You can drag images to a `<DragDropContentView />` component or any other app that supports drag and drop.</p>
+
     ```tsx
+
+    const getSourceType = (source: OnDropEvent) => {
+      if (source.type.startsWith("image")) return "image";
+      if (source.type.startsWith("video")) return "video";
+      if (source.type.startsWith("text")) return "text";
+    };
+
     export const IDragDropContentView = (props) => {
-      const [images, setImages] = useState<OnDropEvent[] | null>(null);
-      const sources = images?.map((image) => image.uri || image.base64);
+      const [sources, setSources] = useState<OnDropEvent[] | null>(null);
+      const draggableSources = sources
+        ?.filter((source) => getSourceType(source) !== undefined)
+        ?.map((source) => ({
+          type: getSourceType(source)!,
+          value: source.uri || source.base64 || source.text || "",
+        }))
 
       return (
         <DragDropContentView
-          draggableSources={sources}
+          draggableSources={draggableSources}
           style={styles.container}
         >
+          {/*To display Image*/}
           <Image {...props} />
+          {/*To display Video*/}
+          <Video {...props} />
+          {/*To display Text*/}
+          <Text {...props} />
+
         </DragDropContentView>
       );
     };
     ```
+
+:::tip
+
+To get more information on why `uri`, `base64`, or `text` are passed draggable sources, visit [Here](/docs/api/overview#draggable-source)
+
+:::
   </div>
 </div>
 
@@ -64,5 +89,54 @@ import {Horizontal} from '@site/src/components/Horizontal'
 ```tsx
 import { Image } from "react-native";
 
-<Image {...props} draggable={true} />;
+<Image
+  {...props}
+  //@ts-ignore
+  draggable={true}
+/>;
 ```
+
+- If you're using `<Text />`, you need to set `draggable=true`.
+
+```tsx
+import { Text } from "react-native";
+
+<Text
+  {...props}
+  //@ts-ignore
+  draggable={true}
+/>;
+```
+
+ This prop is not handled by default and you can to use this [patch](https://raw.githubusercontent.com/AlirezaHadjar/expo-drag-drop-content-view/main/patches/react-native-web+0.19.10.patch).
+```patch
+diff --git a/node_modules/react-native-web/dist/exports/Text/index.js b/node_modules/react-native-web/dist/exports/Text/index.js
+index 8c5f79b..124f7b6 100644
+--- a/node_modules/react-native-web/dist/exports/Text/index.js
++++ b/node_modules/react-native-web/dist/exports/Text/index.js
+@@ -26,7 +26,8 @@ import { warnOnce } from '../../modules/warnOnce';
+ var forwardPropsList = Object.assign({}, forwardedProps.defaultProps, forwardedProps.accessibilityProps, forwardedProps.clickProps, forwardedProps.focusProps, forwardedProps.keyboardProps, forwardedProps.mouseProps, forwardedProps.touchProps, forwardedProps.styleProps, {
+   href: true,
+   lang: true,
+-  pointerEvents: true
++  pointerEvents: true,
++  draggable: true,
+ });
+ var pickProps = props => pick(props, forwardPropsList);
+ var Text = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
+diff --git a/node_modules/react-native-web/src/exports/Text/index.js b/node_modules/react-native-web/src/exports/Text/index.js
+index 071ae10..e22e9ab 100644
+--- a/node_modules/react-native-web/src/exports/Text/index.js
++++ b/node_modules/react-native-web/src/exports/Text/index.js
+@@ -37,7 +37,8 @@ const forwardPropsList = Object.assign(
+   {
+     href: true,
+     lang: true,
+-    pointerEvents: true
++    pointerEvents: true,
++    draggable: true
+   }
+ );
+```
+
+This may be fixed upstream in the future, so please check this [GitHub Issue](https://github.com/necolas/react-native-web/issues/2655) for more information.
