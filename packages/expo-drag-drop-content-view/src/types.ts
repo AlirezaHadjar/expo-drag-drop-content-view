@@ -34,7 +34,7 @@ export type OnDropEvent = {
    */
   fileName?: string;
   /**
-   * @description text value if the type is text
+   * @description If the dropped file is text, this key contains its value
    */
   text?: string;
 };

@@ -16,9 +16,9 @@ A superset of `View` component that supports iOS, Android, and Web Native drag a
 
 ## Features
 
-- 📤 Drag images/videos to other apps
-- 📬 Drag images/videos within the app
-- 📥 Drop images/videos from other apps
+- 📤 Drag images/videos/texts to other apps
+- 📬 Drag images/videos/texts within the app
+- 📥 Drop images/videos/texts from other apps
 
 ## Documentation
 
@@ -36,7 +36,7 @@ A superset of `View` component that supports iOS, Android, and Web Native drag a
 - [x] Adding Drag support
 - [x] Documentation
 - [x] Adding dragging/dropping video support
-- [ ] Adding dragging/dropping text support (🚧 In Progress...)
+- [x] Adding dragging/dropping text support
 - [ ] MacOS support
 
 ## Acknowledgment
