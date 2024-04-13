@@ -5,7 +5,7 @@ import {
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
 import React, { useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, TextInput } from "react-native";
+import { Platform, Pressable, StyleSheet, Text } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Video, ResizeMode } from "expo-av";
 import { usePermission } from "../../hooks/permission";
