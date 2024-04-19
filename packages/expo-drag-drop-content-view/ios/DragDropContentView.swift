@@ -110,7 +110,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     }
 
     func dragInteraction(_ interaction: UIDragInteraction, item: UIDragItem, willAnimateCancelWith animator: UIDragAnimating) {
-        if let localObject = item.localObject {
+        if item.localObject != nil {
             self.addSubview(item.localObject as! UIView)
         }
     }
@@ -164,16 +164,14 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                 UTType.image.identifier,
                 UTType.video.identifier,
                 UTType.movie.identifier,
-                UTType.text.identifier,
-                UTType.pdf.identifier
+                UTType.text.identifier
             ]
         } else {
             typeIdentifiers = [
                 kUTTypeImage as String,
                 kUTTypeMovie as String,
                 kUTTypeVideo as String,
-                kUTTypeText as String,
-                kUTTypePDF as String
+                kUTTypeText as String
             ]
         }
 
@@ -188,7 +186,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
         var assets: [NSMutableDictionary] = []
         let dispatchGroup = DispatchGroup()
 
-        for (index, dragItem) in session.items.enumerated() {
+        for dragItem in session.items {
             dispatchGroup.enter()
 
             let itemType = getSessionItemType(itemProvider: dragItem.itemProvider)
