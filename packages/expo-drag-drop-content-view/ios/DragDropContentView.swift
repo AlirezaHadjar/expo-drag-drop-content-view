@@ -7,8 +7,9 @@ import MobileCoreServices
 class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionDelegate {
 
     var onDrop: EventDispatcher? = nil
-    var onDropStart: EventDispatcher? = nil
-    var onDropEnd: EventDispatcher? = nil
+    var onDragStart: EventDispatcher? = nil
+    var onDragEnd: EventDispatcher? = nil
+    var onEnter: EventDispatcher? = nil
     var onExit: EventDispatcher? = nil
     lazy var includeBase64 = false
     lazy var draggableSources: [DraggableSource] = []
@@ -43,12 +44,16 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
         self.onDrop = eventDispatcher
     }
 
-    func setDropStartEventDispatcher(_ eventDispatcher: EventDispatcher) {
-        self.onDropStart = eventDispatcher
+    func setDragStartEventDispatcher(_ eventDispatcher: EventDispatcher) {
+        self.onDragStart = eventDispatcher
     }
 
-    func setDropEndEventDispatcher(_ eventDispatcher: EventDispatcher) {
-        self.onDropEnd = eventDispatcher
+    func setDragEndEventDispatcher(_ eventDispatcher: EventDispatcher) {
+        self.onDragEnd = eventDispatcher
+    }
+    
+    func setEnterEventDispatcher(_ eventDispatcher: EventDispatcher) {
+        self.onEnter = eventDispatcher
     }
     
     func setExitEventDispatcher(_ eventDispatcher: EventDispatcher) {
@@ -106,6 +111,10 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                 print("Skipping \(source) due to missing image or video.")
             }
         }
+        
+        if (dragItems.count > 0) {
+            self.onDragStart?()
+        }
         return dragItems
     }
 
@@ -137,12 +146,12 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnter session: UIDropSession) {
         // Notify when an item is being dragged over the view
-        self.onDropStart?()
+        self.onEnter?()
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnd session: UIDropSession) {
         // Notify when the drop session ends (successfully or not)
-        self.onDropEnd?()
+        self.onDragEnd?()
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidExit session: UIDropSession) {

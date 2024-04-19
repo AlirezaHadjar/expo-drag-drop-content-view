@@ -28,7 +28,6 @@ const FeatureList: FeatureItem[] = [
 ];
 
 function Feature({ title, gifPath }: FeatureItem) {
-  console.log("gifPath", gifPath);
   return (
     <div className={clsx("col col--4")}>
       <div className="text--center">

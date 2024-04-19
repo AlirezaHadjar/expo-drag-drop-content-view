@@ -1,9 +1,10 @@
 import ExpoModulesCore
 
 let IOnDropEvent = "onDrop"
-let IOnDropStartEvent = "onDropStart"
-let IOnDropEndEvent = "onDropEnd"
+let IOnDragStartEvent = "onDragStart"
+let IOnDragEndEvent = "onDragEnd"
 let IOnExitEvent = "onExit"
+let IOnEnterEvent = "onEnter"
 
 
 public class ExpoDragDropContentViewModule: Module {
@@ -14,7 +15,7 @@ public class ExpoDragDropContentViewModule: Module {
     let fileSystem: EXFileSystemInterface? = self.appContext?.fileSystem
 
     View(ExpoDragDropContentView.self) {
-        Events(IOnDropEvent, IOnDropStartEvent, IOnDropEndEvent, IOnExitEvent)
+        Events(IOnDropEvent, IOnDragStartEvent, IOnDragEndEvent, IOnEnterEvent, IOnExitEvent)
 
         Prop("includeBase64") { (view, includeBase64: Bool?) in
             let include = includeBase64 ?? false

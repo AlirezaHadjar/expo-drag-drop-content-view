@@ -4,8 +4,9 @@ import ExpoModulesCore
 // to apply the proper styling (e.g. border radius and shadows).
 class ExpoDragDropContentView: ExpoView {
     let onDrop = EventDispatcher()
-    let onDropStart = EventDispatcher()
-    let onDropEnd = EventDispatcher()
+    let onDragStart = EventDispatcher()
+    let onDragEnd = EventDispatcher()
+    let onEnter = EventDispatcher()
     let onExit = EventDispatcher()
     let dragDropContentView = DragDropContentView()
 
@@ -15,8 +16,9 @@ class ExpoDragDropContentView: ExpoView {
         addSubview(dragDropContentView)
 
         dragDropContentView.setDropEventDispatcher(onDrop)
-        dragDropContentView.setDropStartEventDispatcher(onDropStart)
-        dragDropContentView.setDropEndEventDispatcher(onDropEnd)
+        dragDropContentView.setDragStartEventDispatcher(onDragStart)
+        dragDropContentView.setDragEndEventDispatcher(onDragEnd)
+        dragDropContentView.setEnterEventDispatcher(onEnter)
         dragDropContentView.setExitEventDispatcher(onExit)
     }
 

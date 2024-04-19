@@ -9,7 +9,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.DragEvent
 import android.view.MotionEvent
-import androidx.core.content.ContextCompat
 import androidx.core.view.DragStartHelper
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.viewevent.EventDispatcher
@@ -24,12 +23,12 @@ import java.io.File
 class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
     private var includeBase64 = false
     private var draggableSources: List<DraggableItem> = emptyList()
-    private var highlightColor = ContextCompat.getColor(context, R.color.highlight_color)
-    private var highlightBorderRadius = 0
     private val onDrop by EventDispatcher()
+    private val onEnter by EventDispatcher<Unit>()
     private val onExit by EventDispatcher<Unit>()
-    private val onDropStart by EventDispatcher<Unit>()
-    private val onDropEnd by EventDispatcher<Unit>()
+    private val onDropListeningStart by EventDispatcher<Unit>()
+    private val onDragStart by EventDispatcher<Unit>()
+    private val onDragEnd by EventDispatcher<Unit>()
 
     private val utils = Utils()
 
@@ -39,20 +38,6 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
     fun setDraggableSources(value: List<DraggableItem>?) {
         draggableSources = value ?: emptyList()
-    }
-
-    fun setHighlightBorderRadius(value: Int?) {
-        if (value != null) {
-            highlightBorderRadius = value
-            configureDropHelper(this)
-        }
-    }
-
-    fun setHighlightColor(value: Int?) {
-        if (value != null) {
-            highlightColor = value
-            configureDropHelper(this)
-        }
     }
 
     private fun configureDropHelper(frame: View) {
@@ -65,18 +50,19 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         frame.setOnDragListener { _, event ->
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> {
+                    onDropListeningStart.invoke(Unit)
+                    true
+                }
+                DragEvent.ACTION_DRAG_ENDED -> {
+                    onDragEnd.invoke(Unit)
                     true
                 }
                 DragEvent.ACTION_DRAG_ENTERED -> {
-                    onDropStart.invoke(Unit)
+                    onEnter.invoke(Unit)
                     true
                 }
                 DragEvent.ACTION_DRAG_EXITED -> {
                     onExit.invoke(Unit)
-                    true
-                }
-                DragEvent.ACTION_DRAG_ENDED -> {
-                    onDropEnd.invoke(Unit)
                     true
                 }
                 DragEvent.ACTION_DROP -> {
@@ -153,6 +139,9 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
             }
         }
 
+        if (clipData.itemCount > 0) {
+            onDragStart.invoke(Unit)
+        }
         view.startDragAndDrop(clipData, shadow, null, DRAG_FLAG_GLOBAL or DRAG_FLAG_GLOBAL_URI_READ)
     }
 
