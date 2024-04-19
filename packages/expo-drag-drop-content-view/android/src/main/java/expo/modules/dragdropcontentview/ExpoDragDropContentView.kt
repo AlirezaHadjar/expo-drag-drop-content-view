@@ -7,10 +7,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.view.DragEvent
 import android.view.MotionEvent
 import androidx.core.content.ContextCompat
 import androidx.core.view.DragStartHelper
-import androidx.draganddrop.DropHelper
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
@@ -27,6 +27,9 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
     private var highlightColor = ContextCompat.getColor(context, R.color.highlight_color)
     private var highlightBorderRadius = 0
     private val onDrop by EventDispatcher()
+    private val onExit by EventDispatcher<Unit>()
+    private val onDropStart by EventDispatcher<Unit>()
+    private val onDropEnd by EventDispatcher<Unit>()
 
     private val utils = Utils()
 
@@ -59,38 +62,58 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
         val activity = appContext.activityProvider?.currentActivity!!
         val contentResolver = context.contentResolver
 
-        DropHelper.configureView(
-            activity,
-            frame,
-            arrayOf("image/*", "video/*", "text/plain"),
-            DropHelper.Options.Builder()
-                .setHighlightColor(highlightColor)
-                .setHighlightCornerRadiusPx(highlightBorderRadius)
-                .build()
-        ) { _, payload ->
-            val clipData = payload.clip
-            val infoList = mutableListOf<Map<String, Any?>>()
-
-            for (i in 0 until clipData.itemCount) {
-                val contentUri = clipData.getItemAt(i).uri
-                val text = clipData.getItemAt(i).text // Get text data
-
-                if (contentUri != null) {
-                    val info = utils.getFileInfo(contentResolver, contentUri, includeBase64, frame.context)
-                    info?.let { infoList.add(it) }
-                } else if (!text.isNullOrEmpty()) {
-                    // Handle text data
-                    if (text.trim().isNotEmpty()) {
-                        val textInfo = mapOf(
-                            "type" to DraggableType.TEXT,
-                            "text" to text
-                        )
-                        infoList.add(textInfo)
-                    }
+        frame.setOnDragListener { _, event ->
+            when (event.action) {
+                DragEvent.ACTION_DRAG_STARTED -> {
+                    true
                 }
+                DragEvent.ACTION_DRAG_ENTERED -> {
+                    onDropStart.invoke(Unit)
+                    true
+                }
+                DragEvent.ACTION_DRAG_EXITED -> {
+                    onExit.invoke(Unit)
+                    true
+                }
+                DragEvent.ACTION_DRAG_ENDED -> {
+                    onDropEnd.invoke(Unit)
+                    true
+                }
+                DragEvent.ACTION_DROP -> {
+                    val clipData = event.clipData
+                    val infoList = mutableListOf<Map<String, Any?>>()
+
+                    for (i in 0 until clipData.itemCount) {
+                        val permissions = activity.requestDragAndDropPermissions(event)
+                        if (permissions != null) {
+                            val contentUri = clipData.getItemAt(i).uri
+                            val text = clipData.getItemAt(i).text // Get text data
+
+                            if (contentUri != null) {
+                                val info = utils.getFileInfo(
+                                    contentResolver,
+                                    contentUri,
+                                    includeBase64,
+                                    frame.context
+                                )
+                                info?.let { infoList.add(it) }
+                            } else if (!text.isNullOrEmpty()) {
+                                // Handle text data
+                                if (text.trim().isNotEmpty()) {
+                                    val textInfo = mapOf(
+                                        "type" to DraggableType.TEXT,
+                                        "text" to text
+                                    )
+                                    infoList.add(textInfo)
+                                }
+                            }
+                        }
+                    }
+                    if (infoList.isNotEmpty()) onDrop(mapOf("assets" to infoList))
+                    true
+                }
+                else -> false
             }
-            if (infoList.isNotEmpty()) onDrop(mapOf("assets" to infoList))
-            return@configureView null
         }
     }
 

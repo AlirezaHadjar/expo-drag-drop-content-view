@@ -23,7 +23,7 @@ class ExpoDragDropContentViewModule : Module() {
       Prop("highlightBorderRadius") { view: ExpoDragDropContentView, color: Int? ->
         view.setHighlightBorderRadius(color)
       }
-      Events("onDrop")
+      Events("onDrop", "onDropStart", "onDropEnd", "onExit")
     }
   }
 }
