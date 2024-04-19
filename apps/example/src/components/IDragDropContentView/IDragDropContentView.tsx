@@ -53,6 +53,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#2f95dc",
     opacity: 1,
   },
+  readyPlaceholderContainer: {
+    backgroundColor: "#2f95dc",
+    opacity: 0.7,
+  },
   placeholderText: {
     color: "white",
     textAlign: "center",
@@ -83,6 +87,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
 ) => {
   usePermission();
   const [sources, setSources] = useState<DropAsset[] | null>(null);
+  const [readyToReceive, setReadyToReceive] = useState(false);
   const [isActive, setIsActive] = useState(false);
 
   const handleClear = () => setSources(null);
@@ -97,19 +102,21 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
           type: getSourceType(source)!,
           value: source.uri || source.base64 || source.text || "",
         }))}
-      onDropStart={() => {
+      onDropListeningStart={() => {
+        setReadyToReceive(true);
+      }}
+      onEnter={() => {
         setIsActive(true);
       }}
       onExit={() => {
         setIsActive(false);
       }}
-      onDropEnd={() => {
+      onDragEnd={() => {
         setIsActive(false);
+        setReadyToReceive(false);
       }}
-      highlightColor="#2f95dc"
-      highlightBorderRadius={borderRadius}
       onDrop={(event) => {
-        console.log(JSON.stringify(event.assets));
+        // console.log(JSON.stringify(event.assets));
         const newData = [...(sources ?? []), ...event.assets];
         setSources(newData);
         props.onDrop?.(event);
@@ -168,6 +175,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
         <Animated.View
           style={[
             styles.placeholderContainer,
+            readyToReceive && styles.readyPlaceholderContainer,
             isActive && styles.activePlaceholderContainer,
           ]}
         >

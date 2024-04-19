@@ -153,7 +153,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
 
   handleDragEnter = (event: Event) => {
     event.preventDefault();
-    this.props.onDropStart?.();
+    this.props.onEnter?.();
     this.target = event.target;
   };
 
@@ -161,7 +161,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     event.preventDefault();
     if (event.target !== this.target) return;
 
-    this.props.onDropEnd?.();
+    this.props.onExit?.();
     this.target = null;
   };
 
@@ -173,17 +173,19 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     event: T
   ) => {
     event.preventDefault();
-    this.props.onDropEnd?.();
+    this.props.onDragEnd?.();
 
     const assets = await getAssets(event.dataTransfer);
     if (assets.length > 0) this.props.onDrop?.({ assets });
   };
 
-  handleDrag = async <T extends Event & { dataTransfer: DataTransfer }>(
+  handleDragStart = async <T extends Event & { dataTransfer: DataTransfer }>(
     event: T
   ) => {
+    this.props.onDragStart?.();
     const sources = this.props.draggableSources;
     const preview = sources?.at(-1);
+    // console.log("preview", preview);
     if (!preview || !sources) return;
 
     event.dataTransfer.setData("text/type", "Custom Drag");
@@ -217,7 +219,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
 
     if (!domElement) return;
 
-    domElement.addEventListener("dragstart", this.handleDrag as any);
+    domElement.addEventListener("dragstart", this.handleDragStart as any);
     domElement.addEventListener("dragenter", this.handleDragEnter);
     domElement.addEventListener("dragleave", this.handleDragLeave);
     domElement.addEventListener("dragover", this.handleDragOver);

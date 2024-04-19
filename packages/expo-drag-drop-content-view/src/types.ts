@@ -43,30 +43,29 @@ export type Assets = { assets: DropAsset[] };
 
 export type DragDropContentViewProps = ViewProps & {
   /**
-   *
    * @param Assets
-   * @default undefined
    * @description Callback that is called when the user drops the files.
    */
   onDrop?: (event: Assets) => void;
   /**
-   *
-   * @platform iOS
-   * @default undefined
-   * @description Callback that is called when the users finger enters the view with the files.
+   * @platform Android
+   * @description Callback that is called for all `<DragDropContentView />` instances within the view port once any drag begins. Useful if you want to customize all drop areas as soon as any asset begins dragging
    */
-  onDropStart?: () => void;
+  onDropListeningStart?: () => void;
   /**
-   *
-   * @platform iOS
-   * @default undefined
+   * @description Callback that is called when the user starts dragging an asset from inside the app
+   */
+  onDragStart?: () => void;
+  /**
    * @description Callback that is called when the users finger is released (successfully or not)
    */
-  onDropEnd?: () => void;
+  onDragEnd?: () => void;
+  /**
+   * @description Callback that is called when the users finger enters the view with the files.
+   */
+  onEnter?: () => void;
   /**
    *
-   * @platform iOS
-   * @default undefined
    * @description Callback that is called when the users finger leaves the view with the files.
    */
   onExit?: () => void;
@@ -76,23 +75,7 @@ export type DragDropContentViewProps = ViewProps & {
    */
   includeBase64?: boolean;
   /**
-   * @default os decided
-   * @platform Android
-   * @description Sets the color of the drop target highlight.
-   * @link https://developer.android.com/reference/androidx/draganddrop/DropHelper.Options.Builder#setHighlightColor(int)
-   *
-   * Note: Opacity, if provided, is ignored.
-   */
-  highlightColor?: string | null;
-  /**
-   * @default os decided ~ 20px
-   * @platform Android
-   * @description Sets the corner radius of the drop target highlight.
-   * @link https://developer.android.com/reference/androidx/draganddrop/DropHelper.Options.Builder#setHighlightCornerRadiusPx(int)
-   */
-  highlightBorderRadius?: number;
-  /**
-   * @description The source of the image or/and video that can be dragged around the screen.
+   * @description The source of the image or/and video or/and text that can be dragged around the screen.
    * @description Pass Uri on iOS and Android, and base64 on Web.
    */
   draggableSources?: {

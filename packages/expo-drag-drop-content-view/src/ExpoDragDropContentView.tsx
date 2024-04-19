@@ -34,27 +34,25 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     this.props.onDrop?.(withDeprecatedNativeEvent(event));
   };
 
-  onDropStartEvent = (event: NativeSyntheticEvent<Assets>) => {
-    this.props.onDropStart?.();
+  onDragStartEvent = () => {
+    this.props.onDragStart?.();
   };
 
-  onDropEndEvent = () => {
-    this.props.onDropEnd?.();
+  onDragEndEvent = () => {
+    this.props.onDragEnd?.();
+  };
+
+  onEnterEvent = () => {
+    this.props.onEnter?.();
+  };
+
+  onExitEvent = () => {
+    this.props.onExit?.();
   };
 
   render() {
-    const {
-      style,
-      highlightColor: _highlightColor,
-      highlightBorderRadius: _highlightBorderRadius,
-      ...props
-    } = this.props;
+    const { style, ...props } = this.props;
     const resolvedStyle = StyleSheet.flatten(style);
-
-    const highlightColor = processColor(_highlightColor || undefined);
-    const highlightBorderRadius = _highlightBorderRadius
-      ? _highlightBorderRadius * 3
-      : undefined;
 
     return (
       <NativeExpoDragDropContentView
@@ -62,13 +60,10 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
         style={resolvedStyle}
         //@ts-ignore
         onDrop={this.onDropEvent}
-        //@ts-ignore
-        onDropStart={this.onDropStartEvent}
-        //@ts-ignore
-        onDropEnd={this.onDropEndEvent}
-        //@ts-ignore
-        highlightColor={highlightColor}
-        highlightBorderRadius={highlightBorderRadius}
+        onEnter={this.onEnterEvent}
+        onExit={this.onExitEvent}
+        onDragStart={this.onDragStartEvent}
+        onDragEnd={this.onDragEndEvent}
         ref={this.nativeViewRef}
       />
     );

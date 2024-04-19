@@ -17,13 +17,7 @@ class ExpoDragDropContentViewModule : Module() {
       Prop("draggableSources") {view: ExpoDragDropContentView, value: List<DraggableItem>? ->
          view.setDraggableSources(value)
       }
-      Prop("highlightColor") { view: ExpoDragDropContentView, color: Int? ->
-        view.setHighlightColor(color)
-      }
-      Prop("highlightBorderRadius") { view: ExpoDragDropContentView, color: Int? ->
-        view.setHighlightBorderRadius(color)
-      }
-      Events("onDrop")
+      Events("onDrop", "onDropListeningStart", "onDragStart", "onDragEnd", "onEnter", "onExit")
     }
   }
 }
