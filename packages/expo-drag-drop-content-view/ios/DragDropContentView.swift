@@ -137,11 +137,18 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnd session: UIDropSession) {
         // Notify when the drop session ends (successfully or not)
+        self.onDropEndEvent?()
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidExit session: UIDropSession) {
         // Notify when an item is being dragged over the view
-        self.onDropEndEvent?()
+        let location = session.location(in: self)
+        // When the there are subview this method gets called even if the finger is within the view and entered subview.
+        // Now should check if the finger is out of the boundaries
+        let isWithinBoundaries = self.bounds.contains(location)
+        if !isWithinBoundaries {
+            self.onDropEndEvent?()
+        }
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
@@ -173,8 +180,6 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         var assets: [NSMutableDictionary] = []
         let dispatchGroup = DispatchGroup()
-
-        self.onDropEndEvent?()
 
         for (index, dragItem) in session.items.enumerated() {
             dispatchGroup.enter()
