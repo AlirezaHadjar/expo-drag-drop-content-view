@@ -1,7 +1,7 @@
 import {
   DragDropContentView,
   DragDropContentViewProps,
-  OnDropEvent,
+  DropAsset,
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
 import React, { useState } from "react";
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const getSourceType = (source: OnDropEvent) => {
+const getSourceType = (source: DropAsset) => {
   if (source.type.startsWith("image")) return "image";
   if (source.type.startsWith("video")) return "video";
   if (source.type.startsWith("text")) return "text";
@@ -82,7 +82,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
 ) => {
   usePermission();
-  const [sources, setSources] = useState<OnDropEvent[] | null>(null);
+  const [sources, setSources] = useState<DropAsset[] | null>(null);
   const [isActive, setIsActive] = useState(false);
 
   const handleClear = () => setSources(null);
