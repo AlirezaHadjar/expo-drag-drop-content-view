@@ -1,6 +1,6 @@
 import { ViewProps } from "react-native";
 
-export type OnDropEvent = {
+export type DropAsset = {
   /**
    * @platform Android, iOS
    * @description The file uri in app-specific cache storage.
@@ -39,7 +39,7 @@ export type OnDropEvent = {
   text?: string;
 };
 
-export type Assets = { assets: OnDropEvent[] };
+export type Assets = { assets: DropAsset[] };
 
 export type DragDropContentViewProps = ViewProps & {
   /**
@@ -48,21 +48,21 @@ export type DragDropContentViewProps = ViewProps & {
    * @default undefined
    * @description Callback that is called when the user drops the files.
    */
-  onDropEvent?: (event: Assets) => void;
+  onDrop?: (event: Assets) => void;
   /**
    *
    * @platform iOS
    * @default undefined
    * @description Callback that is called when the users finger enters the view with the files.
    */
-  onDropStartEvent?: () => void;
+  onDropStart?: () => void;
   /**
    *
    * @platform iOS
    * @default undefined
    * @description Callback that is called when the users finger leaves the view with the files.
    */
-  onDropEndEvent?: () => void;
+  onDropEnd?: () => void;
   /**
    * @default false
    * @description If set to true, the base64 representation of the file will be included in the event.

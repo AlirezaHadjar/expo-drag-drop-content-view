@@ -6,9 +6,9 @@ import MobileCoreServices
 
 class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionDelegate {
 
-    var onDropEvent: EventDispatcher? = nil
-    var onDropStartEvent: EventDispatcher? = nil
-    var onDropEndEvent: EventDispatcher? = nil
+    var onDrop: EventDispatcher? = nil
+    var onDropStart: EventDispatcher? = nil
+    var onDropEnd: EventDispatcher? = nil
     lazy var includeBase64 = false
     lazy var draggableSources: [DraggableSource] = []
     var fileSystem: EXFileSystemInterface?
@@ -39,15 +39,15 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     }
 
     func setDropEventDispatcher(_ eventDispatcher: EventDispatcher) {
-        self.onDropEvent = eventDispatcher
+        self.onDrop = eventDispatcher
     }
 
     func setDropStartEventDispatcher(_ eventDispatcher: EventDispatcher) {
-        self.onDropStartEvent = eventDispatcher
+        self.onDropStart = eventDispatcher
     }
 
     func setDropEndEventDispatcher(_ eventDispatcher: EventDispatcher) {
-        self.onDropEndEvent = eventDispatcher
+        self.onDropEnd = eventDispatcher
     }
 
     func dragInteraction(_ interaction: UIDragInteraction, itemsForBeginning session: UIDragSession) -> [UIDragItem] {
@@ -132,12 +132,12 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnter session: UIDropSession) {
         // Notify when an item is being dragged over the view
-        self.onDropStartEvent?()
+        self.onDropStart?()
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidEnd session: UIDropSession) {
         // Notify when the drop session ends (successfully or not)
-        self.onDropEndEvent?()
+        self.onDropEnd?()
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidExit session: UIDropSession) {
@@ -147,7 +147,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
         // Now should check if the finger is out of the boundaries
         let isWithinBoundaries = self.bounds.contains(location)
         if !isWithinBoundaries {
-            self.onDropEndEvent?()
+            self.onDropEnd?()
         }
     }
 
@@ -159,14 +159,16 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                 UTType.image.identifier,
                 UTType.video.identifier,
                 UTType.movie.identifier,
-                UTType.text.identifier
+                UTType.text.identifier,
+                UTType.pdf.identifier
             ]
         } else {
             typeIdentifiers = [
                 kUTTypeImage as String,
                 kUTTypeMovie as String,
                 kUTTypeVideo as String,
-                kUTTypeText as String
+                kUTTypeText as String,
+                kUTTypePDF as String
             ]
         }
 
@@ -253,7 +255,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
         dispatchGroup.notify(queue: DispatchQueue.main) {
             // print("Assets: \(assets)")
             if !assets.isEmpty {
-                self.onDropEvent?([
+                self.onDrop?([
                     "assets": assets
                 ])
             }

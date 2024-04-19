@@ -97,19 +97,19 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
           type: getSourceType(source)!,
           value: source.uri || source.base64 || source.text || "",
         }))}
-      onDropStartEvent={() => {
+      onDropStart={() => {
         setIsActive(true);
       }}
-      onDropEndEvent={() => {
+      onDropEnd={() => {
         setIsActive(false);
       }}
       highlightColor="#2f95dc"
       highlightBorderRadius={borderRadius}
-      onDropEvent={(event) => {
+      onDrop={(event) => {
         console.log(JSON.stringify(event.assets));
         const newData = [...(sources ?? []), ...event.assets];
         setSources(newData);
-        props.onDropEvent?.(event);
+        props.onDrop?.(event);
       }}
       style={[styles.container, props.style]}
     >

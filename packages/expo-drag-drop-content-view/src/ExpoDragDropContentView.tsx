@@ -31,15 +31,15 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
   }
 
   onDropEvent = (event: NativeSyntheticEvent<Assets>) => {
-    this.props.onDropEvent?.(withDeprecatedNativeEvent(event));
+    this.props.onDrop?.(withDeprecatedNativeEvent(event));
   };
 
   onDropStartEvent = (event: NativeSyntheticEvent<Assets>) => {
-    this.props.onDropStartEvent?.();
+    this.props.onDropStart?.();
   };
 
   onDropEndEvent = () => {
-    this.props.onDropEndEvent?.();
+    this.props.onDropEnd?.();
   };
 
   render() {
@@ -61,11 +61,11 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
         {...props}
         style={resolvedStyle}
         //@ts-ignore
-        onDropEvent={this.onDropEvent}
+        onDrop={this.onDropEvent}
         //@ts-ignore
-        onDropStartEvent={this.onDropStartEvent}
+        onDropStart={this.onDropStartEvent}
         //@ts-ignore
-        onDropEndEvent={this.onDropEndEvent}
+        onDropEnd={this.onDropEndEvent}
         //@ts-ignore
         highlightColor={highlightColor}
         highlightBorderRadius={highlightBorderRadius}

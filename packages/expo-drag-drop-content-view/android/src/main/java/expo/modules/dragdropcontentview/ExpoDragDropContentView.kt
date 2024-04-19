@@ -26,7 +26,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
     private var draggableSources: List<DraggableItem> = emptyList()
     private var highlightColor = ContextCompat.getColor(context, R.color.highlight_color)
     private var highlightBorderRadius = 0
-    private val onDropEvent by EventDispatcher()
+    private val onDrop by EventDispatcher()
 
     private val utils = Utils()
 
@@ -89,7 +89,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                     }
                 }
             }
-            if (infoList.isNotEmpty()) onDropEvent(mapOf("assets" to infoList))
+            if (infoList.isNotEmpty()) onDrop(mapOf("assets" to infoList))
             return@configureView null
         }
     }

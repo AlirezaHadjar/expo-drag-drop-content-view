@@ -1,8 +1,8 @@
 import ExpoModulesCore
 
-let IOnDropEvent = "onDropEvent"
-let IOnDropStartEvent = "onDropStartEvent"
-let IOnDropEndEvent = "onDropEndEvent"
+let IOnDropEvent = "onDrop"
+let IOnDropStartEvent = "onDropStart"
+let IOnDropEndEvent = "onDropEnd"
 
 
 public class ExpoDragDropContentViewModule: Module {

@@ -16,11 +16,11 @@ import {Horizontal} from '@site/src/components/Horizontal'
   <div className='code-container'>
   ```tsx
   export const IDragDropContentView = (props) => {
-    const [sources, setSources] = useState<OnDropEvent[] | null>(null);
+    const [sources, setSources] = useState<onDrop[] | null>(null);
 
     return (
       <DragDropContentView
-        onDropEvent={(event) => {
+        onDrop={(event) => {
           setSources(event.assets);
         }}
         style={styles.container}
@@ -42,14 +42,14 @@ import {Horizontal} from '@site/src/components/Horizontal'
 
     ```tsx
 
-    const getSourceType = (source: OnDropEvent) => {
+    const getSourceType = (source: onDrop) => {
       if (source.type.startsWith("image")) return "image";
       if (source.type.startsWith("video")) return "video";
       if (source.type.startsWith("text")) return "text";
     };
 
     export const IDragDropContentView = (props) => {
-      const [sources, setSources] = useState<OnDropEvent[] | null>(null);
+      const [sources, setSources] = useState<onDrop[] | null>(null);
       const draggableSources = sources
         ?.filter((source) => getSourceType(source) !== undefined)
         ?.map((source) => ({

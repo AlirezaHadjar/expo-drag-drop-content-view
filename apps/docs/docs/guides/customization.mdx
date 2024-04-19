@@ -16,13 +16,13 @@ export const IDragDropContentView = (props) => {
 
   return (
     <DragDropContentView
-      onDropEvent={(event) => {
+      onDrop={(event) => {
         setImageData(event.assets);
       }}
-      onDropStartEvent={() => {
+      onDropStart={() => {
         setIsActive(true);
       }}
-      onDropEndEvent={() => {
+      onDropEnd={() => {
         setIsActive(false);
       }}
       highlightColor="#95d2fc"

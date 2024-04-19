@@ -2,10 +2,10 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
-import { DragDropContentViewProps, OnDropEvent } from "./types";
+import { DragDropContentViewProps, DropAsset } from "./types";
 
 const handleFile = (file: File) => {
-  return new Promise<OnDropEvent>((resolve) => {
+  return new Promise<DropAsset>((resolve) => {
     const reader = new FileReader();
 
     reader.onload = (e) => {
@@ -52,7 +52,7 @@ const getBase64 = (data: string) => {
 };
 
 const handleText = (text: string) => {
-  return new Promise<OnDropEvent>((resolve) => {
+  return new Promise<DropAsset>((resolve) => {
     resolve({
       type: "text",
       text,
@@ -66,8 +66,8 @@ const getKey = (index: number) => ({
 });
 
 const getAssets = async (dataTransfer: DataTransfer) => {
-  const resolvedFiles: (OnDropEvent | null)[] = [];
-  const filePromises: Promise<OnDropEvent | null>[] = [];
+  const resolvedFiles: (DropAsset | null)[] = [];
+  const filePromises: Promise<DropAsset | null>[] = [];
   const type = dataTransfer.getData("text/type");
   const textData = dataTransfer.getData("text/plain");
   const htmlData = dataTransfer.getData("text/html");
@@ -133,7 +133,7 @@ const getAssets = async (dataTransfer: DataTransfer) => {
   resolvedFiles.push(...(await Promise.all(filePromises)));
 
   // Filter out null values (failed handleFile calls)
-  return resolvedFiles.filter((file) => file !== null) as OnDropEvent[];
+  return resolvedFiles.filter((file) => file !== null) as DropAsset[];
 };
 
 export default class ExpoDragDropContentView extends React.PureComponent<DragDropContentViewProps> {
@@ -153,7 +153,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
 
   handleDragEnter = (event: Event) => {
     event.preventDefault();
-    this.props.onDropStartEvent?.();
+    this.props.onDropStart?.();
     this.target = event.target;
   };
 
@@ -161,7 +161,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     event.preventDefault();
     if (event.target !== this.target) return;
 
-    this.props.onDropEndEvent?.();
+    this.props.onDropEnd?.();
     this.target = null;
   };
 
@@ -173,10 +173,10 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     event: T
   ) => {
     event.preventDefault();
-    this.props.onDropEndEvent?.();
+    this.props.onDropEnd?.();
 
     const assets = await getAssets(event.dataTransfer);
-    if (assets.length > 0) this.props.onDropEvent?.({ assets });
+    if (assets.length > 0) this.props.onDrop?.({ assets });
   };
 
   handleDrag = async <T extends Event & { dataTransfer: DataTransfer }>(
