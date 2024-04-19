@@ -49,7 +49,7 @@ export type DragDropContentViewProps = ViewProps & {
   onDrop?: (event: Assets) => void;
   /**
    * @platform Android
-   * @description Callback that is called for all <DragDropContentView /> instances within the view port once any drag begins. Useful if you want to customize all drop areas as soon as any asset begins dragging
+   * @description Callback that is called for all `<DragDropContentView />` instances within the view port once any drag begins. Useful if you want to customize all drop areas as soon as any asset begins dragging
    */
   onDropListeningStart?: () => void;
   /**
