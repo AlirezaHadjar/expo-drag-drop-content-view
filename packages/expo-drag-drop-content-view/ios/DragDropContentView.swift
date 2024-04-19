@@ -9,6 +9,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     var onDrop: EventDispatcher? = nil
     var onDropStart: EventDispatcher? = nil
     var onDropEnd: EventDispatcher? = nil
+    var onExit: EventDispatcher? = nil
     lazy var includeBase64 = false
     lazy var draggableSources: [DraggableSource] = []
     var fileSystem: EXFileSystemInterface?
@@ -48,6 +49,10 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
     func setDropEndEventDispatcher(_ eventDispatcher: EventDispatcher) {
         self.onDropEnd = eventDispatcher
+    }
+    
+    func setExitEventDispatcher(_ eventDispatcher: EventDispatcher) {
+        self.onExit = eventDispatcher
     }
 
     func dragInteraction(_ interaction: UIDragInteraction, itemsForBeginning session: UIDragSession) -> [UIDragItem] {
@@ -147,7 +152,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
         // Now should check if the finger is out of the boundaries
         let isWithinBoundaries = self.bounds.contains(location)
         if !isWithinBoundaries {
-            self.onDropEnd?()
+            self.onExit?()
         }
     }
 

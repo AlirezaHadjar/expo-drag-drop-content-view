@@ -6,6 +6,7 @@ class ExpoDragDropContentView: ExpoView {
     let onDrop = EventDispatcher()
     let onDropStart = EventDispatcher()
     let onDropEnd = EventDispatcher()
+    let onExit = EventDispatcher()
     let dragDropContentView = DragDropContentView()
 
     required init(appContext: AppContext? = nil) {
@@ -16,6 +17,7 @@ class ExpoDragDropContentView: ExpoView {
         dragDropContentView.setDropEventDispatcher(onDrop)
         dragDropContentView.setDropStartEventDispatcher(onDropStart)
         dragDropContentView.setDropEndEventDispatcher(onDropEnd)
+        dragDropContentView.setExitEventDispatcher(onExit)
     }
 
     override func layoutSubviews() {

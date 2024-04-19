@@ -100,7 +100,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
       onDropStart={() => {
         setIsActive(true);
       }}
-      onDropEnd={() => {
+      onExit={() => {
         setIsActive(false);
       }}
       highlightColor="#2f95dc"

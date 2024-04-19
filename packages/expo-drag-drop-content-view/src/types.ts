@@ -60,9 +60,16 @@ export type DragDropContentViewProps = ViewProps & {
    *
    * @platform iOS
    * @default undefined
-   * @description Callback that is called when the users finger leaves the view with the files.
+   * @description Callback that is called when the users finger is released (successfully or not)
    */
   onDropEnd?: () => void;
+  /**
+   *
+   * @platform iOS
+   * @default undefined
+   * @description Callback that is called when the users finger leaves the view with the files.
+   */
+  onExit?: () => void;
   /**
    * @default false
    * @description If set to true, the base64 representation of the file will be included in the event.
