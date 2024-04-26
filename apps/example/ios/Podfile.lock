@@ -1,16 +1,16 @@
 PODS:
   - boost (1.83.0)
   - DoubleConversion (1.1.6)
-  - EXAV (13.10.5):
+  - EXAV (13.10.6):
     - ExpoModulesCore
     - ReactCommon/turbomodule/core
   - EXConstants (15.4.5):
     - ExpoModulesCore
   - EXFont (11.10.3):
     - ExpoModulesCore
-  - Expo (50.0.14):
+  - Expo (50.0.17):
     - ExpoModulesCore
-  - ExpoDragDropContentView (0.4.2):
+  - ExpoDragDropContentView (0.7.0):
     - ExpoModulesCore
   - ExpoFileSystem (16.0.8):
     - ExpoModulesCore
@@ -1320,11 +1320,11 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
-  EXAV: 07e50f934907fa8274dd06fbcd20ee4b9478c619
+  EXAV: e4f6137431ddc4cb025895046bfefa9612025c35
   EXConstants: 988aa430ca0f76b43cd46b66e7fae3287f9cc2fc
   EXFont: f20669cb266ef48b004f1eb1f2b20db96cd1df9f
-  Expo: e01a77c6fa4bc80a6d1bb949cda1d12d21044abd
-  ExpoDragDropContentView: ea1b8bef3290cdfde06e8f3ba6089941e9cdb9a6
+  Expo: 2cdb5916749a1509cf88114f1f510bd458630eb4
+  ExpoDragDropContentView: f5e42b4c2dcd9a1614969b37ccbca86422dfb5ea
   ExpoFileSystem: eecaf6796aed0f4dd20042dc2ca2cac6c4bc1185
   ExpoImage: 8cf2d51de3d03b7e984e9b0ba8f19c0c22057001
   ExpoKeepAwake: 0f5cad99603a3268e50af9a6eb8b76d0d9ac956c

@@ -348,7 +348,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = expo.modules.dragdropcontentview.example1;
+				PRODUCT_BUNDLE_IDENTIFIER = expo.modules.dragdropcontentview.example2;
 				PRODUCT_NAME = expodragdropcontentviewexample;
 				SWIFT_OBJC_BRIDGING_HEADER = "expodragdropcontentviewexample/expodragdropcontentviewexample-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -382,7 +382,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = expo.modules.dragdropcontentview.example1;
+				PRODUCT_BUNDLE_IDENTIFIER = expo.modules.dragdropcontentview.example2;
 				PRODUCT_NAME = expodragdropcontentviewexample;
 				SWIFT_OBJC_BRIDGING_HEADER = "expodragdropcontentviewexample/expodragdropcontentviewexample-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
