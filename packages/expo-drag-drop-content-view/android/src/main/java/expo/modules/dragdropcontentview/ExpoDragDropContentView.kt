@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.DragEvent
 import android.view.MotionEvent
 import androidx.core.view.DragStartHelper
@@ -73,7 +74,7 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                         val permissions = activity.requestDragAndDropPermissions(event)
                         if (permissions != null) {
                             val contentUri = clipData.getItemAt(i).uri
-                            val text = clipData.getItemAt(i).text // Get text data
+
 
                             if (contentUri != null) {
                                 val info = utils.getFileInfo(
@@ -83,7 +84,10 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                                     frame.context
                                 )
                                 info?.let { infoList.add(it) }
-                            } else if (!text.isNullOrEmpty()) {
+                            }
+                        } else {
+                            val text = clipData.getItemAt(i).text // Get text data
+                            if (!text.isNullOrEmpty()) {
                                 // Handle text data
                                 if (text.trim().isNotEmpty()) {
                                     val textInfo = mapOf(
