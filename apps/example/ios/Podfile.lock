@@ -10,7 +10,7 @@ PODS:
     - ExpoModulesCore
   - Expo (50.0.17):
     - ExpoModulesCore
-  - ExpoDragDropContentView (0.7.1):
+  - ExpoDragDropContentView (0.7.2):
     - ExpoModulesCore
   - ExpoFileSystem (16.0.8):
     - ExpoModulesCore
@@ -1324,7 +1324,7 @@ SPEC CHECKSUMS:
   EXConstants: 988aa430ca0f76b43cd46b66e7fae3287f9cc2fc
   EXFont: f20669cb266ef48b004f1eb1f2b20db96cd1df9f
   Expo: 2cdb5916749a1509cf88114f1f510bd458630eb4
-  ExpoDragDropContentView: a41c61df0636641d4097b55cb87b42504c72d9b1
+  ExpoDragDropContentView: 3a4f25c8ca7acaa06a60205821c55947d50ad41b
   ExpoFileSystem: eecaf6796aed0f4dd20042dc2ca2cac6c4bc1185
   ExpoImage: 8cf2d51de3d03b7e984e9b0ba8f19c0c22057001
   ExpoKeepAwake: 0f5cad99603a3268e50af9a6eb8b76d0d9ac956c
