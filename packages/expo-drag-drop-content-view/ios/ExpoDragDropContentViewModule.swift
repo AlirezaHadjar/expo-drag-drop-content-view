@@ -26,6 +26,10 @@ public class ExpoDragDropContentViewModule: Module {
             let sources = draggableSources ?? []
             view.dragDropContentView.setDraggableSources(sources)
         }
+        Prop("mimeTypes") { (view, mimeTypes: [String: String]?) in
+            let types = mimeTypes ?? [:]
+            view.dragDropContentView.setMimeTypes(types)
+        }
     }
   }
 }

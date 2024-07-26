@@ -8,7 +8,7 @@ class ExpoDragDropContentView: ExpoView {
     let onDragEnd = EventDispatcher()
     let onEnter = EventDispatcher()
     let onExit = EventDispatcher()
-    let dragDropContentView = DragDropContentView()
+    let dragDropContentView = DragDropContentView() 
 
     required init(appContext: AppContext? = nil) {
         super.init(appContext: appContext)

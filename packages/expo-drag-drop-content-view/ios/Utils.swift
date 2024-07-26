@@ -106,20 +106,28 @@ func getMimeType(image: UIImage) -> String? {
     return nil
 }
 
-private func getMimeType(from pathExtension: String) -> String? {
-  let filenameExtension = String(pathExtension.dropFirst())
-  if #available(iOS 14, *) {
-    return UTType(filenameExtension: filenameExtension)?.preferredMIMEType
-  }
-  if let uti = UTTypeCreatePreferredIdentifierForTag(
-    kUTTagClassFilenameExtension,
-    pathExtension as NSString, nil
-  )?.takeRetainedValue() {
-    if let mimetype = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
-      return mimetype as String
+private func getMimeType(from pathExtension: String, mimeTypes: [String: String]) -> String {
+    let filenameExtension = String(pathExtension.dropFirst())
+    
+    // Check iOS 14+ UTType API
+    if #available(iOS 14, *) {
+        if let mimeType = UTType(filenameExtension: filenameExtension)?.preferredMIMEType {
+            return mimeType
+        }
     }
-  }
-  return nil
+    
+    // Check older iOS versions
+    if let uti = UTTypeCreatePreferredIdentifierForTag(
+        kUTTagClassFilenameExtension,
+        filenameExtension as NSString, nil
+    )?.takeRetainedValue() {
+        if let mimeType = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
+            return mimeType as String
+        }
+    }
+    
+    // Fallback to dictionary lookup
+    return mimeTypes[filenameExtension] ?? "unknown"
 }
 
 func determineTranscodeFileType(from originalExtension: String) -> AVFileType {
@@ -146,7 +154,7 @@ func getVideoDimensions(from url: URL) -> (width: Int, height: Int)? {
     return (width, height)
 }
 
-func generateVideoAsset(from mediaURL: URL, includeBase64: Bool, fileSystem: EXFileSystemInterface) -> NSMutableDictionary? {
+func generateFileAsset(from mediaURL: URL, includeBase64: Bool, fileSystem: EXFileSystemInterface, isVideo: Bool, mimeTypes: [String: String]) -> NSMutableDictionary? {
     let asset = NSMutableDictionary()
 
     do {
@@ -154,7 +162,7 @@ func generateVideoAsset(from mediaURL: URL, includeBase64: Bool, fileSystem: EXF
         let originalExtension = ".\(mediaURL.pathExtension)"
         let transcodeFileType = determineTranscodeFileType(from: originalExtension)
         let transcodeFileExtension = originalExtension
-        let mimeType = getMimeType(from: originalExtension)
+        let mimeType = getMimeType(from: originalExtension, mimeTypes: mimeTypes)
 
         // Copy the video to a location controlled by us to ensure it's not removed during conversion
         let assetUrl = try generateUrl(withFileExtension: originalExtension, fileSystem: fileSystem)
@@ -174,18 +182,20 @@ func generateVideoAsset(from mediaURL: URL, includeBase64: Bool, fileSystem: EXF
                 let fileName = mediaURL.lastPathComponent
                 asset["fileName"] = fileName
                 asset["type"] = mimeType
-                asset["duration"] = VideoUtils.readDurationFrom(url: mediaURL)
                 asset["path"] = targetUrl.absoluteString.replacingOccurrences(of: "file://", with: "")
                 asset["uri"] = targetUrl.absoluteString
-
-                // Get video dimensions
-                if let dimensions = getVideoDimensions(from: targetUrl) {
-                    asset["width"] = dimensions.width
-                    asset["height"] = dimensions.height
-                } else {
-                    asset["width"] = 0
-                    asset["height"] = 0
-                    print("Failed to get video dimensions")
+                
+                if (isVideo) {
+                    asset["duration"] = VideoUtils.readDurationFrom(url: mediaURL)
+                    // Get video dimensions
+                    if let dimensions = getVideoDimensions(from: targetUrl) {
+                        asset["width"] = dimensions.width
+                        asset["height"] = dimensions.height
+                    } else {
+                        asset["width"] = 0
+                        asset["height"] = 0
+                        print("Failed to get video dimensions")
+                    }
                 }
 
                 if includeBase64 {
@@ -488,6 +498,13 @@ func getSessionItemType(itemProvider: NSItemProvider) -> SessionItemType {
             return .video
         case itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier):
             return .image
+        case itemProvider.hasItemConformingToTypeIdentifier(UTType.json.identifier),
+             itemProvider.hasItemConformingToTypeIdentifier(UTType.zip.identifier),
+             itemProvider.hasItemConformingToTypeIdentifier(UTType.spreadsheet.identifier),
+             itemProvider.hasItemConformingToTypeIdentifier(UTType.presentation.identifier),
+             itemProvider.hasItemConformingToTypeIdentifier(UTType.database.identifier),
+             itemProvider.hasItemConformingToTypeIdentifier(UTType.pdf.identifier):
+                return .file
         case itemProvider.hasItemConformingToTypeIdentifier(UTType.text.identifier):
             return .text
         case itemProvider.hasItemConformingToTypeIdentifier(UTType.item.identifier):
@@ -504,6 +521,8 @@ func getSessionItemType(itemProvider: NSItemProvider) -> SessionItemType {
                     return .video
                 case "jpg", "jpeg", "png", "gif":
                     return .image
+                case "json", "zip", "xlsx", "xls", "docx", "doc", "pptx", "ppt", "pdf":
+                    return .file
                 case "txt":
                     return .text
                 default:

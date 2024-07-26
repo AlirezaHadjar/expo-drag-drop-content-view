@@ -90,6 +90,8 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   const [readyToReceive, setReadyToReceive] = useState(false);
   const [isActive, setIsActive] = useState(false);
 
+  console.log(JSON.stringify(sources));
+
   const handleClear = () => setSources(null);
 
   return (

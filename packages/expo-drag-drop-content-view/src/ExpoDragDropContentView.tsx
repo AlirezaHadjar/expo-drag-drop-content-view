@@ -4,6 +4,7 @@ import * as React from "react";
 import { NativeSyntheticEvent, StyleSheet, processColor } from "react-native";
 
 import { Assets, DragDropContentViewProps } from "./types";
+import { MIME_TYPES } from "./mimeTypes";
 
 function withDeprecatedNativeEvent<NativeEvent>(
   event: NativeSyntheticEvent<NativeEvent>
@@ -61,6 +62,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
         //@ts-ignore
         onDrop={this.onDropEvent}
         onEnter={this.onEnterEvent}
+        mimeTypes={MIME_TYPES}
         onExit={this.onExitEvent}
         onDragStart={this.onDragStartEvent}
         onDragEnd={this.onDragEndEvent}
