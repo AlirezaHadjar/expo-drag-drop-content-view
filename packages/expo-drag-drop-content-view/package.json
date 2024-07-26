@@ -30,17 +30,19 @@
   "homepage": "https://github.com/AlirezaHadjar/expo-drag-drop-content-view#readme",
   "devDependencies": {
     "@types/react": "^18.2.25",
-    "expo": "^50.0.17",
-    "expo-module-scripts": "^3.4.0",
-    "expo-modules-core": "^1.11.7",
-    "react": "^18.2.0",
-    "react-native": "0.73.6",
-    "react-native-web": "^0.19.10"
+    "expo": "51.0.22",
+    "expo-module-scripts": "^3.5.2",
+    "react": "18.2.0",
+    "react-native": "0.74.3",
+    "react-native-web": "^0.19.12"
   },
   "peerDependencies": {
     "expo": "*",
     "react": "*",
     "react-native": "*",
     "react-native-web": "*"
+  },
+  "dependencies": {
+    "expo-modules-core": "^1.12.13"
   }
 }
