@@ -285,11 +285,11 @@ func generateThumbnail(fromVideoURL videoURL: URL) -> UIImage? {
     }
 }
 
-func loadVideoURL(fromVideoPath videoPath: String) -> URL? {
-    if let url = URL(string: videoPath) {
+func loadFileURL(fromFilePath filePath: String) -> URL? {
+    if let url = URL(string: filePath) {
         return url
     } else {
-        print("Invalid URL path: \(videoPath)")
+        print("Invalid URL path: \(filePath)")
         return nil
     }
 }
@@ -329,6 +329,13 @@ func resizeImageAndConvertToImageView(image: UIImage, session: UIDragSession, vi
 
     // Return an empty image view if rootView is not accessible
     return UIImageView()
+}
+
+func captureScreenshot(of view: UIView) -> UIImage? {
+    UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, UIScreen.main.scale)
+    defer { UIGraphicsEndImageContext() }
+    view.drawHierarchy(in: view.bounds, afterScreenUpdates: true)
+    return UIGraphicsGetImageFromCurrentImageContext()
 }
 
 func convertPoint(_ point: CGPoint, fromView view: UIView?) -> CGPoint {

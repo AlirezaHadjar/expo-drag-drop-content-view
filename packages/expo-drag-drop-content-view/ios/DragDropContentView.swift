@@ -81,13 +81,18 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                         itemProvider = NSItemProvider(object: finalImage)
                     }
                 }
-            } else if (sourceType == .video) {
-                if let videoURL = loadVideoURL(fromVideoPath: source.value) {
-                    finalImage = generateThumbnail(fromVideoURL: videoURL)
-                    if let provider = NSItemProvider(contentsOf: videoURL) {
+            } else if (sourceType == .video || sourceType == .file) {
+                if let fileURL = loadFileURL(fromFilePath: source.value) {
+                    if (sourceType == .video) {
+                        finalImage = generateThumbnail(fromVideoURL: fileURL)
+                    } else if sourceType == .file {
+                        finalImage = captureScreenshot(of: self)
+                    }
+                    
+                    if let provider = NSItemProvider(contentsOf: fileURL) {
                         itemProvider = provider
                     } else {
-                        print("Failed to create item provider for video at \(videoURL)")
+                        print("Failed to create item provider for file at \(fileURL)")
                     }
                 }
             } else if (sourceType == .text) {
