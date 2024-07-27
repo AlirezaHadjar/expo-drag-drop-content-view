@@ -25,6 +25,17 @@ const handleFile = (file: File) => {
           height: media.naturalHeight,
         });
       };
+      media.onerror = () => {
+        resolve({
+          uri: undefined,
+          path: undefined,
+          type: file.type,
+          base64: media.src,
+          fileName: file.name,
+          width: media.naturalWidth,
+          height: media.naturalHeight,
+        });
+      };
     };
 
     reader.readAsDataURL(file);
@@ -185,7 +196,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     this.props.onDragStart?.();
     const sources = this.props.draggableSources;
     const preview = sources?.at(-1);
-    // console.log("preview", preview);
+
     if (!preview || !sources) return;
 
     event.dataTransfer.setData("text/type", "Custom Drag");

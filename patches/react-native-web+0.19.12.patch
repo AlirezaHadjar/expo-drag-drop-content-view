@@ -12,6 +12,20 @@ index 8c5f79b..124f7b6 100644
  });
  var pickProps = props => pick(props, forwardPropsList);
  var Text = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
+diff --git a/node_modules/react-native-web/dist/exports/View/index.js b/node_modules/react-native-web/dist/exports/View/index.js
+index c812d77..a444ace 100644
+--- a/node_modules/react-native-web/dist/exports/View/index.js
++++ b/node_modules/react-native-web/dist/exports/View/index.js
+@@ -26,7 +26,8 @@ var forwardPropsList = Object.assign({}, forwardedProps.defaultProps, forwardedP
+   lang: true,
+   onScroll: true,
+   onWheel: true,
+-  pointerEvents: true
++  pointerEvents: true,
++  draggable: true
+ });
+ var pickProps = props => pick(props, forwardPropsList);
+ var View = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
 diff --git a/node_modules/react-native-web/src/exports/Text/index.js b/node_modules/react-native-web/src/exports/Text/index.js
 index 071ae10..e22e9ab 100644
 --- a/node_modules/react-native-web/src/exports/Text/index.js

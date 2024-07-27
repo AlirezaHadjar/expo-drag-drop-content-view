@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   file: {
     width: "100%",
     height: "100%",
-    backgroundColor: "red",
+    backgroundColor: "#013d66",
     borderColor: "orange",
     borderWidth: 3,
     borderRadius: 10,
@@ -183,8 +183,18 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
                   {source.text}
                 </Text>
               ) : type === "file" ? (
-                <View style={styles.file}>
-                  <Text style={styles.fileText}>{"File"}</Text>
+                <View
+                  //@ts-ignore
+                  draggable
+                  style={styles.file}
+                >
+                  <Text
+                    //@ts-ignore
+                    draggable
+                    style={styles.fileText}
+                  >
+                    {"File"}
+                  </Text>
                 </View>
               ) : null}
             </AnimatedPressable>
