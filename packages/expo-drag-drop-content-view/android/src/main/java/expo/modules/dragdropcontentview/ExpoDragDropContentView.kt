@@ -70,11 +70,23 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                     val clipData = event.clipData
                     val infoList = mutableListOf<Map<String, Any?>>()
 
+
                     for (i in 0 until clipData.itemCount) {
                         val permissions = activity.requestDragAndDropPermissions(event)
-                        if (permissions != null) {
+                        val text = clipData.getItemAt(i).text // Get text data
+                        if (text != null) {
+                            if (text.isNotEmpty()) {
+                                // Handle text data
+                                if (text.trim().isNotEmpty()) {
+                                    val textInfo = mapOf(
+                                        "type" to DraggableType.TEXT,
+                                        "text" to text
+                                    )
+                                    infoList.add(textInfo)
+                                }
+                            }
+                        } else if (permissions != null) {
                             val contentUri = clipData.getItemAt(i).uri
-
 
                             if (contentUri != null) {
                                 val info = utils.getFileInfo(
@@ -84,18 +96,6 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                                     frame.context
                                 )
                                 info?.let { infoList.add(it) }
-                            }
-                        } else {
-                            val text = clipData.getItemAt(i).text // Get text data
-                            if (!text.isNullOrEmpty()) {
-                                // Handle text data
-                                if (text.trim().isNotEmpty()) {
-                                    val textInfo = mapOf(
-                                        "type" to DraggableType.TEXT,
-                                        "text" to text
-                                    )
-                                    infoList.add(textInfo)
-                                }
                             }
                         }
                     }
@@ -116,13 +116,10 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
 
         for (source in draggableSources) {
             when (source.type) {
-                DraggableType.IMAGE, DraggableType.VIDEO -> {
-                    val path = Uri.parse(source.value).path
-                    if (!path.isNullOrBlank()) {
-                        val file = File(path)
-                        val uri = utils.getContentUriForFile(context, file)
-                        uri?.let { data.add(it) }
-                    }
+                DraggableType.IMAGE, DraggableType.VIDEO, DraggableType.FILE -> {
+                    val uri = Uri.parse(source.value)
+
+                    uri?.let { data.add(it) }
                 }
                 DraggableType.TEXT -> {
                     // For text sources, add the text value directly to the textData list
