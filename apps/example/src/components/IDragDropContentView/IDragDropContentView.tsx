@@ -91,8 +91,8 @@ const styles = StyleSheet.create({
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const getSourceType = (source: DropAsset) => {
-  if (source.type.startsWith("image")) return "image";
-  if (source.type.startsWith("video")) return "video";
+  if (source.type?.startsWith("image")) return "image";
+  if (source.type?.startsWith("video")) return "video";
   if (source.type === "text") return "text";
   return "file";
 };
