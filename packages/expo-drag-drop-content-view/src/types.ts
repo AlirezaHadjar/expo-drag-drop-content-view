@@ -79,7 +79,7 @@ export type DragDropContentViewProps = ViewProps & {
    * @description Pass Uri on iOS and Android, and base64 on Web.
    */
   draggableSources?: {
-    type: "text" | "image" | "video";
+    type: "text" | "image" | "video" | "file";
     value: string;
   }[];
 };

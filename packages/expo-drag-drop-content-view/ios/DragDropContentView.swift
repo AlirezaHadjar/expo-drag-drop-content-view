@@ -13,6 +13,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     var onExit: EventDispatcher? = nil
     lazy var includeBase64 = false
     lazy var draggableSources: [DraggableSource] = []
+    lazy var mimeTypes: [String: String] = [:]
     var fileSystem: EXFileSystemInterface?
 
     func setIncludeBase64(_ includeBase64: Bool) {
@@ -21,6 +22,10 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
     func setDraggableSources(_ draggableSources: [DraggableSource]) {
         self.draggableSources = draggableSources
+    }
+    
+    func setMimeTypes(_ mimeTypes: [String: String]) {
+        self.mimeTypes = mimeTypes
     }
 
     private func setupDropInteraction() {
@@ -51,11 +56,11 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     func setDragEndEventDispatcher(_ eventDispatcher: EventDispatcher) {
         self.onDragEnd = eventDispatcher
     }
-    
+
     func setEnterEventDispatcher(_ eventDispatcher: EventDispatcher) {
         self.onEnter = eventDispatcher
     }
-    
+
     func setExitEventDispatcher(_ eventDispatcher: EventDispatcher) {
         self.onExit = eventDispatcher
     }
@@ -76,13 +81,18 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                         itemProvider = NSItemProvider(object: finalImage)
                     }
                 }
-            } else if (sourceType == .video) {
-                if let videoURL = loadVideoURL(fromVideoPath: source.value) {
-                    finalImage = generateThumbnail(fromVideoURL: videoURL)
-                    if let provider = NSItemProvider(contentsOf: videoURL) {
+            } else if (sourceType == .video || sourceType == .file) {
+                if let fileURL = loadFileURL(fromFilePath: source.value) {
+                    if (sourceType == .video) {
+                        finalImage = generateThumbnail(fromVideoURL: fileURL)
+                    } else if sourceType == .file {
+                        finalImage = captureScreenshot(of: self)
+                    }
+                    
+                    if let provider = NSItemProvider(contentsOf: fileURL) {
                         itemProvider = provider
                     } else {
-                        print("Failed to create item provider for video at \(videoURL)")
+                        print("Failed to create item provider for file at \(fileURL)")
                     }
                 }
             } else if (sourceType == .text) {
@@ -111,7 +121,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                 print("Skipping \(source) due to missing image or video.")
             }
         }
-        
+
         if (dragItems.count > 0) {
             self.onDragStart?()
         }
@@ -173,16 +183,43 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                 UTType.image.identifier,
                 UTType.video.identifier,
                 UTType.movie.identifier,
-                UTType.text.identifier
+                UTType.text.identifier,
+                UTType.pdf.identifier,
+                UTType.json.identifier,
+                UTType.zip.identifier,
+                UTType.spreadsheet.identifier, // general spreadsheet type
+                UTType.presentation.identifier, // general presentation type
+                UTType.database.identifier, // general database type
+                UTType.item.identifier // General wildcard type for any file
             ]
         } else {
             typeIdentifiers = [
                 kUTTypeImage as String,
                 kUTTypeMovie as String,
                 kUTTypeVideo as String,
-                kUTTypeText as String
+                kUTTypeText as String,
+                kUTTypePDF as String,
+                kUTTypeJSON as String,
+                kUTTypeZipArchive as String,
+                kUTTypeSpreadsheet as String, // general spreadsheet type
+                kUTTypePresentation as String, // general presentation type
+                kUTTypeDatabase as String, // general database type
+                kUTTypeItem as String // General wildcard type for any file
             ]
         }
+        
+        // Add custom MIME types from the JSON dictionary
+        for (ext, mimeType) in self.mimeTypes {
+                if #available(iOS 14.0, *) {
+                    if let utType = UTType(filenameExtension: ext) {
+                        typeIdentifiers.append(utType.identifier)
+                    }
+                } else {
+                    if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType as CFString, nil)?.takeRetainedValue() {
+                        typeIdentifiers.append(uti as String)
+                    }
+                }
+            }
 
         return session.hasItemsConforming(toTypeIdentifiers: typeIdentifiers)
     }
@@ -200,65 +237,40 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
             let itemType = getSessionItemType(itemProvider: dragItem.itemProvider)
 
-            if #available(iOS 15.0, *) {
-                if itemType == SessionItemType.image {
-                    loadImageObject(dragItem: dragItem) { asset in
-                        if let asset = asset {
-                            assets.append(asset)
-                        }
-                        dispatchGroup.leave()
+            if itemType == SessionItemType.image {
+                loadImageObject(dragItem: dragItem) { asset in
+                    if let asset = asset {
+                        assets.append(asset)
                     }
-                } else if itemType == SessionItemType.video {
-                    loadFileObject(dragItem: dragItem, isVideo: true) { asset in
-                        if let asset = asset {
-                            assets.append(asset)
-                        }
-                        dispatchGroup.leave()
-                    }
-                } else if itemType == SessionItemType.file {
-                    loadFileObject(dragItem: dragItem) { asset in
-                        if let asset = asset {
-                            assets.append(asset)
-                        }
-                        dispatchGroup.leave()
-                    }
-                } else if itemType == SessionItemType.text {
-                    loadTextObject(dragItem: dragItem) { asset in
-                        if let asset = asset {
-                            assets.append(asset)
-                        }
-                        dispatchGroup.leave()
-                    }
+                    dispatchGroup.leave()
                 }
-            } else {
-                if itemType == SessionItemType.image {
-                    loadImageObject(dragItem: dragItem) { asset in
-                        if let asset = asset {
-                            assets.append(asset)
-                        }
-                        dispatchGroup.leave()
+            } else if itemType == SessionItemType.video {
+                loadFileObject(dragItem: dragItem, isVideo: true) { asset in
+                    if let asset = asset {
+                        assets.append(asset)
                     }
-                } else if itemType == SessionItemType.video {
-                    loadFileObject(dragItem: dragItem, isVideo: true) { asset in
-                        if let asset = asset {
-                            assets.append(asset)
-                        }
-                        dispatchGroup.leave()
+                    dispatchGroup.leave()
+                }
+            } else if itemType == SessionItemType.file {
+                loadFileObject(dragItem: dragItem) { asset in
+                    if let asset = asset {
+                        assets.append(asset)
                     }
-                } else if itemType == SessionItemType.file {
-                    loadFileObject(dragItem: dragItem) { asset in
-                        if let asset = asset {
-                            assets.append(asset)
-                        }
-                        dispatchGroup.leave()
+                    dispatchGroup.leave()
+                }
+            } else if itemType == SessionItemType.text {
+                loadTextObject(dragItem: dragItem) { asset in
+                    if let asset = asset {
+                        assets.append(asset)
                     }
-                } else if itemType == SessionItemType.text {
-                    loadTextObject(dragItem: dragItem) { asset in
-                        if let asset = asset {
-                            assets.append(asset)
-                        }
-                        dispatchGroup.leave()
+                    dispatchGroup.leave()
+                }
+            } else if itemType == SessionItemType.unknown {
+                loadFileObject(dragItem: dragItem) { asset in
+                    if let asset = asset {
+                        assets.append(asset)
                     }
+                    dispatchGroup.leave()
                 }
             }
         }
@@ -306,7 +318,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
             }
 
                if let fileSystem = self.fileSystem {
-                   if let asset = generateVideoAsset(from: url, includeBase64: self.includeBase64, fileSystem: fileSystem) {
+                   if let asset = generateFileAsset(from: url, includeBase64: self.includeBase64, fileSystem: fileSystem, isVideo: isVideo, mimeTypes: self.mimeTypes) {
                        completion(asset)
                    }
                } else {

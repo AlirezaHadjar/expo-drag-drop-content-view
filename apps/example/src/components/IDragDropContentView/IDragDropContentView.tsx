@@ -5,7 +5,7 @@ import {
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
 import React, { useState } from "react";
-import { Platform, Pressable, StyleSheet, Text } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Video, ResizeMode } from "expo-av";
 import { usePermission } from "../../hooks/permission";
@@ -72,14 +72,29 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: "blue",
   },
+  file: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#013d66",
+    borderColor: "orange",
+    borderWidth: 3,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fileText: {
+    color: "white",
+    fontSize: 25,
+  },
 });
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const getSourceType = (source: DropAsset) => {
-  if (source.type.startsWith("image")) return "image";
-  if (source.type.startsWith("video")) return "video";
-  if (source.type.startsWith("text")) return "text";
+  if (source.type?.startsWith("image")) return "image";
+  if (source.type?.startsWith("video")) return "video";
+  if (source.type === "text") return "text";
+  return "file";
 };
 
 export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
@@ -167,6 +182,20 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
                 >
                   {source.text}
                 </Text>
+              ) : type === "file" ? (
+                <View
+                  //@ts-ignore
+                  draggable
+                  style={styles.file}
+                >
+                  <Text
+                    //@ts-ignore
+                    draggable
+                    style={styles.fileText}
+                  >
+                    {"File"}
+                  </Text>
+                </View>
               ) : null}
             </AnimatedPressable>
           );

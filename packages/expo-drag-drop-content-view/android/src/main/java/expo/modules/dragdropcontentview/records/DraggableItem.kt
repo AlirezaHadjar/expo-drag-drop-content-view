@@ -8,6 +8,7 @@ enum class DraggableType(val value: String) : Enumerable {
     IMAGE("image"),
     VIDEO("video"),
     TEXT("text"),
+    FILE("file");
 }
 
 data class DraggableItem(@Field val type: DraggableType, @Field val value: String): Record
