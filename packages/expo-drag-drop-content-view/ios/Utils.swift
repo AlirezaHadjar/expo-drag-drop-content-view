@@ -163,16 +163,15 @@ func generateFileAsset(from mediaURL: URL, includeBase64: Bool, fileSystem: EXFi
         let transcodeFileType = determineTranscodeFileType(from: originalExtension)
         let transcodeFileExtension = originalExtension
         let mimeType = getMimeType(from: originalExtension, mimeTypes: mimeTypes)
-
-        // Assuming mediaURL is a security-scoped URL obtained from a drag and drop action
-        guard mediaURL.startAccessingSecurityScopedResource() else {
-            throw NSError(domain: "YourAppDomain", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to access security scoped resource"])
-        }
-
+        
+        // Attempt to access security-scoped resource if applicable
+        let didStartAccessing = mediaURL.startAccessingSecurityScopedResource()
+        
         defer {
-            mediaURL.stopAccessingSecurityScopedResource()
+            if didStartAccessing {
+                mediaURL.stopAccessingSecurityScopedResource()
+            }
         }
-
 
         // Copy the video to a location controlled by us to ensure it's not removed during conversion
         let assetUrl = try generateUrl(withFileExtension: originalExtension, fileSystem: fileSystem)
