@@ -58,6 +58,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     return (
       <NativeExpoDragDropContentView
         {...props}
+        includeBase64={props.includeBase64 || false}
         style={resolvedStyle}
         //@ts-ignore
         onDrop={this.onDropEvent}
