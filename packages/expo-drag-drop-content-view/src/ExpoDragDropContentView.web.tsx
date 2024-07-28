@@ -4,6 +4,10 @@ import { StyleSheet, View } from "react-native";
 
 import { DragDropContentViewProps, DropAsset } from "./types";
 
+let DragType: string = "";
+type DragDataItem = { type: string; value: string };
+let DragData: DragDataItem[] = [];
+
 const handleFile = (file: File) => {
   return new Promise<DropAsset>((resolve) => {
     const reader = new FileReader();
@@ -71,55 +75,45 @@ const handleText = (text: string) => {
   });
 };
 
-const getKey = (index: number) => ({
-  type: `custom-type-${index}`,
-  value: `custom-value-${index}`,
-});
-
 const getAssets = async (dataTransfer: DataTransfer) => {
   const resolvedFiles: (DropAsset | null)[] = [];
   const filePromises: Promise<DropAsset | null>[] = [];
-  const type = dataTransfer.getData("text/type");
   const textData = dataTransfer.getData("text/plain");
   const htmlData = dataTransfer.getData("text/html");
-  const isCustomDrag = type === "Custom Drag";
+  const isCustomDrag = DragType === "Custom Drag";
 
   if (textData && !isCustomDrag) {
     filePromises.push(handleText(textData));
   }
 
   // Dragging from the file system
-  if (dataTransfer.items && dataTransfer.items.length > 0) {
-    for (let i = 0; i < dataTransfer.items.length; i++) {
-      const item = dataTransfer.items[i];
-      if (item.kind === "file") {
-        const file = item.getAsFile();
-        if (!file) continue;
+  if (!isCustomDrag) {
+    if (dataTransfer.items && dataTransfer.items.length > 0) {
+      for (let i = 0; i < dataTransfer.items.length; i++) {
+        const item = dataTransfer.items[i];
+        if (item.kind === "file") {
+          const file = item.getAsFile();
+          if (!file) continue;
+          filePromises.push(handleFile(file));
+        }
+      }
+    } else if (dataTransfer.files && dataTransfer.files.length > 0) {
+      for (let i = 0; i < dataTransfer.files.length; i++) {
+        const file = dataTransfer.files[i];
         filePromises.push(handleFile(file));
       }
-    }
-  } else if (dataTransfer.files && dataTransfer.files.length > 0) {
-    for (let i = 0; i < dataTransfer.files.length; i++) {
-      const file = dataTransfer.files[i];
-      filePromises.push(handleFile(file));
     }
   }
 
   // Dragging from current web page
   if (isCustomDrag) {
-    let index = 0;
-    let key = getKey(index);
+    const droppedSources: DragDataItem[] = []; // base64 strings
 
-    const droppedSources: { type: string; value: string }[] = []; // base64 strings
-
-    while (dataTransfer.getData(key.value)) {
-      const value = dataTransfer.getData(key.value);
-      const type = dataTransfer.getData(key.type);
-      droppedSources.push({ type, value });
-
-      index++;
-      key = getKey(index);
-    }
+    DragData.forEach((data) => {
+      droppedSources.push({ type: data.type, value: data.value });
+    });
+    DragData = [];
+    DragType = "";
 
     resolvedFiles.push(
       ...droppedSources.map((item) => {
@@ -199,11 +193,9 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
 
     if (!preview || !sources) return;
 
-    event.dataTransfer.setData("text/type", "Custom Drag");
+    DragType = "Custom Drag";
     sources.forEach((source, index) => {
-      const key = getKey(index);
-      event.dataTransfer.setData(key.value, source.value);
-      event.dataTransfer.setData(key.type, source.type);
+      DragData.push({ type: source.type, value: source.value });
     });
 
     // Both images and videos can be dragged
