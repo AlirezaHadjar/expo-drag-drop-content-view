@@ -112,8 +112,6 @@ const getAssets = async (dataTransfer: DataTransfer) => {
     DragData.forEach((data) => {
       droppedSources.push({ type: data.type, value: data.value });
     });
-    DragData = [];
-    DragType = "";
 
     resolvedFiles.push(
       ...droppedSources.map((item) => {
@@ -136,6 +134,9 @@ const getAssets = async (dataTransfer: DataTransfer) => {
   }
 
   resolvedFiles.push(...(await Promise.all(filePromises)));
+
+  DragData = [];
+  DragType = "";
 
   // Filter out null values (failed handleFile calls)
   return resolvedFiles.filter((file) => file !== null) as DropAsset[];
