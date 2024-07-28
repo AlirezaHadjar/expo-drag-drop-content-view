@@ -108,14 +108,14 @@ func getMimeType(image: UIImage) -> String? {
 
 private func getMimeType(from pathExtension: String, mimeTypes: [String: String]) -> String {
     let filenameExtension = String(pathExtension.dropFirst())
-    
+
     // Check iOS 14+ UTType API
     if #available(iOS 14, *) {
         if let mimeType = UTType(filenameExtension: filenameExtension)?.preferredMIMEType {
             return mimeType
         }
     }
-    
+
     // Check older iOS versions
     if let uti = UTTypeCreatePreferredIdentifierForTag(
         kUTTagClassFilenameExtension,
@@ -125,7 +125,7 @@ private func getMimeType(from pathExtension: String, mimeTypes: [String: String]
             return mimeType as String
         }
     }
-    
+
     // Fallback to dictionary lookup
     return mimeTypes[filenameExtension] ?? "unknown"
 }
@@ -164,6 +164,16 @@ func generateFileAsset(from mediaURL: URL, includeBase64: Bool, fileSystem: EXFi
         let transcodeFileExtension = originalExtension
         let mimeType = getMimeType(from: originalExtension, mimeTypes: mimeTypes)
 
+        // Assuming mediaURL is a security-scoped URL obtained from a drag and drop action
+        guard mediaURL.startAccessingSecurityScopedResource() else {
+            throw NSError(domain: "YourAppDomain", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to access security scoped resource"])
+        }
+
+        defer {
+            mediaURL.stopAccessingSecurityScopedResource()
+        }
+
+
         // Copy the video to a location controlled by us to ensure it's not removed during conversion
         let assetUrl = try generateUrl(withFileExtension: originalExtension, fileSystem: fileSystem)
         let transcodedUrl = try generateUrl(withFileExtension: transcodeFileExtension, fileSystem: fileSystem)
@@ -184,7 +194,7 @@ func generateFileAsset(from mediaURL: URL, includeBase64: Bool, fileSystem: EXFi
                 asset["type"] = mimeType
                 asset["path"] = targetUrl.absoluteString.replacingOccurrences(of: "file://", with: "")
                 asset["uri"] = targetUrl.absoluteString
-                
+
                 if (isVideo) {
                     asset["duration"] = VideoUtils.readDurationFrom(url: mediaURL)
                     // Get video dimensions
@@ -209,6 +219,7 @@ func generateFileAsset(from mediaURL: URL, includeBase64: Bool, fileSystem: EXFi
         }
     } catch {
         print("Error processing video:", error.localizedDescription)
+        return nil
     }
 
     return asset
@@ -471,7 +482,7 @@ enum SessionItemType {
     case text
     case file
     case unknown
-    
+
     var stringValue: String {
         switch self {
         case .text: return "text"
