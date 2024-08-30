@@ -1,7 +1,7 @@
 PODS:
   - boost (1.83.0)
   - DoubleConversion (1.1.6)
-  - EXAV (14.0.5):
+  - EXAV (14.0.6):
     - ExpoModulesCore
     - ReactCommon/turbomodule/core
   - EXConstants (16.0.2):
@@ -10,13 +10,13 @@ PODS:
     - ExpoModulesCore
   - ExpoAsset (10.0.10):
     - ExpoModulesCore
-  - ExpoDragDropContentView (0.7.2):
+  - ExpoDragDropContentView (0.8.1):
     - ExpoModulesCore
   - ExpoFileSystem (17.0.1):
     - ExpoModulesCore
   - ExpoFont (12.0.9):
     - ExpoModulesCore
-  - ExpoImage (1.12.10):
+  - ExpoImage (1.12.13):
     - ExpoModulesCore
     - libavif/libdav1d
     - SDWebImage (~> 5.19.1)
@@ -25,7 +25,7 @@ PODS:
     - SDWebImageWebPCoder (~> 0.14.6)
   - ExpoKeepAwake (13.0.2):
     - ExpoModulesCore
-  - ExpoModulesCore (1.12.13):
+  - ExpoModulesCore (1.12.20):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1249,9 +1249,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - SDWebImage (5.19.4):
-    - SDWebImage/Core (= 5.19.4)
-  - SDWebImage/Core (5.19.4)
+  - SDWebImage (5.19.7):
+    - SDWebImage/Core (= 5.19.7)
+  - SDWebImage/Core (5.19.7)
   - SDWebImageAVIFCoder (0.11.0):
     - libavif/core (>= 0.11.0)
     - SDWebImage (~> 5.10)
@@ -1479,16 +1479,16 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
-  EXAV: cb6e8dbcc40873d8a386af357e6c2eb55d6d739e
+  EXAV: a1e8d579f0cb4a60792d1686732117420c901b8b
   EXConstants: 409690fbfd5afea964e5e9d6c4eb2c2b59222c59
   Expo: 8b7948e45627e848c2d7b6be7cf5851a505aef19
   ExpoAsset: 323700f291684f110fb55f0d4022a3362ea9f875
-  ExpoDragDropContentView: 3a4f25c8ca7acaa06a60205821c55947d50ad41b
+  ExpoDragDropContentView: fd370bfeacfe356e38a6170ea253002bdc8ba42e
   ExpoFileSystem: 80bfe850b1f9922c16905822ecbf97acd711dc51
   ExpoFont: e7f2275c10ca8573c991e007329ad6bf98086485
-  ExpoImage: c4b076fb901821b6cf7293761045fa517733288d
+  ExpoImage: cbe7617b4e0e7ba064cc4caa51bfc96262e51ef3
   ExpoKeepAwake: 3b8815d9dd1d419ee474df004021c69fdd316d08
-  ExpoModulesCore: a4b45b5f081f5fe9b8e87667906d180cd52f32d7
+  ExpoModulesCore: 5440e96a8ee014f4fd88e77264985fd0a65f5f8c
   FBLazyVector: 7e977dd099937dc5458851233141583abba49ff2
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: fdfdfe5479092de0c4bdbebedd9056951f092c4f
@@ -1544,13 +1544,13 @@ SPEC CHECKSUMS:
   React-utils: a06061b3887c702235d2dac92dacbd93e1ea079e
   ReactCommon: f00e436b3925a7ae44dfa294b43ef360fbd8ccc4
   RNReanimated: 33c6135cdf421b795c2f1173075a11cca2a39bf2
-  SDWebImage: 066c47b573f408f18caa467d71deace7c0f8280d
+  SDWebImage: 8a6b7b160b4d710e2a22b6900e25301075c34cb3
   SDWebImageAVIFCoder: 00310d246aab3232ce77f1d8f0076f8c4b021d90
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   Yoga: 04f1db30bb810187397fa4c37dd1868a27af229c
 
-PODFILE CHECKSUM: 7e92a6069e169d6c91f4f4b94e630f8e2bfa2128
+PODFILE CHECKSUM: 394853ca847c2a6e2862adae3d934c4722a92f7c
 
 COCOAPODS: 1.15.2

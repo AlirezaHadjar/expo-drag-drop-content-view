@@ -4,5 +4,5 @@
   "newArchEnabled": "false",
   "apple.extraPods": "[]",
   "apple.ccacheEnabled": "false",
-  "apple.privacyManifestAggregationEnabled": "false"
+  "apple.privacyManifestAggregationEnabled": "true"
 }
