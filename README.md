@@ -6,13 +6,33 @@
 
 A superset of `View` component that supports iOS, Android, and Web Native drag and drop feature.
 
-|                       iOS                       |                        iPadOS                         |                         Android                         |
-| :---------------------------------------------: | :---------------------------------------------------: | :-----------------------------------------------------: |
-| ![iOS Screenshot](apps/docs/static/img/ios.gif) | ![iPadOS Screenshot](apps/docs/static/img/ipados.gif) | ![Android Screenshot](apps/docs/static/img/android.gif) |
+<table>
+  <tr>
+    <th align="center">iOS</th>
+    <th align="center">Android</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="apps/docs/static/img/ios.gif" alt="iOS Screenshot" style="max-width: 100%; height: auto;" />
+    </td>
+    <td align="center">
+      <img src="apps/docs/static/img/android.gif" alt="Android Screenshot" style="max-width: 100%; height: auto;" />
+    </td>
+  </tr>
+  <tr>
+    <th align="center">Web</th>
+    <th align="center">iPadOS</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="apps/docs/static/img/web.gif" alt="Web Screenshot" style="max-width: 100%; height: auto;" />
+    </td>
+    <td align="center">
+      <img src="apps/docs/static/img/ipados.gif" alt="iPadOS Screenshot" style="max-width: 100%; height: auto;" />
+    </td>
+  </tr>
+</table>
 
-|                       Web                       |
-| :---------------------------------------------: |
-| ![Web Screenshot](apps/docs/static/img/web.gif) |
 
 ## Features
 
