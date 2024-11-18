@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { usePermission } from "../../hooks/permission";
+//@ts-ignore
 import { IVideo } from "./Video";
 
 const borderRadius = 20;
