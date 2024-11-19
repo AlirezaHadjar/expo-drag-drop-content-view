@@ -7,8 +7,9 @@ import { Image } from "expo-image";
 import React, { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-import { Video, ResizeMode } from "expo-av";
 import { usePermission } from "../../hooks/permission";
+//@ts-ignore
+import { IVideo } from "./Video";
 
 const borderRadius = 20;
 
@@ -160,20 +161,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
               {type === "image" ? (
                 <Image source={{ uri }} style={styles.image} />
               ) : type === "video" ? (
-                <Video
-                  isMuted
-                  style={styles.image}
-                  shouldPlay
-                  onError={(error) => console.log(JSON.stringify(error))}
-                  source={{ uri }}
-                  resizeMode={ResizeMode.COVER}
-                  isLooping
-                  onReadyForDisplay={(videoData) => {
-                    if (Platform.OS === "web")
-                      //@ts-ignore
-                      videoData.srcElement.style.position = "initial";
-                  }}
-                />
+                <IVideo style={styles.image} uri={uri} />
               ) : type === "text" ? (
                 <Text
                   //@ts-ignore
