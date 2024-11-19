@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-web/dist/exports/Text/index.js b/node_modules/react-native-web/dist/exports/Text/index.js
-index 8c5f79b..124f7b6 100644
+index 4130386..5392836 100644
 --- a/node_modules/react-native-web/dist/exports/Text/index.js
 +++ b/node_modules/react-native-web/dist/exports/Text/index.js
-@@ -26,7 +26,8 @@ import { warnOnce } from '../../modules/warnOnce';
+@@ -29,7 +29,8 @@ import { useLocaleContext, getLocaleDirection } from '../../modules/useLocale';
  var forwardPropsList = Object.assign({}, forwardedProps.defaultProps, forwardedProps.accessibilityProps, forwardedProps.clickProps, forwardedProps.focusProps, forwardedProps.keyboardProps, forwardedProps.mouseProps, forwardedProps.touchProps, forwardedProps.styleProps, {
    href: true,
    lang: true,
@@ -13,10 +13,10 @@ index 8c5f79b..124f7b6 100644
  var pickProps = props => pick(props, forwardPropsList);
  var Text = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
 diff --git a/node_modules/react-native-web/dist/exports/View/index.js b/node_modules/react-native-web/dist/exports/View/index.js
-index c812d77..a444ace 100644
+index a656a0a..51d0861 100644
 --- a/node_modules/react-native-web/dist/exports/View/index.js
 +++ b/node_modules/react-native-web/dist/exports/View/index.js
-@@ -26,7 +26,8 @@ var forwardPropsList = Object.assign({}, forwardedProps.defaultProps, forwardedP
+@@ -28,7 +28,8 @@ var forwardPropsList = Object.assign({}, forwardedProps.defaultProps, forwardedP
    lang: true,
    onScroll: true,
    onWheel: true,
@@ -27,10 +27,10 @@ index c812d77..a444ace 100644
  var pickProps = props => pick(props, forwardPropsList);
  var View = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
 diff --git a/node_modules/react-native-web/src/exports/Text/index.js b/node_modules/react-native-web/src/exports/Text/index.js
-index 071ae10..e22e9ab 100644
+index f79e82c..cbdf399 100644
 --- a/node_modules/react-native-web/src/exports/Text/index.js
 +++ b/node_modules/react-native-web/src/exports/Text/index.js
-@@ -37,7 +37,8 @@ const forwardPropsList = Object.assign(
+@@ -39,7 +39,8 @@ const forwardPropsList = Object.assign(
    {
      href: true,
      lang: true,

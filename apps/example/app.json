@@ -11,9 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "expo.modules.dragdropcontentview.example"
@@ -32,18 +30,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "newArchEnabled": false
-          },
-          "android": {
-            "newArchEnabled": true
-          }
-        }
-      ]
-    ]
+    "newArchEnabled": true
   }
 }
