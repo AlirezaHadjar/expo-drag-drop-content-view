@@ -13,3 +13,6 @@ sidebar_position: 4
 
 - Dropping multiple media files is fully supported. However, for dragging, it is only available across different instances of `<DragDropContentView />`. For external dragging (to other websites or the desktop), you must pass only a single media file to the `draggableSources`.
 - The dropped files will not have `uri` or `path` properties. You can use `base64` or `text` properties to get the file content.
+
+## New Architecture:
+- The new architecture can be enabled for Android but not for iOS. This limitation is caused by a bug upstream which is explained [here](https://github.com/expo/expo/issues/28040). Although if you do not want to have the touchability for the children of the `DragDropContentView`, you can use the new architecture on iOS as well.
