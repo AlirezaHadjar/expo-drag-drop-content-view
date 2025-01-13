@@ -5,13 +5,25 @@ import {
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
 import React, { useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { usePermission } from "../../hooks/permission";
 //@ts-ignore
 import { IVideo } from "./Video";
 
 const borderRadius = 20;
+
+const isNewArchEnabled =
+  (Platform.OS === "ios" || Platform.OS === "android") &&
+  //@ts-ignore
+  global?.nativeFabricUIManager !== "Paper";
 
 const styles = StyleSheet.create({
   container: {
@@ -30,10 +42,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
-    borderRadius,
     overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: isNewArchEnabled ? 0 : borderRadius,
   },
   image: {
     width: "100%",
@@ -48,7 +60,7 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius,
+    borderRadius: isNewArchEnabled ? 0 : borderRadius,
   },
   activePlaceholderContainer: {
     backgroundColor: "#2f95dc",
@@ -65,13 +77,7 @@ const styles = StyleSheet.create({
   text: {
     textAlign: "center",
     fontSize: 25,
-    padding: 10,
     color: "white",
-    backgroundColor: "#2f95dc",
-    borderRadius: 10,
-    overflow: "hidden",
-    borderWidth: 3,
-    borderColor: "blue",
   },
   file: {
     width: "100%",
@@ -112,6 +118,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
     <DragDropContentView
       {...props}
       includeBase64={false}
+      collapsable={true}
       draggableSources={sources
         ?.filter((source) => getSourceType(source) !== undefined)
         ?.map((source) => ({
@@ -132,7 +139,6 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
         setReadyToReceive(false);
       }}
       onDrop={(event) => {
-        // console.log(JSON.stringify(event.assets));
         const newData = [...(sources ?? []), ...event.assets];
         setSources(newData);
         props.onDrop?.(event);
@@ -151,11 +157,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
             <AnimatedPressable
               key={index}
               onPress={handleClear}
-              entering={
-                Platform.OS === "web"
-                  ? undefined
-                  : FadeIn.springify().delay(index * 100)
-              }
+              entering={FadeIn.springify().delay(index * 100)}
               style={[styles.sourceContainer, { transform: [{ rotate }] }]}
             >
               {type === "image" ? (
@@ -189,7 +191,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
           );
         })
       ) : (
-        <Animated.View
+        <TouchableOpacity
           style={[
             styles.placeholderContainer,
             readyToReceive && styles.readyPlaceholderContainer,
@@ -197,7 +199,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
           ]}
         >
           <Text style={styles.placeholderText}>Drop here!</Text>
-        </Animated.View>
+        </TouchableOpacity>
       )}
     </DragDropContentView>
   );
