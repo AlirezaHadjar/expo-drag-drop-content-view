@@ -64,3 +64,12 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# iOS
+ios/
+
+# Android
+android/
+
+!packages/expo-drag-drop-content-view/ios/
+!packages/expo-drag-drop-content-view/android/
