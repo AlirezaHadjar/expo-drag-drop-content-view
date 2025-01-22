@@ -60,7 +60,7 @@ A superset of `View` component that supports iOS, Android, and Web Native drag a
 - [x] Adding dragging/dropping video support
 - [x] Adding dragging/dropping text support
 - [x] Adding dragging/dropping all file types support
-- [ ] Adopting new architecture
+- [x] Adopting new architecture
 - [ ] MacOS support
 
 ## Acknowledgment
