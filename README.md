@@ -40,6 +40,7 @@ A superset of `View` component that supports iOS, Android, and Web Native drag a
 - 📤 Drag any file to other apps
 - 📬 Drag any file within the app
 - 📥 Drop any file from other apps
+- 🔨Support new architecture
 
 ## Documentation
 
@@ -59,6 +60,7 @@ A superset of `View` component that supports iOS, Android, and Web Native drag a
 - [x] Adding dragging/dropping video support
 - [x] Adding dragging/dropping text support
 - [x] Adding dragging/dropping all file types support
+- [ ] Adopting new architecture
 - [ ] MacOS support
 
 ## Acknowledgment
