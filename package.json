@@ -1,7 +1,7 @@
 {
     "name": "@alirezahadjar/monorepo",
     "private": true,
-    "version": "0.8.5",
+    "version": "0.9.0",
     "scripts": {
         "build": "turbo build",
         "clean": "turbo clean && rm -rf node_modules",
