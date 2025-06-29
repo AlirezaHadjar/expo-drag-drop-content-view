@@ -14,6 +14,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     lazy var includeBase64 = false
     lazy var draggableSources: [DraggableSource] = []
     lazy var mimeTypes: [String: String] = [:]
+    lazy var allowedMimeTypes: [String]? = nil
     var fileSystem: EXFileSystemInterface?
 
     func setIncludeBase64(_ includeBase64: Bool) {
@@ -23,10 +24,16 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     func setDraggableSources(_ draggableSources: [DraggableSource]) {
         self.draggableSources = draggableSources
     }
-    
+
     func setMimeTypes(_ mimeTypes: [String: String]) {
         self.mimeTypes = mimeTypes
     }
+
+    func setAllowedMimeTypes(_ allowedMimeTypes: [String]?) {
+        self.allowedMimeTypes = allowedMimeTypes
+    }
+
+
 
     private func setupDropInteraction() {
         let dropInteraction = UIDropInteraction(delegate: self)
@@ -88,7 +95,7 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
                     } else if sourceType == .file {
                         finalImage = captureScreenshot(of: self)
                     }
-                    
+
                     if let provider = NSItemProvider(contentsOf: fileURL) {
                         itemProvider = provider
                     } else {
@@ -176,38 +183,46 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        var typeIdentifiers: [String] = []
+        // If allowedMimeTypes is specified, we need to check each item's MIME type
+        if let allowedMimeTypes = self.allowedMimeTypes {
+            // If empty array, allow none
+            if allowedMimeTypes.isEmpty {
+                return false
+            }
 
-        if #available(iOS 14.0, *) {
-            typeIdentifiers = [
-                UTType.image.identifier,
-                UTType.video.identifier,
-                UTType.movie.identifier,
-                UTType.text.identifier,
-                UTType.pdf.identifier,
-                UTType.json.identifier,
-                UTType.zip.identifier,
-                UTType.spreadsheet.identifier, // general spreadsheet type
-                UTType.presentation.identifier, // general presentation type
-                UTType.database.identifier, // general database type
-                UTType.item.identifier // General wildcard type for any file
-            ]
-        } else {
-            typeIdentifiers = [
-                kUTTypeImage as String,
-                kUTTypeMovie as String,
-                kUTTypeVideo as String,
-                kUTTypeText as String,
-                kUTTypePDF as String,
-                kUTTypeJSON as String,
-                kUTTypeZipArchive as String,
-                kUTTypeSpreadsheet as String, // general spreadsheet type
-                kUTTypePresentation as String, // general presentation type
-                kUTTypeDatabase as String, // general database type
-                kUTTypeItem as String // General wildcard type for any file
-            ]
+            // Check if we have any regex patterns
+            let hasRegexPatterns = allowedMimeTypes.contains { $0.hasPrefix("__REGEX__") }
+
+            if hasRegexPatterns {
+                // For regex patterns, accept all items and filter in performDrop
+                if #available(iOS 14.0, *) {
+                    return session.hasItemsConforming(toTypeIdentifiers: [UTType.item.identifier])
+                } else {
+                    return session.hasItemsConforming(toTypeIdentifiers: [kUTTypeItem as String])
+                }
+            } else {
+                // Convert allowed MIME types to UTI identifiers for exact matching
+                var allowedTypeIdentifiers: [String] = []
+
+                for mimeType in allowedMimeTypes {
+                    if #available(iOS 14.0, *) {
+                        if let utType = UTType(mimeType: mimeType) {
+                            allowedTypeIdentifiers.append(utType.identifier)
+                        }
+                    } else {
+                        if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType as CFString, nil)?.takeRetainedValue() {
+                            allowedTypeIdentifiers.append(uti as String)
+                        }
+                    }
+                }
+
+                return session.hasItemsConforming(toTypeIdentifiers: allowedTypeIdentifiers)
+            }
         }
-        
+
+        // Default behavior when no MIME type restrictions
+        var typeIdentifiers = getDefaultDropTypeIdentifiers()
+
         // Add custom MIME types from the JSON dictionary
         for (ext, mimeType) in self.mimeTypes {
                 if #available(iOS 14.0, *) {
@@ -225,7 +240,9 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
-        return UIDropProposal(operation: .copy)
+        // Use utility function to check if drag session should be allowed
+        let isAllowed = shouldAllowDragSession(session, allowedMimeTypes: self.allowedMimeTypes)
+        return UIDropProposal(operation: isAllowed ? .copy : .forbidden)
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
@@ -289,7 +306,12 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
     private func loadTextObject(dragItem: UIDragItem, completion: @escaping (NSMutableDictionary?) -> Void) {
         _ = dragItem.itemProvider.loadObject(ofClass: String.self) { (text, _) in
                 if let text = text {
-                    completion(["type": "text", "text": text])
+                    // Check if text/plain MIME type is allowed
+                    if isMimeTypeAllowed("text/plain", allowedMimeTypes: self.allowedMimeTypes) {
+                        completion(["type": "text", "text": text])
+                    } else {
+                        completion(nil)
+                    }
                 } else {
                     completion(nil)
                 }
@@ -300,7 +322,16 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
         dragItem.itemProvider.loadObject(ofClass: UIImage.self) { (image, err) in
             if let image = image as? UIImage {
                     let asset = generateImageAsset(image: image, includeBase64: self.includeBase64)
-                    completion(asset)
+                    // Check if the asset's MIME type is allowed
+                    if let asset = asset, let mimeType = asset["type"] as? String {
+                        if isMimeTypeAllowed(mimeType, allowedMimeTypes: self.allowedMimeTypes) {
+                            completion(asset)
+                        } else {
+                            completion(nil)
+                        }
+                    } else {
+                        completion(asset)
+                    }
             } else {
                 completion(nil)
             }
@@ -319,7 +350,18 @@ class DragDropContentView: UIView, UIDropInteractionDelegate, UIDragInteractionD
 
                if let fileSystem = self.fileSystem {
                    if let asset = generateFileAsset(from: url, includeBase64: self.includeBase64, fileSystem: fileSystem, isVideo: isVideo, mimeTypes: self.mimeTypes) {
-                       completion(asset)
+                       // Check if the asset's MIME type is allowed
+                       if let mimeType = asset["type"] as? String {
+                           if isMimeTypeAllowed(mimeType, allowedMimeTypes: self.allowedMimeTypes) {
+                               completion(asset)
+                           } else {
+                               completion(nil)
+                           }
+                       } else {
+                           completion(asset)
+                       }
+                   } else {
+                       completion(nil)
                    }
                } else {
                    completion(nil)

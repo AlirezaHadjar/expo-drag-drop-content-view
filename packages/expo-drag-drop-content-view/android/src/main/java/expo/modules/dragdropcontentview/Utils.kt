@@ -158,4 +158,44 @@ class Utils {
 
         return null
     }
+
+    // MIME Type Filtering Utils
+    fun isMimeTypeAllowed(mimeType: String?, allowedMimeTypes: List<String>?): Boolean {
+        // If null, allow all
+        if (allowedMimeTypes == null) {
+            return true
+        }
+        // If empty array, allow none
+        if (allowedMimeTypes.isEmpty()) {
+            return false
+        }
+        // If mimeType is null or empty, don't allow it when restrictions are set
+        if (mimeType.isNullOrEmpty()) {
+            return false
+        }
+
+        return allowedMimeTypes.any { allowedType ->
+            if (allowedType.startsWith("__REGEX__") && allowedType.contains("__FLAGS__")) {
+                // Handle regex pattern
+                val parts = allowedType.split("__FLAGS__")
+                val pattern = parts[0].removePrefix("__REGEX__")
+                val flags = if (parts.size > 1) parts[1] else ""
+
+                try {
+                    val regexOptions = mutableSetOf<RegexOption>()
+                    if (flags.contains("i")) regexOptions.add(RegexOption.IGNORE_CASE)
+                    if (flags.contains("m")) regexOptions.add(RegexOption.MULTILINE)
+                    if (flags.contains("s")) regexOptions.add(RegexOption.DOT_MATCHES_ALL)
+
+                    val regex = Regex(pattern, regexOptions)
+                    regex.matches(mimeType)
+                } catch (e: Exception) {
+                    false
+                }
+            } else {
+                // Handle exact string match
+                allowedType == mimeType
+            }
+        }
+    }
 }

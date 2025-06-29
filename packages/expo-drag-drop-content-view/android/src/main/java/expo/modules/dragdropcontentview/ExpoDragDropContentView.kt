@@ -24,6 +24,7 @@ import java.io.File
 class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
     private var includeBase64 = false
     private var draggableSources: List<DraggableItem> = emptyList()
+    private var allowedMimeTypes: List<String>? = null
     private val onDrop by EventDispatcher()
     private val onEnter by EventDispatcher<Unit>()
     private val onExit by EventDispatcher<Unit>()
@@ -40,6 +41,12 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
     fun setDraggableSources(value: List<DraggableItem>?) {
         draggableSources = value ?: emptyList()
     }
+
+    fun setAllowedMimeTypes(value: List<String>?) {
+        allowedMimeTypes = value
+    }
+
+
 
     private fun configureDropHelper(frame: View) {
         // DropHelper is only available on Android N and above
@@ -78,11 +85,14 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                             if (text.isNotEmpty()) {
                                 // Handle text data
                                 if (text.trim().isNotEmpty()) {
-                                    val textInfo = mapOf(
-                                        "type" to DraggableType.TEXT,
-                                        "text" to text
-                                    )
-                                    infoList.add(textInfo)
+                                    // Check if text/plain MIME type is allowed
+                                    if (utils.isMimeTypeAllowed("text/plain", allowedMimeTypes)) {
+                                        val textInfo = mapOf(
+                                            "type" to DraggableType.TEXT,
+                                            "text" to text
+                                        )
+                                        infoList.add(textInfo)
+                                    }
                                 }
                             }
                         } else if (permissions != null) {
@@ -95,7 +105,13 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
                                     includeBase64,
                                     frame.context
                                 )
-                                info?.let { infoList.add(it) }
+                                info?.let { fileInfo ->
+                                    // Check if the file's MIME type is allowed
+                                    val mimeType = fileInfo["type"] as? String
+                                    if (utils.isMimeTypeAllowed(mimeType, allowedMimeTypes)) {
+                                        infoList.add(fileInfo)
+                                    }
+                                }
                             }
                         }
                     }

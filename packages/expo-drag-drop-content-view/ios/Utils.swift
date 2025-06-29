@@ -163,10 +163,10 @@ func generateFileAsset(from mediaURL: URL, includeBase64: Bool, fileSystem: EXFi
         let transcodeFileType = determineTranscodeFileType(from: originalExtension)
         let transcodeFileExtension = originalExtension
         let mimeType = getMimeType(from: originalExtension, mimeTypes: mimeTypes)
-        
+
         // Attempt to access security-scoped resource if applicable
         let didStartAccessing = mediaURL.startAccessingSecurityScopedResource()
-        
+
         defer {
             if didStartAccessing {
                 mediaURL.stopAccessingSecurityScopedResource()
@@ -559,4 +559,230 @@ struct DraggableSource: Record {
 
   @Field
   var value: String
+}
+
+// MARK: - MIME Type Filtering Utils
+
+func isMimeTypeAllowed(_ mimeType: String?, allowedMimeTypes: [String]?) -> Bool {
+    // If nil, allow all
+    guard let allowedMimeTypes = allowedMimeTypes else {
+        return true
+    }
+    // If empty array, allow none
+    if allowedMimeTypes.isEmpty {
+        return false
+    }
+    // If mimeType is nil or empty, don't allow it when restrictions are set
+    guard let mimeType = mimeType, !mimeType.isEmpty else {
+        return false
+    }
+
+    return allowedMimeTypes.contains { allowedType in
+        if allowedType.hasPrefix("__REGEX__") && allowedType.contains("__FLAGS__") {
+            // Handle regex pattern
+            let components = allowedType.components(separatedBy: "__FLAGS__")
+            guard components.count >= 1 else { return false }
+
+            let pattern = components[0].replacingOccurrences(of: "__REGEX__", with: "")
+            let flags = components.count > 1 ? components[1] : ""
+
+            do {
+                var options: NSRegularExpression.Options = []
+                if flags.contains("i") {
+                    options.insert(.caseInsensitive)
+                }
+                if flags.contains("m") {
+                    options.insert(.anchorsMatchLines)
+                }
+                if flags.contains("s") {
+                    options.insert(.dotMatchesLineSeparators)
+                }
+
+                let regex = try NSRegularExpression(pattern: pattern, options: options)
+                let range = NSRange(location: 0, length: mimeType.utf16.count)
+                return regex.firstMatch(in: mimeType, options: [], range: range) != nil
+            } catch {
+                return false
+            }
+        } else {
+            // Handle exact string match
+            return allowedType == mimeType
+        }
+    }
+}
+
+// MARK: - Drop Type Identifiers Utils
+
+func getDefaultDropTypeIdentifiers() -> [String] {
+    if #available(iOS 14.0, *) {
+        return [
+            UTType.image.identifier,
+            UTType.video.identifier,
+            UTType.movie.identifier,
+            UTType.text.identifier,
+            UTType.pdf.identifier,
+            UTType.json.identifier,
+            UTType.zip.identifier,
+            UTType.spreadsheet.identifier,
+            UTType.presentation.identifier,
+            UTType.database.identifier,
+            UTType.item.identifier
+        ]
+    } else {
+        return [
+            kUTTypeImage as String,
+            kUTTypeMovie as String,
+            kUTTypeVideo as String,
+            kUTTypeText as String,
+            kUTTypePDF as String,
+            kUTTypeJSON as String,
+            kUTTypeZipArchive as String,
+            kUTTypeSpreadsheet as String,
+            kUTTypePresentation as String,
+            kUTTypeDatabase as String,
+            kUTTypeItem as String
+        ]
+    }
+}
+
+// MARK: - Drag Session Utils
+
+func shouldAllowDragSession(_ session: UIDropSession, allowedMimeTypes: [String]?) -> Bool {
+    // If no restrictions, allow all
+    guard let allowedMimeTypes = allowedMimeTypes else {
+        return true
+    }
+
+    // If empty array, allow none
+    if allowedMimeTypes.isEmpty {
+        return false
+    }
+
+    // Check if we have any regex patterns
+    let hasRegexPatterns = allowedMimeTypes.contains { $0.hasPrefix("__REGEX__") }
+
+    if hasRegexPatterns {
+        // For regex patterns, do basic pattern matching against UTI types
+        for (itemIndex, dragItem) in session.items.enumerated() {
+            var itemAllowed = false
+
+            for allowedType in allowedMimeTypes {
+                if allowedType.hasPrefix("__REGEX__") {
+                    // Extract the pattern
+                    let components = allowedType.components(separatedBy: "__FLAGS__")
+                    let pattern = components[0].replacingOccurrences(of: "__REGEX__", with: "")
+
+                    // Simple pattern matching for common cases
+                    var allowedUTITypes: [String] = []
+
+                    if pattern.contains("image") {
+                        if #available(iOS 14.0, *) {
+                            allowedUTITypes.append(contentsOf: [UTType.image.identifier, UTType.item.identifier])
+                        } else {
+                            allowedUTITypes.append(contentsOf: [kUTTypeImage as String, kUTTypeItem as String])
+                        }
+                    }
+                    if pattern.contains("video") {
+                        if #available(iOS 14.0, *) {
+                            allowedUTITypes.append(contentsOf: [UTType.video.identifier, UTType.movie.identifier, UTType.item.identifier])
+                        } else {
+                            allowedUTITypes.append(contentsOf: [kUTTypeVideo as String, kUTTypeMovie as String, kUTTypeItem as String])
+                        }
+                    }
+                    if pattern.contains("text") {
+                        if #available(iOS 14.0, *) {
+                            allowedUTITypes.append(contentsOf: [UTType.text.identifier, UTType.item.identifier])
+                        } else {
+                            allowedUTITypes.append(contentsOf: [kUTTypeText as String, kUTTypeItem as String])
+                        }
+                    }
+
+                    // Check for PDF patterns - both "pdf" and "application" should match PDFs
+                    let containsPdf = pattern.contains("pdf")
+                    let containsApplication = pattern.contains("application")
+
+                    if containsPdf || containsApplication {
+                        if #available(iOS 14.0, *) {
+                            allowedUTITypes.append(contentsOf: [UTType.pdf.identifier, "com.adobe.pdf", UTType.item.identifier])
+                        } else {
+                            allowedUTITypes.append(contentsOf: [kUTTypePDF as String, "com.adobe.pdf", kUTTypeItem as String])
+                        }
+                    }
+
+                    // Check for audio/music patterns
+                    let containsAudio = pattern.contains("audio")
+
+                    if containsAudio {
+                        if #available(iOS 14.0, *) {
+                            allowedUTITypes.append(contentsOf: [UTType.audio.identifier, UTType.mp3.identifier, UTType.mpeg4Audio.identifier, UTType.item.identifier])
+                        } else {
+                            allowedUTITypes.append(contentsOf: [kUTTypeAudio as String, kUTTypeMP3 as String, kUTTypeMPEG4Audio as String, kUTTypeItem as String])
+                        }
+                    }
+
+                    // Check if the drag item matches any allowed UTI type
+                    for utiType in allowedUTITypes {
+                        if dragItem.itemProvider.hasItemConformingToTypeIdentifier(utiType) {
+                            itemAllowed = true
+                            break
+                        }
+                    }
+                } else {
+                    // Handle exact string matching
+                    if #available(iOS 14.0, *) {
+                        if let utType = UTType(mimeType: allowedType) {
+                            if dragItem.itemProvider.hasItemConformingToTypeIdentifier(utType.identifier) {
+                                itemAllowed = true
+                                break
+                            }
+                        }
+                    } else {
+                        if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, allowedType as CFString, nil)?.takeRetainedValue() {
+                            if dragItem.itemProvider.hasItemConformingToTypeIdentifier(uti as String) {
+                                itemAllowed = true
+                                break
+                            }
+                        }
+                    }
+                }
+
+                if itemAllowed { break }
+            }
+
+            if !itemAllowed {
+                return false
+            }
+        }
+
+        return true
+        } else {
+        // For exact string matching, check if any items have allowed MIME types
+        for (itemIndex, dragItem) in session.items.enumerated() {
+            // Convert allowed MIME types to UTI identifiers
+            var allowedTypeIdentifiers: [String] = []
+
+            for mimeType in allowedMimeTypes {
+                if #available(iOS 14.0, *) {
+                    if let utType = UTType(mimeType: mimeType) {
+                        allowedTypeIdentifiers.append(utType.identifier)
+                    }
+                } else {
+                    if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType as CFString, nil)?.takeRetainedValue() {
+                        allowedTypeIdentifiers.append(uti as String)
+                    }
+                }
+            }
+
+            // Check if this drag item conforms to any allowed type
+            let hasAllowedType = allowedTypeIdentifiers.contains { typeIdentifier in
+                return dragItem.itemProvider.hasItemConformingToTypeIdentifier(typeIdentifier)
+            }
+
+            if !hasAllowedType {
+                return false
+            }
+        }
+
+        return true
+    }
 }

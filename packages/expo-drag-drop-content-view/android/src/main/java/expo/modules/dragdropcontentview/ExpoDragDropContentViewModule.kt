@@ -17,6 +17,9 @@ class ExpoDragDropContentViewModule : Module() {
       Prop("draggableSources") {view: ExpoDragDropContentView, value: List<DraggableItem>? ->
          view.setDraggableSources(value)
       }
+      Prop("allowedMimeTypes") {view: ExpoDragDropContentView, value: List<String>? ->
+         view.setAllowedMimeTypes(value)
+      }
       Events("onDrop", "onDropListeningStart", "onDragStart", "onDragEnd", "onEnter", "onExit")
     }
   }

@@ -68,14 +68,35 @@ const getBase64 = (data: string) => {
 
 const handleText = (text: string) => {
   return new Promise<DropAsset>((resolve) => {
-    resolve({
-      type: "text",
-      text,
-    });
+    resolve({ type: "text", text });
   });
 };
 
-const getAssets = async (dataTransfer: DataTransfer) => {
+// MIME Type Filtering Utils
+const isMimeTypeAllowed = (
+  mimeType: string,
+  allowedMimeTypes?: (string | RegExp)[]
+): boolean => {
+  if (allowedMimeTypes === undefined || allowedMimeTypes === null) {
+    return true; // If undefined or null, allow all
+  }
+  if (allowedMimeTypes.length === 0) {
+    return false; // If empty array, allow none
+  }
+  return allowedMimeTypes.some((allowedType) => {
+    if (typeof allowedType === "string") {
+      return allowedType === mimeType; // Exact string match
+    } else if (allowedType instanceof RegExp) {
+      return allowedType.test(mimeType); // RegExp test
+    }
+    return false;
+  });
+};
+
+const getAssets = async (
+  dataTransfer: DataTransfer,
+  allowedMimeTypes?: (string | RegExp)[]
+) => {
   const resolvedFiles: (DropAsset | null)[] = [];
   const filePromises: Promise<DropAsset | null>[] = [];
   const textData = dataTransfer.getData("text/plain");
@@ -83,7 +104,10 @@ const getAssets = async (dataTransfer: DataTransfer) => {
   const isCustomDrag = DragType === "Custom Drag";
 
   if (textData && !isCustomDrag) {
-    filePromises.push(handleText(textData));
+    // For text, check if text/plain is allowed
+    if (isMimeTypeAllowed("text/plain", allowedMimeTypes)) {
+      filePromises.push(handleText(textData));
+    }
   }
 
   // Dragging from the file system
@@ -94,13 +118,21 @@ const getAssets = async (dataTransfer: DataTransfer) => {
         if (item.kind === "file") {
           const file = item.getAsFile();
           if (!file) continue;
-          filePromises.push(handleFile(file));
+
+          // Check if the file's MIME type is allowed
+          if (isMimeTypeAllowed(file.type, allowedMimeTypes)) {
+            filePromises.push(handleFile(file));
+          }
         }
       }
     } else if (dataTransfer.files && dataTransfer.files.length > 0) {
       for (let i = 0; i < dataTransfer.files.length; i++) {
         const file = dataTransfer.files[i];
-        filePromises.push(handleFile(file));
+
+        // Check if the file's MIME type is allowed
+        if (isMimeTypeAllowed(file.type, allowedMimeTypes)) {
+          filePromises.push(handleFile(file));
+        }
       }
     }
   }
@@ -110,7 +142,20 @@ const getAssets = async (dataTransfer: DataTransfer) => {
     const droppedSources: DragDataItem[] = []; // base64 strings
 
     DragData.forEach((data) => {
-      droppedSources.push({ type: data.type, value: data.value });
+      // For custom drag, we need to extract MIME type from base64 data
+      if (data.type === "text") {
+        if (isMimeTypeAllowed("text/plain", allowedMimeTypes)) {
+          droppedSources.push({ type: data.type, value: data.value });
+        }
+      } else {
+        // Extract MIME type from base64 data
+        const mimeType =
+          data.value?.split(";")?.[0]?.split(":")?.[1] ||
+          "application/octet-stream";
+        if (isMimeTypeAllowed(mimeType, allowedMimeTypes)) {
+          droppedSources.push({ type: data.type, value: data.value });
+        }
+      }
     });
 
     resolvedFiles.push(
@@ -128,8 +173,12 @@ const getAssets = async (dataTransfer: DataTransfer) => {
     const base64 = doc.querySelector("img")?.getAttribute("src");
 
     if (base64) {
-      const file = getBase64(base64);
-      resolvedFiles.push(file);
+      // Extract MIME type from base64 data
+      const mimeType = base64?.split(";")?.[0]?.split(":")?.[1] || "image/jpeg";
+      if (isMimeTypeAllowed(mimeType, allowedMimeTypes)) {
+        const file = getBase64(base64);
+        resolvedFiles.push(file);
+      }
     }
   }
 
@@ -181,7 +230,10 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     event.preventDefault();
     this.props.onDragEnd?.();
 
-    const assets = await getAssets(event.dataTransfer);
+    const assets = await getAssets(
+      event.dataTransfer,
+      this.props.allowedMimeTypes
+    );
     if (assets.length > 0) this.props.onDrop?.({ assets });
   };
 

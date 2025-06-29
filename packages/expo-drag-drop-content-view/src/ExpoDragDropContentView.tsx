@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { requireNativeViewManager } from "expo-modules-core";
 import * as React from "react";
-import { NativeSyntheticEvent, StyleSheet, processColor } from "react-native";
+import { NativeSyntheticEvent, StyleSheet } from "react-native";
 
 import { Assets, DragDropContentViewProps } from "./types";
 import { MIME_TYPES } from "./mimeTypes";
@@ -51,14 +51,31 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     this.props.onExit?.();
   };
 
+  // Convert RegExp objects to serializable strings for native platforms
+  private serializeAllowedMimeTypes = (
+    allowedMimeTypes?: (string | RegExp)[]
+  ): string[] | undefined => {
+    if (!allowedMimeTypes) return undefined;
+
+    return allowedMimeTypes.map((item) => {
+      if (typeof item === "string") {
+        return item;
+      } else if (item instanceof RegExp) {
+        return `__REGEX__${item.source}__FLAGS__${item.flags}`;
+      }
+      return "";
+    });
+  };
+
   render() {
-    const { style, ...props } = this.props;
+    const { style, allowedMimeTypes, ...props } = this.props;
     const resolvedStyle = StyleSheet.flatten(style);
 
     return (
       <NativeExpoDragDropContentView
         {...props}
         includeBase64={props.includeBase64 || false}
+        allowedMimeTypes={this.serializeAllowedMimeTypes(allowedMimeTypes)}
         style={resolvedStyle}
         //@ts-ignore
         onDrop={this.onDropEvent}

@@ -75,6 +75,13 @@ export type DragDropContentViewProps = ViewProps & {
    */
   includeBase64?: boolean;
   /**
+   * @description Array of allowed MIME types. Supports both exact string matches and RegExp patterns. If undefined or null, all MIME types are allowed. If empty array, no MIME types are allowed.
+   * @example ['image/jpeg', 'image/png', 'video/mp4'] // Exact matching
+   * @example [new RegExp('^image/.*'), new RegExp('^video/.*')] // RegExp patterns to match all images and videos
+   * @example ['image/jpeg', new RegExp('^video/.*'), 'application/pdf'] // Mixed exact and regex
+   */
+  allowedMimeTypes?: (string | RegExp)[];
+  /**
    * @description The source of the image or/and video or/and text that can be dragged around the screen.
    * @description Pass Uri on iOS and Android, and base64 on Web.
    */

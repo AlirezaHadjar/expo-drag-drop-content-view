@@ -30,6 +30,9 @@ public class ExpoDragDropContentViewModule: Module {
             let types = mimeTypes ?? [:]
             view.dragDropContentView.setMimeTypes(types)
         }
+        Prop("allowedMimeTypes") { (view, allowedMimeTypes: [String]?) in
+            view.dragDropContentView.setAllowedMimeTypes(allowedMimeTypes)
+        }
     }
   }
 }

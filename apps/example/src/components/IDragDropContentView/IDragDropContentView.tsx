@@ -6,7 +6,6 @@ import {
 import { Image } from "expo-image";
 import React, { useState } from "react";
 import {
-  Platform,
   Pressable,
   StyleSheet,
   Text,
