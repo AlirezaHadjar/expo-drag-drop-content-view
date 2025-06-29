@@ -20,11 +20,6 @@ import { IVideo } from "./Video";
 
 const borderRadius = 20;
 
-const isNewArchEnabled =
-  (Platform.OS === "ios" || Platform.OS === "android") &&
-  //@ts-ignore
-  global?.nativeFabricUIManager !== "Paper";
-
 const styles = StyleSheet.create({
   container: {
     width: "100%",
@@ -45,13 +40,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: isNewArchEnabled ? 0 : borderRadius,
+    borderRadius: borderRadius,
   },
-  image: {
-    width: "100%",
-    height: "100%",
-    overflow: "hidden",
-  },
+  image: { width: "100%", height: "100%", overflow: "hidden" },
   placeholderContainer: {
     paddingHorizontal: 30,
     backgroundColor: "#2f95dc",
@@ -60,25 +51,12 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: isNewArchEnabled ? 0 : borderRadius,
+    borderRadius: borderRadius,
   },
-  activePlaceholderContainer: {
-    backgroundColor: "#2f95dc",
-    opacity: 1,
-  },
-  readyPlaceholderContainer: {
-    backgroundColor: "#2f95dc",
-    opacity: 0.7,
-  },
-  placeholderText: {
-    color: "white",
-    textAlign: "center",
-  },
-  text: {
-    textAlign: "center",
-    fontSize: 25,
-    color: "white",
-  },
+  activePlaceholderContainer: { backgroundColor: "#2f95dc", opacity: 1 },
+  readyPlaceholderContainer: { backgroundColor: "#2f95dc", opacity: 0.7 },
+  placeholderText: { color: "white", textAlign: "center" },
+  text: { textAlign: "center", fontSize: 25, color: "white" },
   file: {
     width: "100%",
     height: "100%",
@@ -89,10 +67,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  fileText: {
-    color: "white",
-    fontSize: 25,
-  },
+  fileText: { color: "white", fontSize: 25 },
 });
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

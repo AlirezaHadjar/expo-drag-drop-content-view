@@ -12,7 +12,7 @@ class ExpoDragDropContentView: ExpoView {
 
     required init(appContext: AppContext? = nil) {
         super.init(appContext: appContext)
-        clipsToBounds = true
+        clipsToBounds = false
         addSubview(dragDropContentView)
 
         dragDropContentView.setDropEventDispatcher(onDrop)

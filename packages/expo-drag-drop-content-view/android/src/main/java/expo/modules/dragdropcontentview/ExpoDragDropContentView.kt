@@ -189,5 +189,8 @@ class ExpoDragDropContentView(context: Context, appContext: AppContext) : ExpoVi
     init {
         configureDropHelper(this)
         configureDragHelper(this)
+        // Allow children to overflow the bounds to match iOS behavior
+        clipChildren = false
+        clipToPadding = false
     }
 }
