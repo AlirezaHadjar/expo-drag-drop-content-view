@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   activePlaceholderContainer: { backgroundColor: "#2f95dc", opacity: 1 },
   readyPlaceholderContainer: { backgroundColor: "#2f95dc", opacity: 0.7 },
   placeholderText: { color: "white", textAlign: "center" },
-  text: { textAlign: "center", fontSize: 25, color: "white" },
+  text: { textAlign: "center", fontSize: 25, color: "#2f95dc" },
   file: {
     width: "100%",
     height: "100%",
