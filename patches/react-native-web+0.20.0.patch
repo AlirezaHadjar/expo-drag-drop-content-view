@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-web/dist/exports/Text/index.js b/node_modules/react-native-web/dist/exports/Text/index.js
-index 4130386..5392836 100644
+index 1076f55..0112b4a 100644
 --- a/node_modules/react-native-web/dist/exports/Text/index.js
 +++ b/node_modules/react-native-web/dist/exports/Text/index.js
 @@ -29,7 +29,8 @@ import { useLocaleContext, getLocaleDirection } from '../../modules/useLocale';
@@ -13,7 +13,7 @@ index 4130386..5392836 100644
  var pickProps = props => pick(props, forwardPropsList);
  var Text = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
 diff --git a/node_modules/react-native-web/dist/exports/View/index.js b/node_modules/react-native-web/dist/exports/View/index.js
-index a656a0a..51d0861 100644
+index 45343e5..f68cce4 100644
 --- a/node_modules/react-native-web/dist/exports/View/index.js
 +++ b/node_modules/react-native-web/dist/exports/View/index.js
 @@ -28,7 +28,8 @@ var forwardPropsList = Object.assign({}, forwardedProps.defaultProps, forwardedP
@@ -27,7 +27,7 @@ index a656a0a..51d0861 100644
  var pickProps = props => pick(props, forwardPropsList);
  var View = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
 diff --git a/node_modules/react-native-web/src/exports/Text/index.js b/node_modules/react-native-web/src/exports/Text/index.js
-index f79e82c..cbdf399 100644
+index f27ccec..57464fc 100644
 --- a/node_modules/react-native-web/src/exports/Text/index.js
 +++ b/node_modules/react-native-web/src/exports/Text/index.js
 @@ -39,7 +39,8 @@ const forwardPropsList = Object.assign(

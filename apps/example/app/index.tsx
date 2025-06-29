@@ -1,6 +1,5 @@
+import { IDragDropContentView } from "@/src/components";
 import { FlatList, View, useWindowDimensions } from "react-native";
-
-import { IDragDropContentView } from "./src/components";
 
 const count = 10;
 const countInRow = 2;
@@ -12,13 +11,7 @@ export default function App() {
 
   const boxSize = SCREEN_WIDTH / 2 - (countInRow - 1) * gap;
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <FlatList
         data={array}
         contentContainerStyle={{
@@ -28,10 +21,8 @@ export default function App() {
           paddingVertical: gap,
           width: SCREEN_WIDTH,
         }}
-        columnWrapperStyle={{
-          gap,
-        }}
-        renderItem={({ index }) => (
+        columnWrapperStyle={{ gap }}
+        renderItem={() => (
           <IDragDropContentView style={{ width: boxSize, height: boxSize }} />
         )}
         numColumns={2}

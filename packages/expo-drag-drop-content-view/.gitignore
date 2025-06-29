@@ -55,25 +55,3 @@ yarn-error.log
 
 # Expo
 .expo/*
-
-# Ignore yarn files
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-
-# iOS
-apps/example/ios/
-
-# Android
-apps/example/android/
-
-!packages/expo-drag-drop-content-view/ios/
-!packages/expo-drag-drop-content-view/android/
-
-# Turborepo
-.turbo/
-turbo-build.log
