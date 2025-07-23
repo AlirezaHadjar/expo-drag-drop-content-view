@@ -65,7 +65,7 @@ A superset of `View` component that supports iOS, Android, and Web Native drag a
 
 ## Acknowledgment
 
-❤️ Special thanks to [Ali Nabavi](https://github.com/sali1290) for helping to add Android support.
+❤️ Special thanks to [Ali Nabavi](https://github.com/sali2001n) for helping to add Android support.
 
 ## License
 
