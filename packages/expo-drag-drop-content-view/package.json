@@ -29,11 +29,11 @@
   "license": "MIT",
   "homepage": "https://github.com/AlirezaHadjar/expo-drag-drop-content-view#readme",
   "devDependencies": {
-    "@types/react": "~19.0.10",
-    "expo": "^53.0.13",
+    "@types/react": "~19.2.0",
+    "expo": "^56.0.4",
     "expo-module-scripts": "^4.1.6",
-    "react": "19.0.0",
-    "react-native": "0.79.4"
+    "react": "19.2.3",
+    "react-native": "0.85.3"
   },
   "peerDependencies": {
     "expo": "*",

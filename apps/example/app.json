@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "expodragdropcontentviewexample",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.alireza-hadjar.expo-drag-drop-content-view-example",
@@ -18,7 +17,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.alirezahadjar.expodragdropcontentviewexample"
     },
     "web": {
