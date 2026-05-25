@@ -1,34 +1,34 @@
 {
-    "name": "@alirezahadjar/monorepo",
-    "private": true,
-    "version": "0.9.0",
-    "scripts": {
-        "build": "turbo build",
-        "clean": "turbo clean && rm -rf node_modules",
-        "docs": "turbo docs --filter=docs",
-        "dev": "turbo dev",
-        "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-        "lint": "turbo lint",
-        "typecheck": "turbo typecheck",
-        "test": "turbo test"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/AlirezaHadjar/expo-drag-drop-content-view.git"
-    },
-    "workspaces": [
-        "apps/*",
-        "packages/*"
-    ],
-    "packageManager": "yarn@4.15.0",
-    "devDependencies": {
-        "@changesets/cli": "^2.29.5",
-        "@manypkg/cli": "^0.24.0",
-        "@typescript-eslint/typescript-estree": "^8.35.0",
-        "eslint-plugin-import": "^2.32.0",
-        "prettier": "^3.6.2",
-        "react-loadable": "npm:@docusaurus/react-loadable@5.5.2",
-        "turbo": "^2.5.4",
-        "typescript": "^5.8.3"
-    }
+  "name": "@alirezahadjar/monorepo",
+  "private": true,
+  "version": "0.9.1",
+  "scripts": {
+    "build": "turbo build",
+    "clean": "turbo clean && rm -rf node_modules",
+    "docs": "turbo docs --filter=docs",
+    "dev": "turbo dev",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlirezaHadjar/expo-drag-drop-content-view.git"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "yarn@4.15.0",
+  "devDependencies": {
+    "@changesets/cli": "^2.29.5",
+    "@manypkg/cli": "^0.24.0",
+    "@typescript-eslint/typescript-estree": "^8.35.0",
+    "eslint-plugin-import": "^2.32.0",
+    "prettier": "^3.6.2",
+    "react-loadable": "npm:@docusaurus/react-loadable@5.5.2",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  }
 }
