@@ -12,4 +12,5 @@ sidebar_position: 4
 ## Web:
 
 - Dropping multiple media files is fully supported. However, for dragging, it is only available across different instances of `<DragDropContentView />`. For external dragging (to other websites or the desktop), you must pass only a single media file to the `draggableSources`.
-- The dropped files will not have `uri` or `path` properties. You can use `base64` or `text` properties to get the file content.
+- Dropped files include a blob URI in the `uri` property. The `path` property is not available on web. Use `text` for plain-text drops, or enable `includeBase64` to also receive a base64 data URL.
+- Blob URIs in `uri` hold memory until explicitly released. Call `URL.revokeObjectURL(asset.uri)` once you are done with each asset to avoid memory leaks.

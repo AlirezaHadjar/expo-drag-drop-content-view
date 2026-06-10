@@ -8,45 +8,52 @@ let DragType: string = "";
 type DragDataItem = { type: string; value: string };
 let DragData: DragDataItem[] = [];
 
-const handleFile = (file: File) => {
+
+const handleFile = (file: File, includeBase64: boolean): Promise<DropAsset> => {
   return new Promise<DropAsset>((resolve) => {
-    const reader = new FileReader();
+    const blobUri = URL.createObjectURL(file);
+    const isImage = file.type.startsWith("image/");
 
-    reader.onload = (e) => {
-      const dataURL = e.target?.result;
-
+    const buildAsset = (base64?: string) => {
+      if (!isImage) {
+        resolve({
+          uri: blobUri,
+          path: undefined,
+          type: file.type,
+          base64,
+          fileName: file.name,
+        });
+        return;
+      }
       const media = new Image();
-      media.src = dataURL as string;
-
-      media.onload = () => {
+      media.src = blobUri;
+      const onDone = () => {
         resolve({
-          uri: undefined,
+          uri: blobUri,
           path: undefined,
           type: file.type,
-          base64: media.src,
+          base64,
           fileName: file.name,
           width: media.naturalWidth,
           height: media.naturalHeight,
         });
       };
-      media.onerror = () => {
-        resolve({
-          uri: undefined,
-          path: undefined,
-          type: file.type,
-          base64: media.src,
-          fileName: file.name,
-          width: media.naturalWidth,
-          height: media.naturalHeight,
-        });
-      };
+      media.onload = onDone;
+      media.onerror = onDone;
     };
 
-    reader.readAsDataURL(file);
+    if (includeBase64) {
+      const reader = new FileReader();
+      reader.onload = (e) => buildAsset(e.target?.result as string);
+      reader.onerror = () => buildAsset();
+      reader.readAsDataURL(file);
+    } else {
+      buildAsset();
+    }
   });
 };
 
-const getBase64 = (data: string) => {
+const getBase64 = (data: string): DropAsset => {
   const extension =
     data?.split(";")?.[0]?.split(":")?.[1]?.split("/")?.[1] || "jpeg";
   const kind =
@@ -56,7 +63,6 @@ const getBase64 = (data: string) => {
   const fileName = `${kind}.${extension}`;
 
   return {
-    uri: undefined,
     path: undefined,
     type,
     base64: data,
@@ -75,7 +81,7 @@ const handleText = (text: string) => {
 // MIME Type Filtering Utils
 const isMimeTypeAllowed = (
   mimeType: string,
-  allowedMimeTypes?: (string | RegExp)[]
+  allowedMimeTypes?: (string | RegExp)[],
 ): boolean => {
   if (allowedMimeTypes === undefined || allowedMimeTypes === null) {
     return true; // If undefined or null, allow all
@@ -95,7 +101,8 @@ const isMimeTypeAllowed = (
 
 const getAssets = async (
   dataTransfer: DataTransfer,
-  allowedMimeTypes?: (string | RegExp)[]
+  allowedMimeTypes?: (string | RegExp)[],
+  includeBase64: boolean = false,
 ) => {
   const resolvedFiles: (DropAsset | null)[] = [];
   const filePromises: Promise<DropAsset | null>[] = [];
@@ -103,7 +110,11 @@ const getAssets = async (
   const htmlData = dataTransfer.getData("text/html");
   const isCustomDrag = DragType === "Custom Drag";
 
-  if (textData && !isCustomDrag) {
+  const hasFiles =
+    Array.from(dataTransfer.items ?? []).some((i) => i.kind === "file") ||
+    dataTransfer.files.length > 0;
+
+  if (textData && !isCustomDrag && !hasFiles) {
     // For text, check if text/plain is allowed
     if (isMimeTypeAllowed("text/plain", allowedMimeTypes)) {
       filePromises.push(handleText(textData));
@@ -121,7 +132,7 @@ const getAssets = async (
 
           // Check if the file's MIME type is allowed
           if (isMimeTypeAllowed(file.type, allowedMimeTypes)) {
-            filePromises.push(handleFile(file));
+            filePromises.push(handleFile(file, includeBase64));
           }
         }
       }
@@ -131,7 +142,7 @@ const getAssets = async (
 
         // Check if the file's MIME type is allowed
         if (isMimeTypeAllowed(file.type, allowedMimeTypes)) {
-          filePromises.push(handleFile(file));
+          filePromises.push(handleFile(file, includeBase64));
         }
       }
     }
@@ -162,7 +173,7 @@ const getAssets = async (
       ...droppedSources.map((item) => {
         if (item.type === "text") return { type: item.type, text: item.value };
         return getBase64(item.value);
-      })
+      }),
     );
   }
   // Dragging from other web pages
@@ -225,20 +236,21 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
   };
 
   handleDrop = async <T extends Event & { dataTransfer: DataTransfer }>(
-    event: T
+    event: T,
   ) => {
     event.preventDefault();
     this.props.onDragEnd?.();
 
     const assets = await getAssets(
       event.dataTransfer,
-      this.props.allowedMimeTypes
+      this.props.allowedMimeTypes,
+      this.props.includeBase64 ?? false,
     );
     if (assets.length > 0) this.props.onDrop?.({ assets });
   };
 
   handleDragStart = async <T extends Event & { dataTransfer: DataTransfer }>(
-    event: T
+    event: T,
   ) => {
     this.props.onDragStart?.();
     const sources = this.props.draggableSources;
