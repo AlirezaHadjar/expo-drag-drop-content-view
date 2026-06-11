@@ -22,6 +22,7 @@ const handleFile = (file: File, includeBase64: boolean): Promise<DropAsset> => {
           type: file.type,
           base64,
           fileName: file.name,
+          [Symbol.dispose]() { URL.revokeObjectURL(blobUri); },
         });
         return;
       }
@@ -36,6 +37,7 @@ const handleFile = (file: File, includeBase64: boolean): Promise<DropAsset> => {
           fileName: file.name,
           width: media.naturalWidth,
           height: media.naturalHeight,
+          [Symbol.dispose]() { URL.revokeObjectURL(blobUri); },
         });
       };
       media.onload = onDone;

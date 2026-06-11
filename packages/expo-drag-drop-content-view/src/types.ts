@@ -3,7 +3,7 @@ import { ViewProps } from "react-native";
 export type DropAsset = {
   /**
    * @description The file uri. On Android and iOS this is the app-specific cache storage URI. On web this is a blob URI created with `URL.createObjectURL`. Not present for plain-text drops.
-   * @web Consumers are responsible for calling `URL.revokeObjectURL(uri)` when done to free memory.
+   * @web A blob URI — must be explicitly released. Call `asset[Symbol.dispose]?.()` when done, or use the `using` declaration (TypeScript 5.2+) per-asset (`using a = asset`). Note: `using` works on individual assets, not on the array from `onDrop`. The URI is invalid after disposal.
    */
   uri?: string;
   /**
@@ -35,6 +35,10 @@ export type DropAsset = {
    * @description If the dropped file is text, this key contains its value
    */
   text?: string;
+  /**
+   * @web Revokes the blob URI — `uri` is invalid after calling. Not called automatically; use the `using` declaration (TypeScript 5.2+) or call it manually. Not present on native or for text-only drops.
+   */
+  [Symbol.dispose]?: () => void;
 };
 
 export type Assets = { assets: DropAsset[] };

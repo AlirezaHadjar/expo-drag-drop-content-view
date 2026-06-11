@@ -4,7 +4,7 @@ import {
   DropAsset,
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -86,7 +86,16 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   const [readyToReceive, setReadyToReceive] = useState(false);
   const [isActive, setIsActive] = useState(false);
 
-  const handleClear = () => setSources(null);
+  const sourcesRef = useRef(sources);
+  useEffect(() => { sourcesRef.current = sources; });
+  useEffect(() => {
+    return () => sourcesRef.current?.forEach((asset) => asset[Symbol.dispose]?.());
+  }, []);
+
+  const handleClear = () => {
+    sources?.forEach((asset) => asset[Symbol.dispose]?.());
+    setSources(null);
+  };
 
   return (
     <DragDropContentView

@@ -25,6 +25,20 @@ yarn add expo-drag-drop-content-view
 Run `npx pod-install` after installing the npm package.
 
 
+# TypeScript requirements
+
+The `DropAsset` type includes a `[Symbol.dispose]` key for blob URI cleanup on web. This requires `ESNext.Disposable` (or a superset such as `ESNext`) in your `tsconfig.json` `lib`:
+
+```json
+{
+  "compilerOptions": {
+    "lib": ["DOM", "ESNext", "ESNext.Disposable"]
+  }
+}
+```
+
+Without this, TypeScript will report `Property 'dispose' does not exist on type 'typeof Symbol'`.
+
 # Contributing
 
 Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).
