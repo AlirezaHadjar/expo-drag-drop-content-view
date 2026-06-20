@@ -25,19 +25,33 @@ yarn add expo-drag-drop-content-view
 Run `npx pod-install` after installing the npm package.
 
 
-# TypeScript requirements
+# Web blob URI cleanup
 
-The `DropAsset` type includes a `[Symbol.dispose]` key for blob URI cleanup on web. This requires `ESNext.Disposable` (or a superset such as `ESNext`) in your `tsconfig.json` `lib`:
+On web, dropped file assets carry a blob URI (`asset.uri`) created with `URL.createObjectURL`. Blob URIs hold memory until explicitly revoked — the recommended way to handle this is the `useDropAssets` hook, which revokes all URIs automatically on unmount and exposes a `clear()` method for manual flushing:
 
-```json
-{
-  "compilerOptions": {
-    "lib": ["DOM", "ESNext", "ESNext.Disposable"]
-  }
+```tsx
+import { DragDropContentView, useDropAssets } from "expo-drag-drop-content-view";
+
+export function DropZone() {
+  const { assets, onDrop, clear } = useDropAssets();
+
+  return (
+    <>
+      <DragDropContentView onDrop={onDrop} />
+      <button onClick={clear}>Clear</button>
+    </>
+  );
 }
 ```
 
-Without this, TypeScript will report `Property 'dispose' does not exist on type 'typeof Symbol'`.
+If you manage assets yourself, call `asset.release?.()` when you're done with each one:
+
+```ts
+onDrop({ assets }) {
+  // use assets ...
+  assets.forEach((a) => a.release?.());
+}
+```
 
 # Contributing
 

@@ -4,55 +4,57 @@ import { StyleSheet, View } from "react-native";
 
 import { DragDropContentViewProps, DropAsset } from "./types";
 
-let DragType: string = "";
 type DragDataItem = { type: string; value: string };
-let DragData: DragDataItem[] = [];
 
 
-const handleFile = (file: File, includeBase64: boolean): Promise<DropAsset> => {
-  return new Promise<DropAsset>((resolve) => {
-    const blobUri = URL.createObjectURL(file);
-    const isImage = file.type.startsWith("image/");
+const handleFile = async (
+  file: File,
+  includeBase64: boolean,
+  pendingBlobs: Set<string>,
+): Promise<DropAsset | null> => {
+  const blobUri = URL.createObjectURL(file);
+  pendingBlobs.add(blobUri);
+  const dispose = () => URL.revokeObjectURL(blobUri);
 
-    const buildAsset = (base64?: string) => {
-      if (!isImage) {
-        resolve({
-          uri: blobUri,
-          path: undefined,
-          type: file.type,
-          base64,
-          fileName: file.name,
-          [Symbol.dispose]() { URL.revokeObjectURL(blobUri); },
-        });
-        return;
-      }
-      const media = new Image();
-      media.src = blobUri;
-      const onDone = () => {
-        resolve({
-          uri: blobUri,
-          path: undefined,
-          type: file.type,
-          base64,
-          fileName: file.name,
-          width: media.naturalWidth,
-          height: media.naturalHeight,
-          [Symbol.dispose]() { URL.revokeObjectURL(blobUri); },
-        });
-      };
-      media.onload = onDone;
-      media.onerror = onDone;
-    };
-
-    if (includeBase64) {
+  let base64: string | undefined;
+  if (includeBase64) {
+    base64 = await new Promise<string | undefined>((res) => {
       const reader = new FileReader();
-      reader.onload = (e) => buildAsset(e.target?.result as string);
-      reader.onerror = () => buildAsset();
+      reader.onload = (e) => res(e.target?.result as string);
+      reader.onerror = () => res(undefined);
       reader.readAsDataURL(file);
-    } else {
-      buildAsset();
+    });
+    if (base64 === undefined) {
+      pendingBlobs.delete(blobUri);
+      URL.revokeObjectURL(blobUri);
+      return null;
     }
-  });
+  }
+
+  let width: number | undefined;
+  let height: number | undefined;
+  if (file.type.startsWith("image/")) {
+    try {
+      const bitmap = await createImageBitmap(file);
+      width = bitmap.width;
+      height = bitmap.height;
+      bitmap.close();
+    } catch {
+      // unsupported format or decode error — proceed without dimensions
+    }
+  }
+
+  const asset: DropAsset = {
+    uri: blobUri,
+    path: undefined,
+    type: file.type,
+    ...(base64 !== undefined && { base64 }),
+    fileName: file.name,
+    ...(width !== undefined && { width, height }),
+    release: dispose,
+  };
+  pendingBlobs.delete(blobUri);
+  return asset;
 };
 
 const getBase64 = (data: string): DropAsset => {
@@ -105,22 +107,22 @@ const getAssets = async (
   dataTransfer: DataTransfer,
   allowedMimeTypes?: (string | RegExp)[],
   includeBase64: boolean = false,
+  pendingBlobs: Set<string> = new Set(),
+  dragType: string = "",
+  dragData: DragDataItem[] = [],
 ) => {
   const resolvedFiles: (DropAsset | null)[] = [];
   const filePromises: Promise<DropAsset | null>[] = [];
   const textData = dataTransfer.getData("text/plain");
   const htmlData = dataTransfer.getData("text/html");
-  const isCustomDrag = DragType === "Custom Drag";
+  const isCustomDrag = dragType === "Custom Drag";
 
   const hasFiles =
     Array.from(dataTransfer.items ?? []).some((i) => i.kind === "file") ||
     dataTransfer.files.length > 0;
 
-  if (textData && !isCustomDrag && !hasFiles) {
-    // For text, check if text/plain is allowed
-    if (isMimeTypeAllowed("text/plain", allowedMimeTypes)) {
-      filePromises.push(handleText(textData));
-    }
+  if (textData && !isCustomDrag && !hasFiles && isMimeTypeAllowed("text/plain", allowedMimeTypes)) {
+    filePromises.push(handleText(textData));
   }
 
   // Dragging from the file system
@@ -134,7 +136,7 @@ const getAssets = async (
 
           // Check if the file's MIME type is allowed
           if (isMimeTypeAllowed(file.type, allowedMimeTypes)) {
-            filePromises.push(handleFile(file, includeBase64));
+            filePromises.push(handleFile(file, includeBase64, pendingBlobs));
           }
         }
       }
@@ -144,7 +146,7 @@ const getAssets = async (
 
         // Check if the file's MIME type is allowed
         if (isMimeTypeAllowed(file.type, allowedMimeTypes)) {
-          filePromises.push(handleFile(file, includeBase64));
+          filePromises.push(handleFile(file, includeBase64, pendingBlobs));
         }
       }
     }
@@ -154,7 +156,7 @@ const getAssets = async (
   if (isCustomDrag) {
     const droppedSources: DragDataItem[] = []; // base64 strings
 
-    DragData.forEach((data) => {
+    dragData.forEach((data) => {
       // For custom drag, we need to extract MIME type from base64 data
       if (data.type === "text") {
         if (isMimeTypeAllowed("text/plain", allowedMimeTypes)) {
@@ -197,9 +199,6 @@ const getAssets = async (
 
   resolvedFiles.push(...(await Promise.all(filePromises)));
 
-  DragData = [];
-  DragType = "";
-
   // Filter out null values (failed handleFile calls)
   return resolvedFiles.filter((file) => file !== null) as DropAsset[];
 };
@@ -210,13 +209,21 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
   private id: string =
     "id-" + (Math.random() * 10000000000).toFixed(0).toString();
   private target: EventTarget | null = null;
+  private pendingBlobs = new Set<string>();
+  private _mounted = false;
+  private _dragType = "";
+  private _dragData: DragDataItem[] = [];
 
   componentDidMount() {
+    this._mounted = true;
     this.setupDragDropListeners();
   }
 
   componentWillUnmount() {
+    this._mounted = false;
     this.removeDragDropListeners();
+    this.pendingBlobs.forEach((uri) => URL.revokeObjectURL(uri));
+    this.pendingBlobs.clear();
   }
 
   handleDragEnter = (event: Event) => {
@@ -243,12 +250,27 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
     event.preventDefault();
     this.props.onDragEnd?.();
 
-    const assets = await getAssets(
-      event.dataTransfer,
-      this.props.allowedMimeTypes,
-      this.props.includeBase64 ?? false,
-    );
-    if (assets.length > 0) this.props.onDrop?.({ assets });
+    try {
+      const assets = await getAssets(
+        event.dataTransfer,
+        this.props.allowedMimeTypes,
+        this.props.includeBase64 ?? false,
+        this.pendingBlobs,
+        this._dragType,
+        this._dragData,
+      );
+      if (this._mounted && assets.length > 0) {
+        this.props.onDrop?.({ assets });
+      } else {
+        assets.forEach((a) => a.release?.());
+      }
+    } catch {
+      // getAssets failed (e.g. URL.createObjectURL threw on detached document).
+      // onDragEnd already fired and reset drag state; nothing more to do.
+    } finally {
+      this._dragType = "";
+      this._dragData = [];
+    }
   };
 
   handleDragStart = async <T extends Event & { dataTransfer: DataTransfer }>(
@@ -260,9 +282,10 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
 
     if (!preview || !sources) return;
 
-    DragType = "Custom Drag";
-    sources.forEach((source, index) => {
-      DragData.push({ type: source.type, value: source.value });
+    this._dragType = "Custom Drag";
+    this._dragData = [];
+    sources.forEach((source) => {
+      this._dragData.push({ type: source.type, value: source.value });
     });
 
     // Both images and videos can be dragged
@@ -301,6 +324,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
 
     if (!domElement) return;
 
+    domElement.removeEventListener("dragstart", this.handleDragStart as any);
     domElement.removeEventListener("dragenter", this.handleDragEnter);
     domElement.removeEventListener("dragleave", this.handleDragLeave);
     domElement.removeEventListener("dragover", this.handleDragOver);

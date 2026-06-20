@@ -13,4 +13,4 @@ sidebar_position: 4
 
 - Dropping multiple media files is fully supported. However, for dragging, it is only available across different instances of `<DragDropContentView />`. For external dragging (to other websites or the desktop), you must pass only a single media file to the `draggableSources`.
 - Dropped files include a blob URI in the `uri` property. The `path` property is not available on web. Use `text` for plain-text drops, or enable `includeBase64` to also receive a base64 data URL.
-- Blob URIs in `uri` hold memory until explicitly released. Each asset provides `[Symbol.dispose]()` — call `asset[Symbol.dispose]?.()` manually, or use the `using` declaration (TypeScript 5.2+) per-asset (`using a = asset`). Note: `using` applies to individual assets, not to the array returned by `onDrop`.
+- Blob URIs in `uri` hold memory until explicitly released. Each asset exposes a `release()` method — call `asset.release?.()` when done, or use the `useDropAssets()` hook for automatic cleanup on unmount.

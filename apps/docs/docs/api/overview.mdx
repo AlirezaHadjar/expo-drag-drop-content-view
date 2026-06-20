@@ -22,7 +22,7 @@
 | -------- | --- | ------- | --- | ------------------------------------------- |
 | base64   | ✅  | ✅      | ✅  | The base64 data URL of the asset. Included when `includeBase64` is `true`.          |
 | uri      | ✅  | ✅      | ✅  | The file uri. On Android and iOS this is the app-specific cache storage URI. On web this is a blob URI (`URL.createObjectURL`). Not present for plain-text drops. |
-| [Symbol.dispose] | ❌  | ❌      | ✅  | Revokes the blob URI. Not called automatically — use `using asset = ...` (TypeScript 5.2+) or call `asset[Symbol.dispose]?.()` when done. `uri` is invalid after disposal. |
+| release  | ❌  | ❌      | ✅  | Revokes the blob URI. Not called automatically — call `asset.release?.()` when done, or use `useDropAssets()` for automatic cleanup. `uri` is invalid after calling. |
 | path     | ✅  | ✅      | ❌  | The original file path.                      |
 | width    | ✅  | ✅      | ✅  | Asset dimensions                            |
 | height   | ✅  | ✅      | ✅  | Asset dimensions                            |
