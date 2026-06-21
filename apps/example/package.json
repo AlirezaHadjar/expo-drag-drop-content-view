@@ -16,7 +16,7 @@
     "expo": "^56.0.4",
     "expo-blur": "~56.0.3",
     "expo-constants": "~56.0.15",
-    "expo-drag-drop-content-view": "*",
+    "expo-drag-drop-content-view": "workspace:*",
     "expo-font": "~56.0.5",
     "expo-haptics": "~56.0.3",
     "expo-image": "~56.0.9",
@@ -44,7 +44,7 @@
     "@types/react": "~19.2.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~56.0.4",
-    "typescript": "^5.8.3"
+    "typescript": "~6.0.3"
   },
   "private": true
 }

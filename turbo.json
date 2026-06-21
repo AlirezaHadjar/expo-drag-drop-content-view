@@ -6,17 +6,17 @@
                 "^build"
             ],
             "outputs": [
-                "dist/**"
+                "build/**"
             ]
         },
         "lint": {
             "dependsOn": [
-                "^lint"
+                "^build"
             ]
         },
         "typecheck": {
             "dependsOn": [
-                "^typecheck"
+                "^build"
             ]
         },
         "clean": {

@@ -1,0 +1,32 @@
+name: Setup
+description: Setup Node.js, Bun, and install dependencies
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: 1.3.13
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+
+    - name: Cache dependencies
+      id: bun-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          **/node_modules
+        key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}-${{ hashFiles('**/package.json', '!node_modules/**') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          ${{ runner.os }}-bun-
+
+    - name: Install dependencies
+      if: steps.bun-cache.outputs.cache-hit != 'true'
+      run: bun install --frozen-lockfile
+      shell: bash

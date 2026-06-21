@@ -1,0 +1,71 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  merge_group:
+    types:
+      - checks_requested
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Lint files
+        run: bun run lint
+
+      - name: Typecheck files
+        run: bun run typecheck
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Run unit tests
+        run: bun run test
+
+  build-library:
+    name: Build Library
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build package
+        run: bunx turbo build --filter=expo-drag-drop-content-view
+
+  build-web:
+    name: Build Web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build library
+        run: bunx turbo build --filter=expo-drag-drop-content-view
+
+      - name: Build example for Web
+        working-directory: apps/example
+        run: bunx expo export --platform web
