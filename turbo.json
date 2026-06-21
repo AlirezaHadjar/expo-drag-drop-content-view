@@ -11,12 +11,12 @@
         },
         "lint": {
             "dependsOn": [
-                "^lint"
+                "^build"
             ]
         },
         "typecheck": {
             "dependsOn": [
-                "^typecheck"
+                "^build"
             ]
         },
         "clean": {
