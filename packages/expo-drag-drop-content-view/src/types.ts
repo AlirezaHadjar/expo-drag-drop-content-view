@@ -2,18 +2,16 @@ import { ViewProps } from "react-native";
 
 export type DropAsset = {
   /**
-   * @platform Android, iOS
-   * @description The file uri in app-specific cache storage.
+   * @description The file uri. On Android and iOS this is the app-specific cache storage URI. On web this is a blob URI created with `URL.createObjectURL`. Not present for plain-text drops.
+   * @web A blob URI — must be explicitly released. Call `asset.release?.()` when done, or use `useDropAssets()` for automatic cleanup. The URI is invalid after release.
    */
-  uri?: string | undefined;
+  uri?: string;
   /**
    * @description The mime type of the file.
    */
   type: string;
   /**
-   * @platform Android, iOS
-   * @description The base64 string of the image
-   * @optional
+   * @description The base64 data URL of the asset. Included when `includeBase64` prop is true.
    */
   base64?: string;
   /**
@@ -37,6 +35,12 @@ export type DropAsset = {
    * @description If the dropped file is text, this key contains its value
    */
   text?: string;
+  /**
+   * @web Revokes the blob URI — `uri` is invalid after calling. Not called automatically.
+   * Not present on native or for text-only drops.
+   * Use `useDropAssets()` for automatic cleanup, or call this manually when done.
+   */
+  release?: () => void;
 };
 
 export type Assets = { assets: DropAsset[] };
@@ -83,7 +87,7 @@ export type DragDropContentViewProps = ViewProps & {
   allowedMimeTypes?: (string | RegExp)[];
   /**
    * @description The source of the image or/and video or/and text that can be dragged around the screen.
-   * @description Pass Uri on iOS and Android, and base64 on Web.
+   * @description Pass a URI on iOS and Android. On web, pass a base64 data URL.
    */
   draggableSources?: {
     type: "text" | "image" | "video" | "file";

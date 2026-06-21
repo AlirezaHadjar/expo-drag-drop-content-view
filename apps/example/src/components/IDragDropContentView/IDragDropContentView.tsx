@@ -2,6 +2,7 @@ import {
   DragDropContentView,
   DragDropContentViewProps,
   DropAsset,
+  useDropAssets,
 } from "expo-drag-drop-content-view";
 import { Image } from "expo-image";
 import React, { useState } from "react";
@@ -82,23 +83,23 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
   props
 ) => {
   usePermission();
-  const [sources, setSources] = useState<DropAsset[] | null>(null);
+  const { assets, onDrop: onDropAssets, clear } = useDropAssets();
   const [readyToReceive, setReadyToReceive] = useState(false);
   const [isActive, setIsActive] = useState(false);
-
-  const handleClear = () => setSources(null);
 
   return (
     <DragDropContentView
       {...props}
       includeBase64={false}
       collapsable={true}
-      draggableSources={sources
-        ?.filter((source) => getSourceType(source) !== undefined)
-        ?.map((source) => ({
-          type: getSourceType(source)!,
-          value: source.uri || source.base64 || source.text || "",
-        }))}
+      draggableSources={assets
+        .map((source) => ({
+          type: getSourceType(source),
+          // Blob URIs (web) are not valid drag values — draggableSources requires a
+          // data URL on web. Prefer base64, fall back to uri only for native file paths.
+          value: source.base64 || source.text || (source.uri?.startsWith("blob:") ? "" : source.uri) || "",
+        }))
+        .filter((source) => source.value !== "")}
       onDropListeningStart={() => {
         setReadyToReceive(true);
       }}
@@ -113,14 +114,13 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
         setReadyToReceive(false);
       }}
       onDrop={(event) => {
-        const newData = [...(sources ?? []), ...event.assets];
-        setSources(newData);
+        onDropAssets(event);
         props.onDrop?.(event);
       }}
       style={[styles.container, props.style]}
     >
-      {sources ? (
-        sources.map((source, index) => {
+      {assets.length > 0 ? (
+        assets.map((source, index) => {
           const uri = (source.uri ? source.uri : source.base64) || "";
           const rotation = Math.ceil(index / 2) * 5;
           const direction = index % 2 === 0 ? 1 : -1;
@@ -130,7 +130,7 @@ export const IDragDropContentView: React.FC<DragDropContentViewProps> = (
           return (
             <AnimatedPressable
               key={index}
-              onPress={handleClear}
+              onPress={clear}
               entering={FadeIn.springify().delay(index * 100)}
               style={[styles.sourceContainer, { transform: [{ rotate }] }]}
             >

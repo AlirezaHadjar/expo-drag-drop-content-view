@@ -25,6 +25,34 @@ yarn add expo-drag-drop-content-view
 Run `npx pod-install` after installing the npm package.
 
 
+# Web blob URI cleanup
+
+On web, dropped file assets carry a blob URI (`asset.uri`) created with `URL.createObjectURL`. Blob URIs hold memory until explicitly revoked — the recommended way to handle this is the `useDropAssets` hook, which revokes all URIs automatically on unmount and exposes a `clear()` method for manual flushing:
+
+```tsx
+import { DragDropContentView, useDropAssets } from "expo-drag-drop-content-view";
+
+export function DropZone() {
+  const { assets, onDrop, clear } = useDropAssets();
+
+  return (
+    <>
+      <DragDropContentView onDrop={onDrop} />
+      <button onClick={clear}>Clear</button>
+    </>
+  );
+}
+```
+
+If you manage assets yourself, call `asset.release?.()` when you're done with each one:
+
+```ts
+onDrop({ assets }) {
+  // use assets ...
+  assets.forEach((a) => a.release?.());
+}
+```
+
 # Contributing
 
 Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).
