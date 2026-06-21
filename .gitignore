@@ -56,14 +56,8 @@ yarn-error.log
 # Expo
 .expo/*
 
-# Ignore yarn files
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+# Bun
+.bun/
 
 # iOS
 apps/example/ios/

@@ -1,2 +1,2 @@
 npx patch-package
-yarn manypkg check
+bunx manypkg check

@@ -10,7 +10,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
-    "test": "turbo test"
+    "test": "turbo test",
+    "postinstall": "sh ./scripts/postinstall.sh"
   },
   "repository": {
     "type": "git",
@@ -20,7 +21,10 @@
     "apps/*",
     "packages/*"
   ],
-  "packageManager": "yarn@4.15.0",
+  "packageManager": "bun@1.3.13",
+  "trustedDependencies": [
+    "unrs-resolver"
+  ],
   "devDependencies": {
     "@changesets/cli": "^2.29.5",
     "@manypkg/cli": "^0.24.0",
@@ -29,6 +33,6 @@
     "prettier": "^3.6.2",
     "react-loadable": "npm:@docusaurus/react-loadable@5.5.2",
     "turbo": "^2.5.4",
-    "typescript": "^5.8.3"
+    "typescript": "~6.0.3"
   }
 }
