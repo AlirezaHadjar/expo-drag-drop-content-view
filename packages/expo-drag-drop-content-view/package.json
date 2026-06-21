@@ -9,7 +9,7 @@
     "clean": "expo-module clean",
     "lint": "expo-module lint",
     "test": "expo-module test --passWithNoTests",
-    "prepare": "expo-module prepare",
+    "prepack": "expo-module build",
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module",
     "open:ios": "xed example/ios",

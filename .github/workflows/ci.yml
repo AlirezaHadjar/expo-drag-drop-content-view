@@ -12,6 +12,7 @@ on:
 
 jobs:
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,6 +28,7 @@ jobs:
         run: bun run typecheck
 
   test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,6 +41,7 @@ jobs:
         run: bun run test
 
   build-library:
+    name: Build Library
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -51,6 +54,7 @@ jobs:
         run: bunx turbo build --filter=expo-drag-drop-content-view
 
   build-web:
+    name: Build Web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
