@@ -20,6 +20,11 @@ export type DropAsset = {
    */
   path?: string | undefined;
   /**
+   * @platform Web
+   * @description The original file object.
+   */
+  file?: File | undefined;
+  /**
    * @description Asset height
    */
   height?: number;
@@ -78,6 +83,12 @@ export type DragDropContentViewProps = ViewProps & {
    * @description If set to true, the base64 representation of the file will be included in the event.
    */
   includeBase64?: boolean;
+  /**
+   * @platform Web
+   * @default false
+   * @description If set to true, the web implementation will not create an Object URL for dropped assets.
+   */
+  disableObjectUrl?: boolean;
   /**
    * @description Array of allowed MIME types. Supports both exact string matches and RegExp patterns. If undefined or null, all MIME types are allowed. If empty array, no MIME types are allowed.
    * @example ['image/jpeg', 'image/png', 'video/mp4'] // Exact matching
