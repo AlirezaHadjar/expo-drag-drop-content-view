@@ -6,15 +6,15 @@ import { DragDropContentViewProps, DropAsset } from "./types";
 
 type DragDataItem = { type: string; value: string };
 
-
 const handleFile = async (
   file: File,
   includeBase64: boolean,
+  disableObjectUrl: boolean,
   pendingBlobs: Set<string>,
 ): Promise<DropAsset | null> => {
-  const blobUri = URL.createObjectURL(file);
-  pendingBlobs.add(blobUri);
-  const dispose = () => URL.revokeObjectURL(blobUri);
+  const blobUri = disableObjectUrl ? undefined : URL.createObjectURL(file);
+  if (blobUri) pendingBlobs.add(blobUri);
+  const dispose = blobUri ? () => URL.revokeObjectURL(blobUri) : undefined;
 
   let base64: string | undefined;
   if (includeBase64) {
@@ -25,8 +25,10 @@ const handleFile = async (
       reader.readAsDataURL(file);
     });
     if (base64 === undefined) {
-      pendingBlobs.delete(blobUri);
-      URL.revokeObjectURL(blobUri);
+      if (blobUri) {
+        pendingBlobs.delete(blobUri);
+        URL.revokeObjectURL(blobUri);
+      }
       return null;
     }
   }
@@ -54,7 +56,7 @@ const handleFile = async (
     release: dispose,
     file,
   };
-  pendingBlobs.delete(blobUri);
+  if (blobUri) pendingBlobs.delete(blobUri);
   return asset;
 };
 
@@ -108,6 +110,7 @@ const getAssets = async (
   dataTransfer: DataTransfer,
   allowedMimeTypes?: (string | RegExp)[],
   includeBase64: boolean = false,
+  disableObjectUrl: boolean = false,
   pendingBlobs: Set<string> = new Set(),
   dragType: string = "",
   dragData: DragDataItem[] = [],
@@ -137,7 +140,7 @@ const getAssets = async (
 
           // Check if the file's MIME type is allowed
           if (isMimeTypeAllowed(file.type, allowedMimeTypes)) {
-            filePromises.push(handleFile(file, includeBase64, pendingBlobs));
+            filePromises.push(handleFile(file, includeBase64, disableObjectUrl, pendingBlobs));
           }
         }
       }
@@ -147,7 +150,7 @@ const getAssets = async (
 
         // Check if the file's MIME type is allowed
         if (isMimeTypeAllowed(file.type, allowedMimeTypes)) {
-          filePromises.push(handleFile(file, includeBase64, pendingBlobs));
+          filePromises.push(handleFile(file, includeBase64, disableObjectUrl, pendingBlobs));
         }
       }
     }
@@ -256,6 +259,7 @@ export default class ExpoDragDropContentView extends React.PureComponent<DragDro
         event.dataTransfer,
         this.props.allowedMimeTypes,
         this.props.includeBase64 ?? false,
+        this.props.disableObjectUrl ?? false,
         this.pendingBlobs,
         this._dragType,
         this._dragData,

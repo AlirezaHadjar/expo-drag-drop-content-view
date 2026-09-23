@@ -84,6 +84,12 @@ export type DragDropContentViewProps = ViewProps & {
    */
   includeBase64?: boolean;
   /**
+   * @platform Web
+   * @default false
+   * @description If set to true, the web implementation will not create an Object URL for dropped assets.
+   */
+  disableObjectUrl?: boolean;
+  /**
    * @description Array of allowed MIME types. Supports both exact string matches and RegExp patterns. If undefined or null, all MIME types are allowed. If empty array, no MIME types are allowed.
    * @example ['image/jpeg', 'image/png', 'video/mp4'] // Exact matching
    * @example [new RegExp('^image/.*'), new RegExp('^video/.*')] // RegExp patterns to match all images and videos
