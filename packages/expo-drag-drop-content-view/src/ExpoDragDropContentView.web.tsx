@@ -52,6 +52,7 @@ const handleFile = async (
     fileName: file.name,
     ...(width !== undefined && { width, height }),
     release: dispose,
+    file,
   };
   pendingBlobs.delete(blobUri);
   return asset;

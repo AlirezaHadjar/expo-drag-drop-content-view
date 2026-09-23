@@ -20,6 +20,11 @@ export type DropAsset = {
    */
   path?: string | undefined;
   /**
+   * @platform Web
+   * @description The original file object.
+   */
+  file?: File | undefined;
+  /**
    * @description Asset height
    */
   height?: number;
