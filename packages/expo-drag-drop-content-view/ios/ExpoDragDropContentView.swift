@@ -38,7 +38,7 @@ class ExpoDragDropContentView: ExpoView {
        // Other events we want to pass to child views, omitting the `dragDropContentView`.
        // We don't need to use `reactZIndexSortedSubviews` on Fabric, but it seems to be necessary on Paper.
        for subview in reactZIndexSortedSubviews() where subview != dragDropContentView {
-         let hit = subview.hitTest(point, with: event)
+         let hit = subview.hitTest(convert(point, to: subview), with: event)
          if hit != nil {
            return hit
          }
